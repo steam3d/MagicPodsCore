@@ -55,14 +55,6 @@ namespace MagicPodsCore {
         void Disconnect() {
             _deviceProxy->callMethod("Disconnect").onInterface("org.bluez.Device1").dontExpectReply();
         }
-
-        std::string AsJson() {
-            nlohmann::json json{};
-            json["name"] = GetName();
-            json["address"] = GetAddress();
-            json["connected"] = GetConnected();
-            return json.dump();
-        }
     };
 
     class DevicesInfoFetcher {
@@ -75,6 +67,20 @@ namespace MagicPodsCore {
         // TODO: запретить копирование и перенос
 
         std::vector<std::shared_ptr<Device>> GetAirpodsInfos();
+
+        std::string AsJson() {
+            auto airpodsDevices = GetAirpodsInfos();
+            
+            auto jsonArray = nlohmann::json::array();
+            for (size_t i = 0; i < airpodsDevices.size(); ++i) {
+                auto jsonObject = nlohmann::json::object();
+                jsonObject["name"] = airpodsDevices[i]->GetName();
+                jsonObject["address"] = airpodsDevices[i]->GetAddress();
+                jsonObject["connected"] = airpodsDevices[i]->GetConnected();
+                jsonArray.push_back(jsonObject);
+            }
+            return jsonArray.dump();
+        }
 
     private:
         void UpdateInfos();
