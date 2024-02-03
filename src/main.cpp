@@ -10,7 +10,7 @@ int main() {
     auto airpodsDevices = devicesInfoFetcher.GetAirpodsInfos();
     for (int i = 0; i < airpodsDevices.size(); ++i) {
         airpodsDevices[i]->Disconnect();
-        std::cout << "Name:" << airpodsDevices[i]->GetName() << " Address:" << airpodsDevices[i]->GetAddress() << " Connected:"<< airpodsDevices[i]->GetConnected() << std::endl;
+        std::cout << airpodsDevices[i]->AsJson() << std::endl;
     }
 
     return 0;

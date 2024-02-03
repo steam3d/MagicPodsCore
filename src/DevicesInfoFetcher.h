@@ -4,8 +4,10 @@
 #include <vector>
 #include <regex>
 #include <functional>
-#include <sdbus-c++/sdbus-c++.h>
 #include <map>
+
+#include <sdbus-c++/sdbus-c++.h>
+#include <json.hpp>
 
 namespace MagicPodsCore {
 
@@ -52,6 +54,14 @@ namespace MagicPodsCore {
 
         void Disconnect() {
             _deviceProxy->callMethod("Disconnect").onInterface("org.bluez.Device1").dontExpectReply();
+        }
+
+        std::string AsJson() {
+            nlohmann::json json{};
+            json["name"] = GetName();
+            json["address"] = GetAddress();
+            json["connected"] = GetConnected();
+            return json.dump();
         }
     };
 

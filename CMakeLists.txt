@@ -9,5 +9,5 @@ add_executable(MagicPodsCore
     src/DevicesInfoFetcher.cpp
 )
 add_subdirectory(dependencies)
-target_include_directories(MagicPodsCore PRIVATE src)
+target_include_directories(MagicPodsCore PRIVATE src dependencies/json)
 target_link_libraries(MagicPodsCore PRIVATE sdbus-c++)
