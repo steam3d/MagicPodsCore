@@ -5,3 +5,5 @@ project(MagicPodsCore LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 23)
 
 add_executable(MagicPodsCore src/main.cpp)
+add_subdirectory(dependencies)
+target_link_libraries(MagicPodsCore PRIVATE sdbus-c++)
