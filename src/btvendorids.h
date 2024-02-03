@@ -1,9 +1,7 @@
-#ifndef BTVENDORIDS_H
-#define BTVENDORIDS_H
+#pragma once
 
 // Modalias: bluetooth:v{BtVendorIds}p{AppleProductIds}dB087
-enum class BtVendorIds: unsigned short{
- Apple = 0x004c,
- Sony = 0x054c
+enum class BtVendorIds: unsigned short {
+    Apple = 0x004c,
+    Sony = 0x054c
 };
-#endif

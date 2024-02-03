@@ -1,5 +1,4 @@
-#ifndef APPLEPRODUCTIDS_H
-#define APPLEPRODUCTIDS_H
+#pragma once
 
 // Modalias: bluetooth:v{VendorIds}p{AppleProductIds}dB087
 enum class AppleProductIds: unsigned short{
@@ -22,4 +21,24 @@ enum class AppleProductIds: unsigned short{
     beatsstudiobudsplus = 0x2016,
     powerbeats4 = 0x200d,
 };
-#endif
+
+static const AppleProductIds AllAppleProductIds[] = {
+    AppleProductIds::airpods1,
+    AppleProductIds::airpods2,
+    AppleProductIds::airpods3,
+    AppleProductIds::airpodspro,
+    AppleProductIds::airpodspro2,
+    AppleProductIds::airpodsprousbc,
+    AppleProductIds::powerbeatspro,
+    AppleProductIds::airpodsmax,
+    AppleProductIds::beatsSolo3,
+    AppleProductIds::beatssolopro,
+    AppleProductIds::beatsstudio3,
+    AppleProductIds::beatsx,
+    AppleProductIds::beatsflex,
+    AppleProductIds::powerbeats3,
+    AppleProductIds::beatsfitpro,
+    AppleProductIds::beatsstudiobuds,
+    AppleProductIds::beatsstudiobudsplus,
+    AppleProductIds::powerbeats4
+};
