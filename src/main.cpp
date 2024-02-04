@@ -5,21 +5,42 @@
 
 using namespace MagicPodsCore;
 
-// int main() {
-//     std::cout << "Hello World!" << std::endl;
-//     DevicesInfoFetcher devicesInfoFetcher{};
+void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleGetDevicesRequest" << std::endl; // TODO: delete
 
-//     auto airpodsDevices = devicesInfoFetcher.GetAirpodsInfos();
-//     for (int i = 0; i < airpodsDevices.size(); ++i) {
-//         airpodsDevices[i]->Disconnect();
-//         std::cout << airpodsDevices[i]->AsJson() << std::endl;
-//     }
+    auto response = devicesInfoFetcher.AsJson();
+    ws->send(response, opCode, response.length() < 16 * 1024);
+}
 
-//     return 0;
-// }
+void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleConnectDeviceRequest" << std::endl; // TODO: delete
 
-/* This is a simple WebSocket echo server example.
- * You may compile it with "WITH_OPENSSL=1 make" or with "make" */
+    auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
+    devicesInfoFetcher.Connect(deviceAddress);
+}
+
+void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleDisconnectDeviceRequest" << std::endl; // TODO: delete
+    auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
+    devicesInfoFetcher.Disconnect(deviceAddress);
+}
+
+void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    try {
+        auto json = nlohmann::json::parse(message);
+
+        std::string methodName = json.at("method").template get<std::string>();
+            if (methodName == "GetDevices")
+                HandleGetDevicesRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "ConnectDevice")
+                HandleConnectDeviceRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "DisconnectDevice")
+                HandleDisconnectDeviceRequest(ws, json, opCode, devicesInfoFetcher);
+    }
+    catch(const std::exception& exception) {
+        // ignoring incorrect json
+    }
+}
 
 int main() {
     DevicesInfoFetcher devicesInfoFetcher{};
@@ -47,12 +68,12 @@ int main() {
 
         },
         .message = [&devicesInfoFetcher](auto *ws, std::string_view message, uWS::OpCode opCode) {
+            HandleRequest(ws, message, opCode, devicesInfoFetcher);
+
             /* This is the opposite of what you probably want; compress if message is LARGER than 16 kb
              * the reason we do the opposite here; compress if SMALLER than 16 kb is to allow for 
              * benchmarking of large message sending without compression */
-            auto response = devicesInfoFetcher.AsJson();
-            ws->send(response, opCode, response.length() < 16 * 1024);
-            std::cout << "Received" << response << std::endl;
+            std::cout << "Received:" << message << std::endl; // TODO: delete
         },
         .dropped = [](auto */*ws*/, std::string_view /*message*/, uWS::OpCode /*opCode*/) {
             /* A message was dropped due to set maxBackpressure and closeOnBackpressureLimit limit */

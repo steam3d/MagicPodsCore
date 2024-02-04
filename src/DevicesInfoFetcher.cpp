@@ -38,6 +38,40 @@ namespace MagicPodsCore {
         return airpodsDevices;
     }
 
+    void DevicesInfoFetcher::Connect(const std::string& deviceAddress) {
+        UpdateInfos();
+        for (auto& device : _devices) {
+            if (device->GetAddress() == deviceAddress) {
+                device->Connect();
+                break;
+            }
+        }
+    }
+
+    void DevicesInfoFetcher::Disconnect(const std::string& deviceAddress) {
+        UpdateInfos();
+        for (auto& device : _devices) {
+            if (device->GetAddress() == deviceAddress) {
+                device->Disconnect();
+                break;
+            }
+        }
+    }
+
+    std::string DevicesInfoFetcher::AsJson() {
+        auto airpodsDevices = GetAirpodsInfos();
+        
+        auto jsonArray = nlohmann::json::array();
+        for (size_t i = 0; i < airpodsDevices.size(); ++i) {
+            auto jsonObject = nlohmann::json::object();
+            jsonObject["name"] = airpodsDevices[i]->GetName();
+            jsonObject["address"] = airpodsDevices[i]->GetAddress();
+            jsonObject["connected"] = airpodsDevices[i]->GetConnected();
+            jsonArray.push_back(jsonObject);
+        }
+        return jsonArray.dump();
+    }
+
     void DevicesInfoFetcher::UpdateInfos() {
         _devices.clear();
 
