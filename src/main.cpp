@@ -2,6 +2,7 @@
 #include <App.h>
 
 #include "DevicesInfoFetcher.h"
+#include "StringUtils.h"
 
 using namespace MagicPodsCore;
 
@@ -44,6 +45,8 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
 
 int main() {
     DevicesInfoFetcher devicesInfoFetcher{};
+
+    std::cout << StringUtils::Format("v%04Xp", 0x7f3) << std::endl;
 
     /* ws->getUserData returns one of these */
     struct PerSocketData {

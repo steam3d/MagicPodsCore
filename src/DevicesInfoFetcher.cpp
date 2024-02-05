@@ -2,10 +2,10 @@
 
 #include "btvendorids.h"
 #include "appleproductids.h"
+#include "StringUtils.h"
 
 #include <regex>
 #include <iostream>
-#include <format>
 #include <algorithm>
 
 namespace MagicPodsCore {
@@ -28,7 +28,7 @@ namespace MagicPodsCore {
             for (auto& appleProductId : AllAppleProductIds) {
                 std::string upperCaseActualModalias = deviceInfo.GetModalias();
                 std::transform(upperCaseActualModalias.begin(), upperCaseActualModalias.end(), upperCaseActualModalias.begin(), [](unsigned char c){ return std::toupper(c); });
-                std::string upperCaseTargetModalias = std::format("v{:04x}p{:04x}", static_cast<unsigned short>(BtVendorIds::Apple), static_cast<unsigned short>(appleProductId));
+                std::string upperCaseTargetModalias = StringUtils::Format("v%04Xp%04X", static_cast<unsigned short>(BtVendorIds::Apple), static_cast<unsigned short>(appleProductId));
                 std::transform(upperCaseTargetModalias.begin(), upperCaseTargetModalias.end(), upperCaseTargetModalias.begin(), [](unsigned char c){ return std::toupper(c); });
                 if (upperCaseActualModalias.contains(upperCaseTargetModalias))
                     return true;
