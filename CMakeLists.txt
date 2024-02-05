@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 23)
 add_executable(MagicPodsCore 
     src/main.cpp
     src/DevicesInfoFetcher.cpp
+    src/Device.cpp
 )
 add_subdirectory(dependencies)
 target_include_directories(MagicPodsCore PRIVATE src dependencies/json)
