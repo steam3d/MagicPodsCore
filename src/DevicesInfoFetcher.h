@@ -4,7 +4,7 @@
 #include <vector>
 #include <regex>
 #include <functional>
-#include <map>
+#include <set>
 
 #include <sdbus-c++/sdbus-c++.h>
 #include <json.hpp>
@@ -16,13 +16,13 @@ namespace MagicPodsCore {
     class DevicesInfoFetcher {
     private:
         std::unique_ptr<sdbus::IProxy> _rootProxy{};
-        std::vector<std::shared_ptr<Device>> _devices{};
+        std::set<std::shared_ptr<Device>> _devices{};
 
     public:
         DevicesInfoFetcher();
         // TODO: запретить копирование и перенос
 
-        std::vector<std::shared_ptr<Device>> GetAirpodsInfos();
+        std::set<std::shared_ptr<Device>> GetAirpodsInfos();
 
         void Connect(const std::string& deviceAddress);
 

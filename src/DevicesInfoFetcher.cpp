@@ -12,9 +12,16 @@ namespace MagicPodsCore {
 
     DevicesInfoFetcher::DevicesInfoFetcher() {
         _rootProxy = sdbus::createProxy("org.bluez", "/");
+
+        _rootProxy->uponSignal("InterfacesAdded").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath path, std::map<std::string, std::map<std::string, sdbus::Variant>> dictionary) {
+            UpdateInfos();
+        });
+        _rootProxy->uponSignal("InterfacesRemoved").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath path, std::vector<std::string> array) {
+            UpdateInfos();
+        });
     }
 
-    std::vector<std::shared_ptr<Device>> DevicesInfoFetcher::GetAirpodsInfos() {
+    std::set<std::shared_ptr<Device>> DevicesInfoFetcher::GetAirpodsInfos() {
         UpdateInfos();
         
         auto predicate = [](const Device& deviceInfo) {
@@ -29,10 +36,10 @@ namespace MagicPodsCore {
             return false;
         };
 
-        std::vector<std::shared_ptr<Device>> airpodsDevices{};
+        std::set<std::shared_ptr<Device>> airpodsDevices{};
         for (auto& device : _devices) {
             if (predicate(*device))
-                airpodsDevices.emplace_back(device);
+                airpodsDevices.emplace(device);
         }
 
         return airpodsDevices;
@@ -62,11 +69,11 @@ namespace MagicPodsCore {
         auto airpodsDevices = GetAirpodsInfos();
         
         auto jsonArray = nlohmann::json::array();
-        for (size_t i = 0; i < airpodsDevices.size(); ++i) {
+        for (auto& device : airpodsDevices) {
             auto jsonObject = nlohmann::json::object();
-            jsonObject["name"] = airpodsDevices[i]->GetName();
-            jsonObject["address"] = airpodsDevices[i]->GetAddress();
-            jsonObject["connected"] = airpodsDevices[i]->GetConnected();
+            jsonObject["name"] = device->GetName();
+            jsonObject["address"] = device->GetAddress();
+            jsonObject["connected"] = device->GetConnected();
             jsonArray.push_back(jsonObject);
         }
         return jsonArray.dump();
@@ -85,10 +92,12 @@ namespace MagicPodsCore {
                 if (interfaces.contains("org.bluez.Device1")) {
                     auto deviceInterface = interfaces.at("org.bluez.Device1");
                     auto device = std::make_shared<Device>(objectPath, deviceInterface);
-                    _devices.emplace_back(device);
+                    _devices.emplace(device);
                 }
             }
         }
     }
+
+    
 
 }
