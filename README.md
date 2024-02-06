@@ -70,5 +70,53 @@ Responce
 
 > Get Devices
 
+### Get default Bluetooth adapter
+
+Request
+
+```
+{
+    "method":"GetDefaultBluetoothAdapter"
+}
+```
+
+responce
+
+```
+{
+  "defaultbluetooth": {
+    "connected":"bool"
+  }
+}
+```
+
+### Enable default Bluetooth adapter
+
+Request
+
+```
+{
+    "method":"EnableDefaultBluetoothAdapter"
+}
+```
+
+Responece
+
+> Get default Bluetooth adapter
+
+### Disable default Bluetooth adapter
+
+Request
+
+```
+{
+    "method":"DisableDefaultBluetoothAdapter"
+}
+```
+
+Responece
+
+> Get default Bluetooth adapter
+
 
 
