@@ -13,12 +13,43 @@ namespace MagicPodsCore {
     DevicesInfoFetcher::DevicesInfoFetcher() {
         _rootProxy = sdbus::createProxy("org.bluez", "/");
 
+        UpdateInfos();
+
         _rootProxy->uponSignal("InterfacesAdded").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath path, std::map<std::string, std::map<std::string, sdbus::Variant>> dictionary) {
+            std::cout << "OnInterfacesAdded" << std::endl;
+
+            std::set<std::shared_ptr<Device>, DeviceComparator> addedDevices{};
+
+            auto actualDevices = LoadActualDevices();
+            for (const auto& actualDevice : actualDevices) {
+                if (!_devices.contains(actualDevice))
+                    addedDevices.emplace(actualDevice);
+            }
+
+            if (!addedDevices.empty())
+                OnDevicesAdd(addedDevices);
+
             UpdateInfos();
         });
+
         _rootProxy->uponSignal("InterfacesRemoved").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath path, std::vector<std::string> array) {
+            std::cout << "OnInterfacesRemoved" << std::endl;
+
+            std::set<std::shared_ptr<Device>, DeviceComparator> removedDevices{};
+
+            auto actualDevices = LoadActualDevices();
+            for (const auto& knownDevice : _devices) {
+                if (!actualDevices.contains(knownDevice))
+                    removedDevices.emplace(knownDevice);
+            }
+
+            if (!removedDevices.empty())
+                OnDevicesRemove(removedDevices);
+
             UpdateInfos();
         });
+
+        _rootProxy->finishRegistration();
     }
 
     std::set<std::shared_ptr<Device>> DevicesInfoFetcher::GetAirpodsInfos() {
@@ -80,7 +111,11 @@ namespace MagicPodsCore {
     }
 
     void DevicesInfoFetcher::UpdateInfos() {
-        _devices.clear();
+        _devices = LoadActualDevices();
+    }
+
+    std::set<std::shared_ptr<Device>, DeviceComparator> DevicesInfoFetcher::LoadActualDevices() {
+        std::set<std::shared_ptr<Device>, DeviceComparator> devices{};
 
         std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>> managedObjects{};
         _rootProxy->callMethod("GetManagedObjects").onInterface("org.freedesktop.DBus.ObjectManager").storeResultsTo<std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>>>(managedObjects);
@@ -92,12 +127,24 @@ namespace MagicPodsCore {
                 if (interfaces.contains("org.bluez.Device1")) {
                     auto deviceInterface = interfaces.at("org.bluez.Device1");
                     auto device = std::make_shared<Device>(objectPath, deviceInterface);
-                    _devices.emplace(device);
+                    devices.emplace(device);
                 }
             }
         }
+
+        return devices;
     }
 
-    
+    void DevicesInfoFetcher::OnDevicesAdd(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices) {
+        std::cout << "--- OnDevicesAdd ---" << std::endl;
+        for (const auto& device : devices)
+            std::cout << device->GetName() << " " << device->GetAddress() << std::endl;
+    }
+
+    void DevicesInfoFetcher::OnDevicesRemove(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices) {
+        std::cout << "--- OnDevicesRemove ---" << std::endl;
+        for (const auto& device : devices)
+            std::cout << device->GetName() << " " << device->GetAddress() << std::endl;
+    }
 
 }

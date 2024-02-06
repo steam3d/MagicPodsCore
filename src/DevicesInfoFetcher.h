@@ -13,10 +13,17 @@
 
 namespace MagicPodsCore {
 
+    class DeviceComparator {
+    public:
+        bool operator()(const std::shared_ptr<Device>& device1, const std::shared_ptr<Device>& device2) const {
+            return device1->GetAddress() < device2->GetAddress();
+        }
+    };
+
     class DevicesInfoFetcher {
     private:
         std::unique_ptr<sdbus::IProxy> _rootProxy{};
-        std::set<std::shared_ptr<Device>> _devices{};
+        std::set<std::shared_ptr<Device>, DeviceComparator> _devices{};
 
     public:
         DevicesInfoFetcher();
@@ -32,6 +39,10 @@ namespace MagicPodsCore {
 
     private:
         void UpdateInfos();
+        std::set<std::shared_ptr<Device>, DeviceComparator> LoadActualDevices();
+
+        void OnDevicesAdd(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices);
+        void OnDevicesRemove(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices);
     };
 
 }
