@@ -10,6 +10,7 @@
 #include <json.hpp>
 
 #include "Device.h"
+#include "Event.h"
 
 namespace MagicPodsCore {
 
@@ -24,6 +25,8 @@ namespace MagicPodsCore {
     private:
         std::unique_ptr<sdbus::IProxy> _rootProxy{};
         std::set<std::shared_ptr<Device>, DeviceComparator> _devices{};
+        Event<std::set<std::shared_ptr<Device>, DeviceComparator>> _onDevicesAddEvent{};
+        Event<std::set<std::shared_ptr<Device>, DeviceComparator>> _onDevicesRemoveEvent{};
 
     public:
         DevicesInfoFetcher();
@@ -36,6 +39,14 @@ namespace MagicPodsCore {
         void Disconnect(const std::string& deviceAddress);
 
         std::string AsJson();
+
+        Event<std::set<std::shared_ptr<Device>, DeviceComparator>>& GetOnDevicesAddEvent() {
+            return _onDevicesAddEvent;
+        }
+
+        Event<std::set<std::shared_ptr<Device>, DeviceComparator>>& GetOnDevicesRemoveEvent() {
+            return _onDevicesRemoveEvent;
+        }
 
     private:
         void UpdateInfos();

@@ -43,9 +43,6 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
 }
 
 int main() {
-    
-
-
     DevicesInfoFetcher devicesInfoFetcher{};    
 
     /* ws->getUserData returns one of these */

@@ -139,12 +139,16 @@ namespace MagicPodsCore {
         std::cout << "--- OnDevicesAdd ---" << std::endl;
         for (const auto& device : devices)
             std::cout << device->GetName() << " " << device->GetAddress() << std::endl;
+
+        _onDevicesAddEvent.FireEvent(devices);
     }
 
     void DevicesInfoFetcher::OnDevicesRemove(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices) {
         std::cout << "--- OnDevicesRemove ---" << std::endl;
         for (const auto& device : devices)
             std::cout << device->GetName() << " " << device->GetAddress() << std::endl;
+
+        _onDevicesRemoveEvent.FireEvent(devices);
     }
 
 }
