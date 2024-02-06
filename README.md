@@ -85,7 +85,7 @@ responce
 ```
 {
   "defaultbluetooth": {
-    "connected":"bool"
+    "enabled":"bool"
   }
 }
 ```
