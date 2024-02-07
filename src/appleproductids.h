@@ -1,7 +1,7 @@
 #pragma once
 
 // Modalias: bluetooth:v{VendorIds}p{AppleProductIds}dB087
-enum class AppleProductIds: unsigned short{
+enum class AppleProductIds: unsigned short {
     airpods1 = 0x2002,
     airpods2 = 0x200f, 
     airpods3 = 0x2013, 
