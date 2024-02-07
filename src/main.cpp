@@ -37,8 +37,8 @@ using namespace MagicPodsCore;
 // }
 
 void l2capClient() {
-    AapClient client{};
-    client.Process();
+    // AapClient client{};
+    // client.Process();
 }
 
 void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {

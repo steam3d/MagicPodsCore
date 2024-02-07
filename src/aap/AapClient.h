@@ -10,15 +10,30 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <thread>
 
 #include "aap.h"
 
 using namespace std; // TODO: delete
 
+// скорее всего внутри будет поток который слушать все входящие сообщения и основной поток будет засылать 
 namespace MagicPodsCore {
 
     class AapClient {
+    private:
+        std::string _address{};
+
     public:
+        explicit AapClient(const std::string& address);
+
+        void Start() {
+            std::cout << "AapClient started for " << _address << std::endl;
+        }
+        
+        void Stop() {
+            std::cout << "AapClient stopped for " << _address << std::endl;
+        }
+
         std::vector<char> hexStringToBytes(const std::string& hex) {
 	        std::vector<char> bytes;
 

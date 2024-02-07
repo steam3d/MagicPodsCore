@@ -9,6 +9,7 @@ add_executable(MagicPodsCore
     src/DevicesInfoFetcher.cpp
     src/Device.cpp
     src/aap/aap.cpp
+    src/aap/AapClient.cpp
 )
 add_subdirectory(dependencies)
 target_include_directories(MagicPodsCore PRIVATE src src/aap dependencies/json)
