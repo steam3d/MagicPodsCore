@@ -21,6 +21,8 @@ namespace MagicPodsCore {
         std::unique_ptr<AapClient> _aapClient{};
 
     public:
+        static std::shared_ptr<Device> TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
+
         Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
         // TODO: убрать возможность копирования
 

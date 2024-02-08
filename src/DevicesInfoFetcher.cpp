@@ -27,9 +27,10 @@ namespace MagicPodsCore {
                     auto deviceInterface = interfaces.at("org.bluez.Device1");
                     
                     if (!_devicesMap.contains(objectPath)) {
-                        auto device = std::make_shared<Device>(objectPath, deviceInterface);
-                        _devicesMap.emplace(objectPath, device);
-                        addedDevices.emplace(device);
+                        if (auto device = Device::TryCreateDevice(objectPath, deviceInterface)) {
+                            _devicesMap.emplace(objectPath, device);
+                            addedDevices.emplace(device);
+                        }
                     }
                 }
             }
@@ -56,26 +57,12 @@ namespace MagicPodsCore {
         _rootProxy->finishRegistration();
     }
 
-    std::set<std::shared_ptr<Device>> DevicesInfoFetcher::GetAirpodsInfos() {     
-        auto predicate = [](const Device& deviceInfo) {
-            for (auto& appleProductId : AllAppleProductIds) {
-                std::string upperCaseActualModalias = deviceInfo.GetModalias();
-                std::transform(upperCaseActualModalias.begin(), upperCaseActualModalias.end(), upperCaseActualModalias.begin(), [](unsigned char c){ return std::toupper(c); });
-                std::string upperCaseTargetModalias = StringUtils::Format("v%04Xp%04X", static_cast<unsigned short>(BtVendorIds::Apple), static_cast<unsigned short>(appleProductId));
-                std::transform(upperCaseTargetModalias.begin(), upperCaseTargetModalias.end(), upperCaseTargetModalias.begin(), [](unsigned char c){ return std::toupper(c); });
-                if (upperCaseActualModalias.contains(upperCaseTargetModalias))
-                    return true;
-            }
-            return false;
-        };
-
-        std::set<std::shared_ptr<Device>> airpodsDevices{};
+    std::set<std::shared_ptr<Device>, DeviceComparator> DevicesInfoFetcher::GetDevices() const {
+        std::set<std::shared_ptr<Device>, DeviceComparator> devices{};
         for (const auto& [key, value] : _devicesMap) {
-            if (predicate(*value))
-                airpodsDevices.emplace(value);
+            devices.emplace(value);
         }
-
-        return airpodsDevices;
+        return devices;
     }
 
     void DevicesInfoFetcher::Connect(const std::string& deviceAddress) {
@@ -96,11 +83,9 @@ namespace MagicPodsCore {
         }
     }
 
-    std::string DevicesInfoFetcher::AsJson() {
-        auto airpodsDevices = GetAirpodsInfos();
-        
+    std::string DevicesInfoFetcher::AsJson() {        
         auto jsonArray = nlohmann::json::array();
-        for (auto& device : airpodsDevices) {
+        for (const auto& [key, device] : _devicesMap) {
             auto jsonObject = nlohmann::json::object();
             jsonObject["name"] = device->GetName();
             jsonObject["address"] = device->GetAddress();
@@ -122,11 +107,13 @@ namespace MagicPodsCore {
             if (std::regex_match(objectPath, match, DEVICE_INSTANCE_RE)) {
                 if (interfaces.contains("org.bluez.Device1")) {
                     auto deviceInterface = interfaces.at("org.bluez.Device1");
-                    auto device = std::make_shared<Device>(objectPath, deviceInterface);
-                    _devicesMap.emplace(objectPath, device);
+                    if (auto device = Device::TryCreateDevice(objectPath, deviceInterface))
+                        _devicesMap.emplace(objectPath, device);
                 }
             }
         }
+
+        std::cout << "Devices created:" << _devicesMap.size() << std::endl;
     }
 
     void DevicesInfoFetcher::OnDevicesAdd(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices) {

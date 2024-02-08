@@ -35,7 +35,7 @@ namespace MagicPodsCore {
         DevicesInfoFetcher();
         // TODO: запретить копирование и перенос
 
-        std::set<std::shared_ptr<Device>> GetAirpodsInfos();
+        std::set<std::shared_ptr<Device>, DeviceComparator> GetDevices() const;
 
         void Connect(const std::string& deviceAddress);
 
