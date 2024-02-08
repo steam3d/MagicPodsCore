@@ -25,11 +25,13 @@ namespace MagicPodsCore {
         }
 
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
-            for (const auto& [key, value]: values) {
-                std::cout << "PropertiesChanged:" << key << std::endl;
-            }
+            std::cout << "PropertiesChanged" << std::endl;
+            // for (const auto& [key, value]: values) {
+            //     std::cout << "PropertiesChanged:" << key << std::endl;
+            // }
             if (values.contains("Connected")) {
-                _onConnectedPropertyChangedEvent.FireEvent(values["Connected"]);
+                _connected = values["Connected"];
+                _onConnectedPropertyChangedEvent.FireEvent(_connected);
                 if (_connected)
                     _aapClient->Start();
                 else
