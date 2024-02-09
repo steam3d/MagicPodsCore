@@ -66,7 +66,7 @@ Request
 }
 ```
 
-Responce
+Response
 
 > Get Devices
 
@@ -80,7 +80,7 @@ Request
 }
 ```
 
-responce
+Response
 
 ```
 {
@@ -100,7 +100,7 @@ Request
 }
 ```
 
-Responece
+Resonance
 
 > Get default Bluetooth adapter
 
@@ -114,9 +114,102 @@ Request
 }
 ```
 
-Responece
+Resonance
 
 > Get default Bluetooth adapter
 
+### Get decky Info
+
+Request
+
+```
+{
+    "method":"GetDeckyInfo"
+}
+```
+
+Response
+
+```
+{
+  "info":{
+    "name": "AirPods (steam3d)",
+    "address": "12:45:ds:23:fd:12",
+    "connected": true,
+    "battery": {
+      "s": "int",
+      "sc": "bool",
+      "l": "int",
+      "lc": "bool",
+      "r": "int",
+      "rc": "bool",
+      "c": "int",
+      "cc": "bool"      
+    },
+    "capabilities": {
+      "anc"?: "int"      
+    } 
+  }
+}
+```
+
+if headphones do not have capabilities return empty:
+
+```
+{
+  "capabilities": {}
+}
+```
+
+### Get all
+
+Collects requests `GetDevices` `GetDefaultBluetoothAdapter` `GetDeckyInfo` together
+
+Request
+
+```
+{
+    "method":"GetAll"
+}
+```
 
 
+Response
+
+```
+{
+  "headphones": [{
+    "name": "string",
+    "address": "string",
+    "connected":"bool"
+  },
+  {
+    "name": "string",
+    "address": "string",
+    "connected":"bool"
+  }],
+  
+  "defaultbluetooth": {
+    "enabled":"bool"
+ },
+  
+  "info":{
+    "name": "AirPods (steam3d)",
+    "address": "12:45:ds:23:fd:12",
+    "connected": true,
+    "battery": {
+      "s": "int",
+      "sc": "bool",
+      "l": "int",
+      "lc": "bool",
+      "r": "int",
+      "rc": "bool",
+      "c": "int",
+      "cc": "bool"      
+    },
+    "capabilities": {
+      "anc?": "int"      
+    } 
+  }
+}
+```
