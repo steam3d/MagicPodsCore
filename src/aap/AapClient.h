@@ -23,16 +23,16 @@ namespace MagicPodsCore {
     private:
         std::string _address{};
 
+        int _socket{};
+
+        bool _isStarted{false};
+
     public:
         explicit AapClient(const std::string& address);
 
-        void Start() {
-            std::cout << "AapClient started for " << _address << std::endl;
-        }
+        void Start();
         
-        void Stop() {
-            std::cout << "AapClient stopped for " << _address << std::endl;
-        }
+        void Stop();
 
         std::vector<char> hexStringToBytes(const std::string& hex) {
 	        std::vector<char> bytes;
@@ -107,6 +107,8 @@ namespace MagicPodsCore {
             
             close(sock);
         }
+
+        bool SetSocketBlockingEnabled(int fd, bool blocking);
     };
 
 }
