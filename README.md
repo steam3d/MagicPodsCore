@@ -90,6 +90,14 @@ Response
 }
 ```
 
+Empty if there are no Bluetooth adapter in the system
+
+```
+{
+  "defaultbluetooth": {}
+}
+```
+
 ### Enable default Bluetooth adapter
 
 Request
@@ -153,13 +161,22 @@ Response
 }
 ```
 
-if headphones do not have capabilities return empty:
+Empty if there are no connected headphones:
+
+```
+{
+    "info": {}
+}
+```
+
+Empty if headphones do not have capabilities:
 
 ```
 {
   "capabilities": {}
 }
 ```
+
 
 ### Get all
 
