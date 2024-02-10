@@ -3,7 +3,7 @@
 #include <sdbus-c++/sdbus-c++.h>
 
 #include "Event.h"
-#include "AapClient.h"
+#include "aap/AapClient.h"
 
 namespace MagicPodsCore {
 

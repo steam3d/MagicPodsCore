@@ -2,8 +2,8 @@
 #include <App.h>
 
 #include "DevicesInfoFetcher.h"
-#include "aap.h"
-#include "AapClient.h"
+#include "aap/Aap.h"
+#include "aap/AapClient.h"
 
 using namespace MagicPodsCore;
 

@@ -12,7 +12,7 @@
 #include <iostream>
 #include <thread>
 
-#include "aap.h"
+#include "Aap.h"
 
 namespace MagicPodsCore {
 

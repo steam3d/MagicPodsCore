@@ -1,7 +1,7 @@
 #include "DevicesInfoFetcher.h"
 
-#include "btvendorids.h"
-#include "appleproductids.h"
+#include "BtVendorIds.h"
+#include "AppleProductIds.h"
 #include "StringUtils.h"
 
 #include <regex>
