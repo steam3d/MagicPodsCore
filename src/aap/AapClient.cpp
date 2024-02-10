@@ -36,29 +36,28 @@ namespace MagicPodsCore {
             }
             printf("connected...\n");
             
-            std::string initialMessage = "00000400000000000000000000000000";
-            auto initialMessageBytes = hexStringToBytes(initialMessage);
-            ssize_t sendedBytesLength = send(_socket, initialMessageBytes.data(), initialMessageBytes.size(), 0);
-            std::cout << "i(" << sendedBytesLength << "):" << initialMessage << std::endl;
-
             char buffer[1024];
-            while(true) {
+            while(_isStarted) {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(_socket, buffer, sizeof(buffer), 0);
                 if (receivedBytesLength >= 0) {
                     std::cout << "o(" << receivedBytesLength << "):" << bytesToHexString(buffer, receivedBytesLength) << std::endl;
-                } else {
+                }
+                else if (receivedBytesLength < 0) {
                     break;
                 }
-
-                initialMessage.clear();
             }
-            
-            close(_socket);
 
             std::cout << "Thread stopped" << std::endl;
         });
         thread.detach();
+
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+
+        std::string initialMessage = "00000400000000000000000000000000";
+            auto initialMessageBytes = hexStringToBytes(initialMessage);
+            ssize_t sendedBytesLength = send(_socket, initialMessageBytes.data(), initialMessageBytes.size(), 0);
+            std::cout << "i(" << sendedBytesLength << "):" << initialMessage << std::endl;
     }
 
     void AapClient::Stop() {
@@ -66,31 +65,9 @@ namespace MagicPodsCore {
             return;
         _isStarted = false;
 
-        int iResult;
-        u_long iMode = 0;
-
-        SetSocketBlockingEnabled(_socket, false);
-        // int rc = ioctl(_socket, FIONBIO,(char *)&iResult);
-        // if (rc < 0) {
-        //     perror("ioctl() failed");
-        //     // close(_socket);
-        // }
+        close(_socket);
 
         std::cout << "AapClient stopped for " << _address << std::endl;
-    }
-
-    bool AapClient::SetSocketBlockingEnabled(int fd, bool blocking) {
-        if (fd < 0) return false;
-
-        #ifdef _WIN32
-        unsigned long mode = blocking ? 0 : 1;
-        return (ioctlsocket(fd, FIONBIO, &mode) == 0);
-        #else
-        int flags = fcntl(fd, F_GETFL, 0);
-        if (flags == -1) return false;
-        flags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
-        return (fcntl(fd, F_SETFL, flags) == 0);
-        #endif
     }
 
 }
