@@ -230,3 +230,23 @@ Response
   }
 }
 ```
+
+
+### Set anc (for apple device only)
+
+Request
+
+```
+{
+    "method":"SetAnc",
+    "arguments": {
+        "address": "string",
+        "value": "int",
+    }
+}
+```
+
+Responce
+
+> Get decky Info
+
