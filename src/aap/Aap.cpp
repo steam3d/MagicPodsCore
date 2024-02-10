@@ -17,21 +17,21 @@ namespace MagicPodsCore {
     AapInit::AapInit() : AapRequest{"AapInit"} {
     }
 
-    std::vector<unsigned char> AapInit::Request() {
+    std::vector<unsigned char> AapInit::Request() const {
         return std::vector<unsigned char>{0x00, 0x00, 0x04, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     }
 
     AapEnableNotifications::AapEnableNotifications(NotificationsMode mode) : AapRequest{"AapEnableNotifications"}, _mode{mode} {
     }
 
-    std::vector<unsigned char> AapEnableNotifications::Request() {
+    std::vector<unsigned char> AapEnableNotifications::Request() const {
         return std::vector<unsigned char>{0x00, 0x00, 0x04, 0x00, static_cast<unsigned char>(Cmd::Notifications), 0x00, 0xff, 0xff, static_cast<unsigned char>(_mode), 0xff};
     }
 
     AapSetAnc::AapSetAnc(AncMode mode) : AapRequest{"AapSetAnc"}, _mode{mode} {
     }
 
-    std::vector<unsigned char> AapSetAnc::Request() {
+    std::vector<unsigned char> AapSetAnc::Request() const {
         return std::vector<unsigned char>{0x04, 0x00, 0x04, 0x00, static_cast<unsigned char>(Cmd::Settings), 0x00, static_cast<unsigned char>(CmdSettings::Anc), static_cast<unsigned char>(_mode), 0x00, 0x00, 0x00};
     }
 

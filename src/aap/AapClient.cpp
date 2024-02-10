@@ -36,12 +36,17 @@ namespace MagicPodsCore {
             }
             printf("connected...\n");
             
-            char buffer[1024];
+            unsigned char buffer[1024];
+            std::vector<unsigned char> vectorBuffer(1024); // optimize
             while(_isStarted) {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(_socket, buffer, sizeof(buffer), 0);
                 if (receivedBytesLength >= 0) {
                     std::cout << "o(" << receivedBytesLength << "):" << bytesToHexString(buffer, receivedBytesLength) << std::endl;
+                    vectorBuffer.assign(buffer, buffer + receivedBytesLength);
+                    for (auto& watcher : RegisteredWatchers) {
+                        watcher->ProcessBytes(vectorBuffer);
+                    }
                 }
                 else if (receivedBytesLength < 0) {
                     break;
@@ -53,11 +58,10 @@ namespace MagicPodsCore {
         thread.detach();
 
         std::this_thread::sleep_for(std::chrono::seconds(5));
-
-        std::string initialMessage = "00000400000000000000000000000000";
-            auto initialMessageBytes = hexStringToBytes(initialMessage);
-            ssize_t sendedBytesLength = send(_socket, initialMessageBytes.data(), initialMessageBytes.size(), 0);
-            std::cout << "i(" << sendedBytesLength << "):" << initialMessage << std::endl;
+        SendRequest(AapInit{});
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        SendRequest(AapEnableNotifications{NotificationsMode::Unknown1});
+        
     }
 
     void AapClient::Stop() {
@@ -68,6 +72,12 @@ namespace MagicPodsCore {
         close(_socket);
 
         std::cout << "AapClient stopped for " << _address << std::endl;
+    }
+
+    void AapClient::SendRequest(const AapRequest& aapRequest) {
+        auto requestData = aapRequest.Request();
+        ssize_t sendedBytesLength = send(_socket, requestData.data(), requestData.size(), 0);
+        std::cout << "i(" << requestData.size() << "):" << bytesToHexString(requestData.data(), requestData.size()) << std::endl;
     }
 
 }

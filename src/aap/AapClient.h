@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Aap.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -11,17 +13,20 @@
 #include <sstream>
 #include <iostream>
 #include <thread>
-
-#include "Aap.h"
+#include <array>
+#include <memory>
 
 namespace MagicPodsCore {
 
     class AapClient {
     private:
+        inline static const std::unique_ptr<AapWatcher> RegisteredWatchers[] {
+            std::make_unique<AapBatteryWatcher>(),
+            std::make_unique<AapAncWatcher>()
+        };
+
         std::string _address{};
-
         int _socket{};
-
         bool _isStarted{false};
 
     public:
@@ -30,6 +35,9 @@ namespace MagicPodsCore {
         void Start();
         
         void Stop();
+
+    private:
+        void SendRequest(const AapRequest& aapRequest);
 
         std::vector<char> hexStringToBytes(const std::string& hex) {
 	        std::vector<char> bytes;
@@ -46,7 +54,7 @@ namespace MagicPodsCore {
         inline static const char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                                 '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-        std::string bytesToHexString(char *data, int len)
+        std::string bytesToHexString(unsigned char *data, int len)
         {
             std::string s(len * 2, ' ');
             for (int i = 0; i < len; ++i) {

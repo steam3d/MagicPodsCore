@@ -31,7 +31,7 @@ namespace MagicPodsCore {
 
     public:
         explicit AapRequest(std::string tag);
-        virtual std::vector<unsigned char> Request() = 0;
+        virtual std::vector<unsigned char> Request() const = 0;
         void PrintAsHex();
     };
 
@@ -48,7 +48,7 @@ namespace MagicPodsCore {
     class AapInit : public AapRequest {
     public:
         AapInit();
-        std::vector<unsigned char> Request() override;
+        std::vector<unsigned char> Request() const override;
     };
 
 
@@ -91,7 +91,7 @@ namespace MagicPodsCore {
 
     public:
         AapEnableNotifications(NotificationsMode mode);
-        std::vector<unsigned char> Request() override;
+        std::vector<unsigned char> Request() const override;
     };
 
 
@@ -126,7 +126,7 @@ namespace MagicPodsCore {
 
     public:
         AapSetAnc(AncMode mode);
-        std::vector<unsigned char> Request() override;
+        std::vector<unsigned char> Request() const override;
     };
 
     // Base class to process incoming data from headphones
