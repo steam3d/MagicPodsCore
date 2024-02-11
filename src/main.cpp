@@ -2,8 +2,44 @@
 #include <App.h>
 
 #include "DevicesInfoFetcher.h"
+#include "aap/Aap.h"
+#include "aap/AapClient.h"
 
 using namespace MagicPodsCore;
+
+// void checkAap()
+// {
+//     AapInit init;
+//     init.PrintAsHex();
+
+//     AapEnableNotifications EnableNotifications(NotificationsMode::Unknown1);
+//     EnableNotifications.PrintAsHex();
+
+//     AapSetAnc setAnc(AncMode::Off);
+//     setAnc.PrintAsHex();
+
+//     //04000400040003020164020104016301010801110201
+//     unsigned char* barr22 = new unsigned char[22] { 4, 0, 4, 0, 4, 0, 3, 2, 1, 100, 2, 1, 4, 1, 99, 1, 1, 8, 1, 17, 2, 1};
+//     //0400040004000101015d0101
+//     unsigned char* barr12 = new unsigned char[22] { 4, 0, 4, 0, 4, 0, 1, 1, 1, 93, 1, 1};
+//     AapBatteryWatcher batteryWatcher;
+//     batteryWatcher.ProcessBytes(barr22, 22);
+//     batteryWatcher.ProcessBytes(barr12, 22);
+
+//     AapAncWatcher aapAncWatcher;
+//     aapAncWatcher.ProcessBytes(setAnc.Request(), setAnc.GetLength());
+
+//      printf("%04x \n", 0x4c00);
+//      printf("%04x \n", 0x4c05);
+//      printf("%d \n", 0x4c00);
+//      printf("%d \n", static_cast<unsigned short>(AppleProductIds::airpods2));
+//      printf("%04x \n", static_cast<unsigned short>(BtVendorIds::Apple));
+// }
+
+void l2capClient() {
+    // AapClient client{};
+    // client.Process();
+}
 
 void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleGetDevicesRequest" << std::endl; // TODO: delete
@@ -43,6 +79,8 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
 }
 
 int main() {
+    l2capClient();
+
     DevicesInfoFetcher devicesInfoFetcher{};    
 
     /* ws->getUserData returns one of these */
