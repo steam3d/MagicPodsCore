@@ -2,6 +2,9 @@
 
 #include <sdbus-c++/sdbus-c++.h>
 
+#include "Event.h"
+#include "aap/AapClient.h"
+
 namespace MagicPodsCore {
 
     class Device {
@@ -11,9 +14,15 @@ namespace MagicPodsCore {
         std::string _name{};
         std::string _address{};
         bool _connected{};
-        std::string _modalias{};       
+        std::string _modalias{};
+
+        Event<bool> _onConnectedPropertyChangedEvent{};
+
+        std::unique_ptr<AapClient> _aapClient{};
 
     public:
+        static std::shared_ptr<Device> TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
+
         Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
         // TODO: убрать возможность копирования
 
@@ -31,6 +40,10 @@ namespace MagicPodsCore {
         
         std::string GetModalias() const {
             return _modalias;
+        }
+
+        Event<bool>& GetConnectedPropertyChangedEvent() {
+            return _onConnectedPropertyChangedEvent;
         }
 
         void Connect();

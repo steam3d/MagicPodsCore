@@ -8,7 +8,9 @@ add_executable(MagicPodsCore
     src/main.cpp
     src/DevicesInfoFetcher.cpp
     src/Device.cpp
+    src/aap/Aap.cpp
+    src/aap/AapClient.cpp
 )
 add_subdirectory(dependencies)
 target_include_directories(MagicPodsCore PRIVATE src dependencies/json)
-target_link_libraries(MagicPodsCore PRIVATE sdbus-c++ uWebSockets)
+target_link_libraries(MagicPodsCore PRIVATE sdbus-c++ uWebSockets bluetooth)
