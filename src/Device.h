@@ -15,10 +15,14 @@ namespace MagicPodsCore {
         std::string _address{};
         bool _connected{};
         std::string _modalias{};
+        std::map<BatteryType, BatteryWatcherData> _batteryStatus{};
+        AncMode _ancMode{};
 
         Event<bool> _onConnectedPropertyChangedEvent{};
 
         std::unique_ptr<AapClient> _aapClient{};
+
+        mutable std::mutex _propertyMutex{};
 
     public:
         static std::shared_ptr<Device> TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
@@ -27,19 +31,33 @@ namespace MagicPodsCore {
         // TODO: убрать возможность копирования
 
         std::string GetName() const {
+            std::lock_guard{_propertyMutex};
             return _name;
         }
 
         std::string GetAddress() const {
+            std::lock_guard{_propertyMutex};
             return _address;
         }
 
         bool GetConnected() const {
+            std::lock_guard{_propertyMutex};
             return _connected;
         }
         
         std::string GetModalias() const {
+            std::lock_guard{_propertyMutex};
             return _modalias;
+        }
+
+        std::map<BatteryType, BatteryWatcherData> GetBatteryStatus() const {
+            std::lock_guard{_propertyMutex};
+            return _batteryStatus;
+        }
+
+        AncMode GetAncMode() const {
+            std::lock_guard{_propertyMutex};
+            return _ancMode;
         }
 
         Event<bool>& GetConnectedPropertyChangedEvent() {
@@ -49,6 +67,10 @@ namespace MagicPodsCore {
         void Connect();
 
         void Disconnect();
+
+    private:
+        void OnBatteryEvent(const BatteryWatcherData& data);
+        void OnAncEvent(const AncWatcherData& data);
     };
 
 }

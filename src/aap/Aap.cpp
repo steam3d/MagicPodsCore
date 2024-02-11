@@ -25,7 +25,7 @@ namespace MagicPodsCore {
     }
 
     std::vector<unsigned char> AapEnableNotifications::Request() const {
-        return std::vector<unsigned char>{0x00, 0x00, 0x04, 0x00, static_cast<unsigned char>(Cmd::Notifications), 0x00, 0xff, 0xff, static_cast<unsigned char>(_mode), 0xff};
+        return std::vector<unsigned char>{0x04, 0x00, 0x04, 0x00, static_cast<unsigned char>(Cmd::Notifications), 0x00, 0xff, 0xff, static_cast<unsigned char>(_mode), 0xff};
     }
 
     AapSetAnc::AapSetAnc(AncMode mode) : AapRequest{"AapSetAnc"}, _mode{mode} {
@@ -62,7 +62,9 @@ namespace MagicPodsCore {
             startByte += 5;
             
             // REPLACE WITH BATTERY STORAGE LOGIC OR EVENT ONBATTERYCHANGED?
-            readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + "\n";                                
+            readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + "\n";
+
+            _event.FireEvent(BatteryWatcherData{_tag, batteryType, charging, battery});
         }
 
         std::cout << readableStr << std::endl;
@@ -112,9 +114,10 @@ namespace MagicPodsCore {
 
         // REPLACE WITH ANC STORAGE LOGIC OR EVENT ONANCCHANGED?
         std::cout << DummyConvertAncMode(ancMode) << std::endl;
+        _event.FireEvent(AncWatcherData{_tag, ancMode});
     }
 
-    std::string AapAncWatcher::DummyConvertAncMode(AncMode mode){
+    std::string AapAncWatcher::DummyConvertAncMode(AncMode mode) {
         switch (mode) {
             case AncMode::On:
                 return "On";

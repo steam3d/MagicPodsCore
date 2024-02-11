@@ -20,21 +20,28 @@ namespace MagicPodsCore {
 
     class AapClient {
     private:
-        inline static const std::unique_ptr<AapWatcher> RegisteredWatchers[] {
-            std::make_unique<AapBatteryWatcher>(),
-            std::make_unique<AapAncWatcher>()
-        };
+        std::unique_ptr<AapBatteryWatcher> BatteryWatcher {std::make_unique<AapBatteryWatcher>()};
+        std::unique_ptr<AapAncWatcher> AncWatcher {std::make_unique<AapAncWatcher>()};
 
         std::string _address{};
         int _socket{};
         bool _isStarted{false};
+        
+        std::mutex _startStopMutex{};
 
     public:
         explicit AapClient(const std::string& address);
 
         void Start();
-        
         void Stop();
+
+        Event<BatteryWatcherData>& GetBatteryEvent() {
+            return BatteryWatcher->GetEvent();
+        }
+
+        Event<AncWatcherData>& GetAncEvent() {
+            return AncWatcher->GetEvent();
+        }
 
     private:
         void SendRequest(const AapRequest& aapRequest);

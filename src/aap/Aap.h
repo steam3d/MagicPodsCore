@@ -2,6 +2,7 @@
 
 #include "AppleProductIds.h"
 #include "BtVendorIds.h"
+#include "Event.h"
 
 #include <stdio.h>
 #include <iostream>
@@ -129,6 +130,10 @@ namespace MagicPodsCore {
         std::vector<unsigned char> Request() const override;
     };
 
+    struct WatcherData {
+        std::string Tag{};
+    };
+
     // Base class to process incoming data from headphones
     class AapWatcher {
     protected:        
@@ -186,21 +191,45 @@ namespace MagicPodsCore {
         Disconnected = 0x04, 
     };
 
+    struct BatteryWatcherData : public WatcherData {
+        BatteryType Type{};
+        ChargingStatus Status{};
+        short Battery{};
+    };
+
     class AapBatteryWatcher : public AapWatcher {
+    private:
+        Event<BatteryWatcherData> _event{};
+
     public:
         AapBatteryWatcher();
         // !MUST BE TESTED ON ALL AIRPOD MODES! 
         void ProcessBytes(const std::vector<unsigned char>& bytes) override;
+
+        Event<BatteryWatcherData>& GetEvent() {
+            return _event;
+        }
 
     private:
         std::string DummyConvertChargingStatus(ChargingStatus status);
         std::string DummyConvertBatteryType(BatteryType status);
     };
 
+    struct AncWatcherData : public WatcherData {
+        AncMode Mode{};
+    };
+
     class AapAncWatcher : public AapWatcher {
+    private:
+        Event<AncWatcherData> _event{};
+
     public:
         AapAncWatcher();
         void ProcessBytes(const std::vector<unsigned char>& bytes) override;
+
+        Event<AncWatcherData>& GetEvent() {
+            return _event;
+        }
 
     private:
         std::string DummyConvertAncMode(AncMode mode);
