@@ -139,9 +139,7 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
 int main() {
     l2capClient();
 
-    DevicesInfoFetcher devicesInfoFetcher{};    
-
-    devicesInfoFetcher.EnableBluetoothAdapter();
+    DevicesInfoFetcher devicesInfoFetcher{};
 
     /* ws->getUserData returns one of these */
     struct PerSocketData {
