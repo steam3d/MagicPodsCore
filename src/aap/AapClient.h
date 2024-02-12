@@ -35,6 +35,10 @@ namespace MagicPodsCore {
         void Start();
         void Stop();
 
+        bool IsStarted() const {
+            return _isStarted;
+        }
+
         Event<BatteryWatcherData>& GetBatteryEvent() {
             return BatteryWatcher->GetEvent();
         }
@@ -43,9 +47,9 @@ namespace MagicPodsCore {
             return AncWatcher->GetEvent();
         }
 
-    private:
         void SendRequest(const AapRequest& aapRequest);
 
+    private:
         std::vector<char> hexStringToBytes(const std::string& hex) {
 	        std::vector<char> bytes;
 

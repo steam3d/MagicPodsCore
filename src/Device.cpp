@@ -74,6 +74,11 @@ namespace MagicPodsCore {
         _deviceProxy->callMethod("Disconnect").onInterface("org.bluez.Device1").dontExpectReply();
     }
 
+    void Device::SetAnc(AncMode mode) {
+        if (_aapClient->IsStarted())
+            _aapClient->SendRequest(AapSetAnc(mode));
+    }
+
     void Device::OnBatteryEvent(const BatteryWatcherData& data) {
         std::lock_guard{_propertyMutex};
         _batteryStatus[data.Type] = data;

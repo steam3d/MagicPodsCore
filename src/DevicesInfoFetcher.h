@@ -41,6 +41,8 @@ namespace MagicPodsCore {
 
         void Disconnect(const std::string& deviceAddress);
 
+        void SetAnc(const std::string& deviceAddress, AncMode mode);
+
         std::string AsJson();
 
         Event<std::set<std::shared_ptr<Device>, DeviceComparator>>& GetOnDevicesAddEvent() {

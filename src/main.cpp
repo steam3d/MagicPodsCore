@@ -61,6 +61,15 @@ void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::Op
     devicesInfoFetcher.Disconnect(deviceAddress);
 }
 
+void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleSetAncRequest" << std::endl; // TODO: delete
+    auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
+    auto value = json.at("arguments").at("value").template get<int>();
+
+    if (value == 1 || value == 2 || value == 3) // TODO: исправить костыль
+        devicesInfoFetcher.SetAnc(deviceAddress, static_cast<AncMode>(value));
+}
+
 void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     try {
         auto json = nlohmann::json::parse(message);
@@ -72,6 +81,8 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
                 HandleConnectDeviceRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "DisconnectDevice")
                 HandleDisconnectDeviceRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "SetAnc")
+                HandleSetAncRequest(ws, json, opCode, devicesInfoFetcher);
     }
     catch(const std::exception& exception) {
         // ignoring incorrect json

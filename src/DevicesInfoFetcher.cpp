@@ -83,6 +83,15 @@ namespace MagicPodsCore {
         }
     }
 
+    void DevicesInfoFetcher::SetAnc(const std::string& deviceAddress, AncMode mode) {
+        for (const auto& [key, value] : _devicesMap) {
+            if (value->GetAddress() == deviceAddress) {
+                value->SetAnc(mode);
+                break;
+            }
+        }
+    }
+
     std::string DevicesInfoFetcher::AsJson() {        
         auto jsonArray = nlohmann::json::array();
         for (const auto& [key, device] : _devicesMap) {

@@ -68,6 +68,8 @@ namespace MagicPodsCore {
 
         void Disconnect();
 
+        void SetAnc(AncMode mode);
+
     private:
         void OnBatteryEvent(const BatteryWatcherData& data);
         void OnAncEvent(const AncWatcherData& data);
