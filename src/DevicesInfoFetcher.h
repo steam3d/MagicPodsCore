@@ -25,6 +25,7 @@ namespace MagicPodsCore {
     class DevicesInfoFetcher {
     private:
         std::unique_ptr<sdbus::IProxy> _rootProxy{};
+        std::unique_ptr<sdbus::IProxy> _defaultBluetoothAdapterProxy{};
 
         std::map<sdbus::ObjectPath, std::shared_ptr<Device>> _devicesMap{};
 
@@ -38,10 +39,12 @@ namespace MagicPodsCore {
         std::set<std::shared_ptr<Device>, DeviceComparator> GetDevices() const;
 
         void Connect(const std::string& deviceAddress);
-
         void Disconnect(const std::string& deviceAddress);
-
         void SetAnc(const std::string& deviceAddress, AncMode mode);
+
+        bool IsBluetoothAdapterPowered();
+        void EnableBluetoothAdapter();
+        void DisableBluetoothAdapter();
 
         std::string AsJson();
 

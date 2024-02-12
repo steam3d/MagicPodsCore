@@ -10,9 +10,7 @@
 
 namespace MagicPodsCore {
 
-    DevicesInfoFetcher::DevicesInfoFetcher() {
-        _rootProxy = sdbus::createProxy("org.bluez", "/");
-
+    DevicesInfoFetcher::DevicesInfoFetcher() : _rootProxy{sdbus::createProxy("org.bluez", "/")}, _defaultBluetoothAdapterProxy{sdbus::createProxy("org.bluez", "/org/bluez/hci0")} {
         ClearAndFillDevicesMap();
 
         _rootProxy->uponSignal("InterfacesAdded").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces) {
@@ -90,6 +88,18 @@ namespace MagicPodsCore {
                 break;
             }
         }
+    }
+
+    bool DevicesInfoFetcher::IsBluetoothAdapterPowered() {
+        return _defaultBluetoothAdapterProxy->getProperty("Powered").onInterface("org.bluez.Adapter1").get<bool>();
+    }
+
+    void DevicesInfoFetcher::EnableBluetoothAdapter() {
+        _defaultBluetoothAdapterProxy->setProperty("Powered").onInterface("org.bluez.Adapter1").toValue(true);
+    }
+
+    void DevicesInfoFetcher::DisableBluetoothAdapter() {
+        _defaultBluetoothAdapterProxy->setProperty("Powered").onInterface("org.bluez.Adapter1").toValue(false);
     }
 
     std::string DevicesInfoFetcher::AsJson() {        

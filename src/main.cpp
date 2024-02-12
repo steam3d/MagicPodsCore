@@ -70,6 +70,47 @@ void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
         devicesInfoFetcher.SetAnc(deviceAddress, static_cast<AncMode>(value));
 }
 
+void HandleGetDefaultBluetoothAdapterRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleGetDefaultBluetoothAdapterRequest" << std::endl; // TODO: delete
+    auto responseJson = nlohmann::json::object();
+    auto defaultBluetoothJson = nlohmann::json::object();
+    defaultBluetoothJson["enabled"] = devicesInfoFetcher.IsBluetoothAdapterPowered();
+    responseJson["defaultbluetooth"] = defaultBluetoothJson;
+
+    auto response = responseJson.dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
+}
+
+void HandleEnableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleEnableDefaultBluetoothAdapter" << std::endl; // TODO: delete
+
+    devicesInfoFetcher.EnableBluetoothAdapter();
+
+    std::cout << "HandledEnableDefaultBluetoothAdapter" << std::endl; // TODO: delete
+
+    auto responseJson = nlohmann::json::object(); // TODO: убрать дублирование
+    auto defaultBluetoothJson = nlohmann::json::object();
+    defaultBluetoothJson["enabled"] = devicesInfoFetcher.IsBluetoothAdapterPowered();
+    responseJson["defaultbluetooth"] = defaultBluetoothJson;
+
+    auto response = responseJson.dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
+}
+
+void HandleDisableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleDisableDefaultBluetoothAdapter" << std::endl; // TODO: delete
+
+    devicesInfoFetcher.DisableBluetoothAdapter();
+
+    auto responseJson = nlohmann::json::object(); // TODO: убрать дублирование
+    auto defaultBluetoothJson = nlohmann::json::object();
+    defaultBluetoothJson["enabled"] = devicesInfoFetcher.IsBluetoothAdapterPowered();
+    responseJson["defaultbluetooth"] = defaultBluetoothJson;
+
+    auto response = responseJson.dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
+}
+
 void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     try {
         auto json = nlohmann::json::parse(message);
@@ -83,6 +124,12 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
                 HandleDisconnectDeviceRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "SetAnc")
                 HandleSetAncRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "GetDefaultBluetoothAdapter")
+                HandleGetDefaultBluetoothAdapterRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "EnableDefaultBluetoothAdapter")
+                HandleEnableDefaultBluetoothAdapter(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "DisableDefaultBluetoothAdapter")
+                HandleDisableDefaultBluetoothAdapter(ws, json, opCode, devicesInfoFetcher);
     }
     catch(const std::exception& exception) {
         // ignoring incorrect json
@@ -93,6 +140,8 @@ int main() {
     l2capClient();
 
     DevicesInfoFetcher devicesInfoFetcher{};    
+
+    devicesInfoFetcher.EnableBluetoothAdapter();
 
     /* ws->getUserData returns one of these */
     struct PerSocketData {
