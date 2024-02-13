@@ -102,45 +102,6 @@ namespace MagicPodsCore {
         _defaultBluetoothAdapterProxy->setProperty("Powered").onInterface("org.bluez.Adapter1").toValue(false);
     }
 
-    std::string DevicesInfoFetcher::AsJson() {        
-        auto jsonArray = nlohmann::json::array();
-        for (const auto& [key, device] : _devicesMap) {
-            auto jsonObject = nlohmann::json::object();
-            jsonObject["name"] = device->GetName();
-            jsonObject["address"] = device->GetAddress();
-            jsonObject["connected"] = device->GetConnected();
-
-            auto jsonBatteryObject = nlohmann::json::object();
-            for (const auto& [batteryKey, battery] : device->GetBatteryStatus()) {
-                switch (batteryKey) {
-                    case BatteryType::Single:
-                        jsonBatteryObject["s"] = battery.Battery;
-                        jsonBatteryObject["sc"] = battery.Status == ChargingStatus::Charging;
-                        break;
-
-                    case BatteryType::Right:
-                        jsonBatteryObject["r"] = battery.Battery;
-                        jsonBatteryObject["rc"] = battery.Status == ChargingStatus::Charging;
-                        break;
-
-                    case BatteryType::Left:
-                        jsonBatteryObject["l"] = battery.Battery;
-                        jsonBatteryObject["lc"] = battery.Status == ChargingStatus::Charging;
-                        break;
-
-                    case BatteryType::Case:
-                        jsonBatteryObject["c"] = battery.Battery;
-                        jsonBatteryObject["cc"] = battery.Status == ChargingStatus::Charging;
-                        break;
-                }
-            }
-            jsonObject["battery"] = jsonBatteryObject;
-
-            jsonArray.push_back(jsonObject);
-        }
-        return jsonArray.dump();
-    }
-
     void DevicesInfoFetcher::ClearAndFillDevicesMap() {
         _devicesMap.clear();
 

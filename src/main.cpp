@@ -44,7 +44,45 @@ void l2capClient() {
 void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleGetDevicesRequest" << std::endl; // TODO: delete
 
-    auto response = devicesInfoFetcher.AsJson();
+    auto rootObject = nlohmann::json::object();
+    auto jsonArray = nlohmann::json::array();
+    for (const auto& device : devicesInfoFetcher.GetDevices()) {
+        auto jsonObject = nlohmann::json::object();
+        jsonObject["name"] = device->GetName();
+        jsonObject["address"] = device->GetAddress();
+        jsonObject["connected"] = device->GetConnected();
+
+        // auto jsonBatteryObject = nlohmann::json::object();
+        // for (const auto& [batteryKey, battery] : device->GetBatteryStatus()) {
+        //     switch (batteryKey) {
+        //         case BatteryType::Single:
+        //             jsonBatteryObject["s"] = battery.Battery;
+        //             jsonBatteryObject["sc"] = battery.Status == ChargingStatus::Charging;
+        //             break;
+
+        //         case BatteryType::Right:
+        //             jsonBatteryObject["r"] = battery.Battery;
+        //             jsonBatteryObject["rc"] = battery.Status == ChargingStatus::Charging;
+        //             break;
+
+        //         case BatteryType::Left:
+        //             jsonBatteryObject["l"] = battery.Battery;
+        //             jsonBatteryObject["lc"] = battery.Status == ChargingStatus::Charging;
+        //             break;
+
+        //         case BatteryType::Case:
+        //             jsonBatteryObject["c"] = battery.Battery;
+        //             jsonBatteryObject["cc"] = battery.Status == ChargingStatus::Charging;
+        //             break;
+        //     }
+        // }
+        // jsonObject["battery"] = jsonBatteryObject;
+
+        jsonArray.push_back(jsonObject);
+    }
+    rootObject["headphones"] = jsonArray;
+
+    auto response =  rootObject.dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 

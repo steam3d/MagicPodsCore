@@ -46,8 +46,6 @@ namespace MagicPodsCore {
         void EnableBluetoothAdapter();
         void DisableBluetoothAdapter();
 
-        std::string AsJson();
-
         Event<std::set<std::shared_ptr<Device>, DeviceComparator>>& GetOnDevicesAddEvent() {
             return _onDevicesAddEvent;
         }
