@@ -33,6 +33,8 @@ namespace MagicPodsCore {
                 }
             }
 
+            TrySelectNewActiveDevice();
+
             if (!addedDevices.empty())
                 OnDevicesAdd(addedDevices);
         });
@@ -47,6 +49,8 @@ namespace MagicPodsCore {
                 _devicesMap.erase(objectPath);
 
             }
+
+            TrySelectNewActiveDevice();
 
             if (!removedDevices.empty())
                 OnDevicesRemove(removedDevices);
@@ -104,6 +108,7 @@ namespace MagicPodsCore {
 
     void DevicesInfoFetcher::ClearAndFillDevicesMap() {
         _devicesMap.clear();
+        _activeDevice = nullptr;
 
         std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>> managedObjects{};
         _rootProxy->callMethod("GetManagedObjects").onInterface("org.freedesktop.DBus.ObjectManager").storeResultsTo<std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>>>(managedObjects);
@@ -120,7 +125,18 @@ namespace MagicPodsCore {
             }
         }
 
+        TrySelectNewActiveDevice();
+
         std::cout << "Devices created:" << _devicesMap.size() << std::endl;
+        
+    }
+
+    void DevicesInfoFetcher::TrySelectNewActiveDevice() {
+        if (_activeDevice != nullptr && !_devicesMap.contains(_activeDevice->GetAddress()))
+            _activeDevice = nullptr;
+
+        if (_activeDevice == nullptr && _devicesMap.size() > 0)
+            _activeDevice = _devicesMap.begin()->second;
     }
 
     void DevicesInfoFetcher::OnDevicesAdd(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices) {

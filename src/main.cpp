@@ -7,43 +7,7 @@
 
 using namespace MagicPodsCore;
 
-// void checkAap()
-// {
-//     AapInit init;
-//     init.PrintAsHex();
-
-//     AapEnableNotifications EnableNotifications(NotificationsMode::Unknown1);
-//     EnableNotifications.PrintAsHex();
-
-//     AapSetAnc setAnc(AncMode::Off);
-//     setAnc.PrintAsHex();
-
-//     //04000400040003020164020104016301010801110201
-//     unsigned char* barr22 = new unsigned char[22] { 4, 0, 4, 0, 4, 0, 3, 2, 1, 100, 2, 1, 4, 1, 99, 1, 1, 8, 1, 17, 2, 1};
-//     //0400040004000101015d0101
-//     unsigned char* barr12 = new unsigned char[22] { 4, 0, 4, 0, 4, 0, 1, 1, 1, 93, 1, 1};
-//     AapBatteryWatcher batteryWatcher;
-//     batteryWatcher.ProcessBytes(barr22, 22);
-//     batteryWatcher.ProcessBytes(barr12, 22);
-
-//     AapAncWatcher aapAncWatcher;
-//     aapAncWatcher.ProcessBytes(setAnc.Request(), setAnc.GetLength());
-
-//      printf("%04x \n", 0x4c00);
-//      printf("%04x \n", 0x4c05);
-//      printf("%d \n", 0x4c00);
-//      printf("%d \n", static_cast<unsigned short>(AppleProductIds::airpods2));
-//      printf("%04x \n", static_cast<unsigned short>(BtVendorIds::Apple));
-// }
-
-void l2capClient() {
-    // AapClient client{};
-    // client.Process();
-}
-
-void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleGetDevicesRequest" << std::endl; // TODO: delete
-
+nlohmann::json MakeGetDeviceResponse(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     auto rootObject = nlohmann::json::object();
     auto jsonArray = nlohmann::json::array();
     for (const auto& device : devicesInfoFetcher.GetDevices()) {
@@ -51,38 +15,68 @@ void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode o
         jsonObject["name"] = device->GetName();
         jsonObject["address"] = device->GetAddress();
         jsonObject["connected"] = device->GetConnected();
-
-        // auto jsonBatteryObject = nlohmann::json::object();
-        // for (const auto& [batteryKey, battery] : device->GetBatteryStatus()) {
-        //     switch (batteryKey) {
-        //         case BatteryType::Single:
-        //             jsonBatteryObject["s"] = battery.Battery;
-        //             jsonBatteryObject["sc"] = battery.Status == ChargingStatus::Charging;
-        //             break;
-
-        //         case BatteryType::Right:
-        //             jsonBatteryObject["r"] = battery.Battery;
-        //             jsonBatteryObject["rc"] = battery.Status == ChargingStatus::Charging;
-        //             break;
-
-        //         case BatteryType::Left:
-        //             jsonBatteryObject["l"] = battery.Battery;
-        //             jsonBatteryObject["lc"] = battery.Status == ChargingStatus::Charging;
-        //             break;
-
-        //         case BatteryType::Case:
-        //             jsonBatteryObject["c"] = battery.Battery;
-        //             jsonBatteryObject["cc"] = battery.Status == ChargingStatus::Charging;
-        //             break;
-        //     }
-        // }
-        // jsonObject["battery"] = jsonBatteryObject;
-
         jsonArray.push_back(jsonObject);
     }
     rootObject["headphones"] = jsonArray;
 
-    auto response =  rootObject.dump();
+    return rootObject;
+}
+
+nlohmann::json MakeGetDeckyInfoResponse(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    auto activeDevice = devicesInfoFetcher.GetActiveDevice();
+
+    auto rootObject = nlohmann::json::object();
+    auto jsonObject = nlohmann::json::object();
+
+    if (activeDevice) {
+        jsonObject["name"] = activeDevice->GetName();
+        jsonObject["address"] = activeDevice->GetAddress();
+        jsonObject["connected"] = activeDevice->GetConnected();
+
+        auto jsonBatteryObject = nlohmann::json::object();
+        for (const auto& [batteryKey, battery] : activeDevice->GetBatteryStatus()) {
+            switch (batteryKey) {
+                case BatteryType::Single:
+                    jsonBatteryObject["s"] = battery.Battery;
+                    jsonBatteryObject["sc"] = battery.Status == ChargingStatus::Charging;
+                    break;
+
+                case BatteryType::Right:
+                    jsonBatteryObject["r"] = battery.Battery;
+                    jsonBatteryObject["rc"] = battery.Status == ChargingStatus::Charging;
+                    break;
+
+                case BatteryType::Left:
+                    jsonBatteryObject["l"] = battery.Battery;
+                    jsonBatteryObject["lc"] = battery.Status == ChargingStatus::Charging;
+                    break;
+
+                case BatteryType::Case:
+                    jsonBatteryObject["c"] = battery.Battery;
+                    jsonBatteryObject["cc"] = battery.Status == ChargingStatus::Charging;
+                    break;
+            }
+        }
+        jsonObject["battery"] = jsonBatteryObject;
+    }
+
+    rootObject["info"] = jsonObject;
+
+    return rootObject;
+}
+
+nlohmann::json MakeGetDefaultBluetoothAdapterResponse(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    auto responseJson = nlohmann::json::object();
+    auto defaultBluetoothJson = nlohmann::json::object();
+    defaultBluetoothJson["enabled"] = devicesInfoFetcher.IsBluetoothAdapterPowered();
+    responseJson["defaultbluetooth"] = defaultBluetoothJson;
+    return responseJson;
+}
+
+void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleGetDevicesRequest" << std::endl; // TODO: delete
+
+    auto response = MakeGetDeviceResponse(ws, json, opCode, devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
@@ -91,12 +85,19 @@ void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCod
 
     auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
     devicesInfoFetcher.Connect(deviceAddress);
+
+    auto response = MakeGetDeviceResponse(ws, json, opCode, devicesInfoFetcher).dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
 void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleDisconnectDeviceRequest" << std::endl; // TODO: delete
+
     auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
     devicesInfoFetcher.Disconnect(deviceAddress);
+
+    auto response = MakeGetDeviceResponse(ws, json, opCode, devicesInfoFetcher).dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
 void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
@@ -110,12 +111,9 @@ void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
 
 void HandleGetDefaultBluetoothAdapterRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleGetDefaultBluetoothAdapterRequest" << std::endl; // TODO: delete
-    auto responseJson = nlohmann::json::object();
-    auto defaultBluetoothJson = nlohmann::json::object();
-    defaultBluetoothJson["enabled"] = devicesInfoFetcher.IsBluetoothAdapterPowered();
-    responseJson["defaultbluetooth"] = defaultBluetoothJson;
+    
 
-    auto response = responseJson.dump();
+    auto response = MakeGetDefaultBluetoothAdapterResponse(ws, json, opCode, devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
@@ -149,6 +147,28 @@ void HandleDisableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, 
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
+void HandleGetDeckyInfoRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleGetDeckyInfoRequest" << std::endl; // TODO: delete
+
+    auto response = MakeGetDeckyInfoResponse(ws, json, opCode, devicesInfoFetcher).dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
+}
+
+void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    std::cout << "HandleGetAll" << std::endl; // TODO: delete
+
+    auto rootObject = nlohmann::json::object();
+    auto getDevicesResponseJson = MakeGetDeviceResponse(ws, json, opCode, devicesInfoFetcher);
+    auto getDefaultBluetoothAdapterJson = MakeGetDefaultBluetoothAdapterResponse(ws, json, opCode, devicesInfoFetcher);
+    auto getDeckyInfoResponseJson = MakeGetDeckyInfoResponse(ws, json, opCode, devicesInfoFetcher);
+    rootObject["headphones"] = getDevicesResponseJson["headphones"];
+    rootObject["defaultbluetooth"] = getDefaultBluetoothAdapterJson["defaultbluetooth"];
+    rootObject["info"] = getDeckyInfoResponseJson["info"];
+
+    auto response = rootObject.dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
+}
+
 void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     try {
         auto json = nlohmann::json::parse(message);
@@ -168,6 +188,10 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
                 HandleEnableDefaultBluetoothAdapter(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "DisableDefaultBluetoothAdapter")
                 HandleDisableDefaultBluetoothAdapter(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "GetDeckyInfo")
+                HandleGetDeckyInfoRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "GetAll")
+                HandleGetAllRequest(ws, json, opCode, devicesInfoFetcher);
     }
     catch(const std::exception& exception) {
         // ignoring incorrect json
@@ -175,8 +199,6 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
 }
 
 int main() {
-    l2capClient();
-
     DevicesInfoFetcher devicesInfoFetcher{};
 
     /* ws->getUserData returns one of these */
