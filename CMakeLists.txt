@@ -13,4 +13,4 @@ add_executable(MagicPodsCore
 )
 add_subdirectory(dependencies)
 target_include_directories(MagicPodsCore PRIVATE src dependencies/json)
-target_link_libraries(MagicPodsCore PRIVATE sdbus-c++ uWebSockets bluetooth)
+target_link_libraries(MagicPodsCore PRIVATE sdbus-c++ uWebSockets bluetooth -static-libgcc -static-libstdc++)
