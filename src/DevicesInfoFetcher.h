@@ -59,6 +59,8 @@ namespace MagicPodsCore {
         }
 
     private:
+        std::shared_ptr<Device> TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
+
         void ClearAndFillDevicesMap();
         void TrySelectNewActiveDevice();
         

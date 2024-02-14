@@ -5,24 +5,6 @@
 
 namespace MagicPodsCore {
 
-    std::shared_ptr<Device> Device::TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) {
-        const static auto checkModalias = [](const std::string& modalias) -> bool {
-            for (auto& appleProductId : AllAppleProductIds) {
-                std::string upperCaseActualModalias = modalias;
-                std::transform(upperCaseActualModalias.begin(), upperCaseActualModalias.end(), upperCaseActualModalias.begin(), [](unsigned char c){ return std::toupper(c); });
-                std::string upperCaseTargetModalias = StringUtils::Format("v%04Xp%04X", static_cast<unsigned short>(BtVendorIds::Apple), static_cast<unsigned short>(appleProductId));
-                std::transform(upperCaseTargetModalias.begin(), upperCaseTargetModalias.end(), upperCaseTargetModalias.begin(), [](unsigned char c){ return std::toupper(c); });
-                if (upperCaseActualModalias.contains(upperCaseTargetModalias))
-                    return true;
-            }
-            return false;
-        };
-    
-        return deviceInterface.contains("Modalias") && checkModalias(deviceInterface.at("Modalias").get<std::string>()) 
-            ? std::make_shared<Device>(objectPath, deviceInterface)
-            : nullptr;
-    }
-
     Device::Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) : _deviceProxy{sdbus::createProxy("org.bluez", objectPath)} {
         if (deviceInterface.contains("Name")) {
             _name = deviceInterface.at("Name").get<std::string>();

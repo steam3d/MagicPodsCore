@@ -28,7 +28,7 @@ nlohmann::json MakeGetDeckyInfoResponse(auto *ws, const nlohmann::json& json, uW
     auto rootObject = nlohmann::json::object();
     auto jsonObject = nlohmann::json::object();
 
-    if (activeDevice->GetConnected()) {
+    if (activeDevice) {
         jsonObject["name"] = activeDevice->GetName();
         jsonObject["address"] = activeDevice->GetAddress();
         jsonObject["connected"] = activeDevice->GetConnected();

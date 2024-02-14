@@ -25,38 +25,36 @@ namespace MagicPodsCore {
         mutable std::mutex _propertyMutex{};
 
     public:
-        static std::shared_ptr<Device> TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
-
         Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
         // TODO: убрать возможность копирования
 
         std::string GetName() const {
-            std::lock_guard{_propertyMutex};
+            std::lock_guard lock{_propertyMutex};
             return _name;
         }
 
         std::string GetAddress() const {
-            std::lock_guard{_propertyMutex};
+            std::lock_guard lock{_propertyMutex};
             return _address;
         }
 
         bool GetConnected() const {
-            std::lock_guard{_propertyMutex};
+            std::lock_guard lock{_propertyMutex};
             return _connected;
         }
         
         std::string GetModalias() const {
-            std::lock_guard{_propertyMutex};
+            std::lock_guard lock{_propertyMutex};
             return _modalias;
         }
 
         std::map<BatteryType, BatteryWatcherData> GetBatteryStatus() const {
-            std::lock_guard{_propertyMutex};
+            std::lock_guard lock{_propertyMutex};
             return _batteryStatus;
         }
 
         AncMode GetAncMode() const {
-            std::lock_guard{_propertyMutex};
+            std::lock_guard lock{_propertyMutex};
             return _ancMode;
         }
 
