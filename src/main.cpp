@@ -28,6 +28,7 @@ nlohmann::json MakeGetDeckyInfoResponse(auto *ws, const nlohmann::json& json, uW
     auto rootObject = nlohmann::json::object();
     auto jsonObject = nlohmann::json::object();
 
+
     if (activeDevice) {
         jsonObject["name"] = activeDevice->GetName();
         jsonObject["address"] = activeDevice->GetAddress();
@@ -37,27 +38,31 @@ nlohmann::json MakeGetDeckyInfoResponse(auto *ws, const nlohmann::json& json, uW
         for (const auto& [batteryKey, battery] : activeDevice->GetBatteryStatus()) {
             switch (batteryKey) {
                 case BatteryType::Single:
-                    jsonBatteryObject["s"] = battery.Battery;
+                    jsonBatteryObject["s"] =  battery.Status != ChargingStatus::Disconnected ? battery.Battery : -1; //TODO: Create battery class and clarify the logic of proceeding battery data
                     jsonBatteryObject["sc"] = battery.Status == ChargingStatus::Charging;
                     break;
 
                 case BatteryType::Right:
-                    jsonBatteryObject["r"] = battery.Battery;
+                    jsonBatteryObject["r"] = battery.Status != ChargingStatus::Disconnected ? battery.Battery : -1; //TODO: Create battery class and clarify the logic of proceeding battery data
                     jsonBatteryObject["rc"] = battery.Status == ChargingStatus::Charging;
                     break;
 
                 case BatteryType::Left:
-                    jsonBatteryObject["l"] = battery.Battery;
+                    jsonBatteryObject["l"] = battery.Status != ChargingStatus::Disconnected ? battery.Battery : -1; //TODO: Create battery class and clarify the logic of proceeding battery data
                     jsonBatteryObject["lc"] = battery.Status == ChargingStatus::Charging;
                     break;
 
                 case BatteryType::Case:
-                    jsonBatteryObject["c"] = battery.Battery;
+                    jsonBatteryObject["c"] = battery.Status != ChargingStatus::Disconnected ? battery.Battery : -1; //TODO: Create battery class and clarify the logic of proceeding battery data
                     jsonBatteryObject["cc"] = battery.Status == ChargingStatus::Charging;
                     break;
             }
         }
         jsonObject["battery"] = jsonBatteryObject;
+        
+        // TODO: REMOVE THIS TWO LINES
+        auto jsonBatteryObjectCap = nlohmann::json::object();
+        jsonObject["capabilities"] = jsonBatteryObjectCap;
     }
 
     rootObject["info"] = jsonObject;
