@@ -33,7 +33,7 @@ namespace MagicPodsCore {
     private:
         std::map<DeviceBatteryType, DeviceBatteryData> _batteryStatus{};
         Event<std::map<DeviceBatteryType, DeviceBatteryData>> _event{};
-        bool _cached = true;
+        bool _cached;
     
     bool UpdateKey(DeviceBatteryType BatteryType, BatteryWatcherData watcherData);
 
@@ -42,7 +42,7 @@ namespace MagicPodsCore {
             return _event;
         }
 
-        DeviceBattery();
+        DeviceBattery(bool cached);
         
         std::map<DeviceBatteryType, DeviceBatteryData> GetBatteryStatus() const {
                 return _batteryStatus;

@@ -17,7 +17,7 @@ namespace MagicPodsCore {
         bool _connected{};
         std::string _modalias{};
         std::map<BatteryType, BatteryWatcherData> _batteryStatus{};
-        DeviceBattery _battery{};
+        DeviceBattery _battery;
         AncMode _ancMode{};
 
         Event<bool> _onConnectedPropertyChangedEvent{};

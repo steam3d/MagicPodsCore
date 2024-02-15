@@ -2,7 +2,7 @@
 
 namespace MagicPodsCore {
 
-    DeviceBattery::DeviceBattery(){
+    DeviceBattery::DeviceBattery(bool cached): _cached(cached) {
         struct DeviceBatteryData defaultData;
         defaultData.Battery = 0;
         defaultData.isCharging = false;
@@ -51,8 +51,8 @@ namespace MagicPodsCore {
         auto status = watcherData.Status == ChargingStatus::Disconnected ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
 
         
-        // Do not update the battery, use previews (cached) values
-        if (_cached && status == DeviceBatteryStatus::Disconnected){
+        // Do not update the battery, use previews (cached) values. If battery is zero then the previous value empty 
+        if (_cached && _batteryStatus[BatteryType].Battery > 0 && status == DeviceBatteryStatus::Disconnected){
             if (_batteryStatus[BatteryType].Status != DeviceBatteryStatus::Cached){
                 // Say UI that battery from cache now
                 _batteryStatus[BatteryType].Status = DeviceBatteryStatus::Cached;

@@ -5,8 +5,8 @@
 
 namespace MagicPodsCore {
 
-    Device::Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) : _deviceProxy{sdbus::createProxy("org.bluez", objectPath)} {
-        if (deviceInterface.contains("Name")) {
+    Device::Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) : _deviceProxy{sdbus::createProxy("org.bluez", objectPath)}, _battery(true) {
+        if (deviceInterface.contains("Name")) {           
             _name = deviceInterface.at("Name").get<std::string>();
         }
 
