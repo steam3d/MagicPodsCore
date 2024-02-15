@@ -15,30 +15,71 @@ namespace MagicPodsCore {
     }
 
     void DeviceBattery::UpdateFromAppleBattery(std::map<BatteryType, BatteryWatcherData> appleBattery) {
+        bool isUpdated = false;
+        
         for (const auto& [batteryKey, battery] : appleBattery) {
+            bool isUpdatedKey = false;
              switch (batteryKey) {
                 case BatteryType::Single:
-                    DeviceBattery::UpdateKey(DeviceBatteryType::Single, battery);
+                    isUpdatedKey = DeviceBattery::UpdateKey(DeviceBatteryType::Single, battery);
                     break;
-
                 case BatteryType::Right:
-                    DeviceBattery::UpdateKey(DeviceBatteryType::Right, battery);
+                    isUpdatedKey = DeviceBattery::UpdateKey(DeviceBatteryType::Right, battery);
                     break;
-
                 case BatteryType::Left:
-                    DeviceBattery::UpdateKey(DeviceBatteryType::Left, battery);
+                    isUpdatedKey = DeviceBattery::UpdateKey(DeviceBatteryType::Left, battery);
                     break;
-
                 case BatteryType::Case:
-                    DeviceBattery::UpdateKey(DeviceBatteryType::Case, battery);
+                    isUpdatedKey = DeviceBattery::UpdateKey(DeviceBatteryType::Case, battery);
                     break;
-            }
+                }
+                // Any update battery must trigger event
+                if (isUpdatedKey == true){
+                    isUpdated = true;
+                }
+        }
+
+        if (isUpdated){
+            printf("Battery updated\n");
+            _event.FireEvent(_batteryStatus);
         }
     }
 
-    void DeviceBattery::UpdateKey(DeviceBatteryType BatteryType, BatteryWatcherData watcherData){
-        _batteryStatus[BatteryType].Battery = watcherData.Battery;
-        _batteryStatus[BatteryType].isCharging = watcherData.Status == ChargingStatus::Charging;
-        _batteryStatus[BatteryType].Status = watcherData.Status == ChargingStatus::Disconnected ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
+    bool DeviceBattery::UpdateKey(DeviceBatteryType BatteryType, BatteryWatcherData watcherData){
+        auto battery = watcherData.Battery;
+        auto isCharging = watcherData.Status == ChargingStatus::Charging;
+        auto status = watcherData.Status == ChargingStatus::Disconnected ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
+
+        
+        // Do not update the battery, use previews (cached) values
+        if (_cached && status == DeviceBatteryStatus::Disconnected){
+            if (_batteryStatus[BatteryType].Status != DeviceBatteryStatus::Cached){
+                // Say UI that battery from cache now
+                _batteryStatus[BatteryType].Status = DeviceBatteryStatus::Cached;
+                printf("Changed to cache");
+                return true;
+            }
+            else{
+                
+                return false;
+            }            
+        }
+        
+        bool isUpdated = false;
+        if (_batteryStatus[BatteryType].Battery != battery){
+             _batteryStatus[BatteryType].Battery = battery;
+            isUpdated = true;
+        }
+
+        if (_batteryStatus[BatteryType].isCharging != isCharging){
+            _batteryStatus[BatteryType].isCharging = isCharging;
+            isUpdated = true;
+        }
+
+        if (_batteryStatus[BatteryType].Status != status){
+            _batteryStatus[BatteryType].Status = status;
+            isUpdated = true;
+        }
+        return isUpdated;
     }    
 }
