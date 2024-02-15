@@ -37,33 +37,26 @@ nlohmann::json MakeGetDeckyInfoResponse(auto *ws, const nlohmann::json& json, uW
 
         auto jsonBatteryObject = nlohmann::json::object();
         for (const auto& [batteryType, batteryData] : activeDevice->GetBatteryStatus()) {
+            
             auto jsonBatteryData = nlohmann::json::object();
+            jsonBatteryData["battery"] = batteryData.Battery;
+            jsonBatteryData["charging"] = batteryData.isCharging;
+            jsonBatteryData["status"] = batteryData.Status;
+            
             switch (batteryType) {
                 case DeviceBatteryType::Single:
-                    jsonBatteryData["battery"] = batteryData.Battery;
-                    jsonBatteryData["charging"] = batteryData.isCharging;
-                    jsonBatteryData["status"] = batteryData.Status;
                     jsonBatteryObject["single"] = jsonBatteryData;                
                     break;
 
                 case DeviceBatteryType::Right:
-                    jsonBatteryData["battery"] = batteryData.Battery;
-                    jsonBatteryData["charging"] = batteryData.isCharging;
-                    jsonBatteryData["status"] = batteryData.Status;
                     jsonBatteryObject["right"] = jsonBatteryData;  
                     break;
 
                 case DeviceBatteryType::Left:
-                    jsonBatteryData["battery"] = batteryData.Battery;
-                    jsonBatteryData["charging"] = batteryData.isCharging;
-                    jsonBatteryData["status"] = batteryData.Status;
                     jsonBatteryObject["left"] = jsonBatteryData;  
                     break;
 
                 case DeviceBatteryType::Case:
-                    jsonBatteryData["battery"] = batteryData.Battery;
-                    jsonBatteryData["charging"] = batteryData.isCharging;
-                    jsonBatteryData["status"] = batteryData.Status;
                     jsonBatteryObject["case"] = jsonBatteryData;  
                     break;
             }
