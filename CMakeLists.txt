@@ -8,6 +8,7 @@ add_executable(MagicPodsCore
     src/main.cpp
     src/DevicesInfoFetcher.cpp
     src/Device.cpp
+    src/DeviceBattery.cpp
     src/aap/Aap.cpp
     src/aap/AapClient.cpp
 )

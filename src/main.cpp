@@ -4,6 +4,7 @@
 #include "DevicesInfoFetcher.h"
 #include "aap/Aap.h"
 #include "aap/AapClient.h"
+#include "DeviceBattery.h"
 
 using namespace MagicPodsCore;
 
@@ -35,26 +36,35 @@ nlohmann::json MakeGetDeckyInfoResponse(auto *ws, const nlohmann::json& json, uW
         jsonObject["connected"] = activeDevice->GetConnected();
 
         auto jsonBatteryObject = nlohmann::json::object();
-        for (const auto& [batteryKey, battery] : activeDevice->GetBatteryStatus()) {
-            switch (batteryKey) {
-                case BatteryType::Single:
-                    jsonBatteryObject["s"] =  battery.Status != ChargingStatus::Disconnected ? battery.Battery : -1; //TODO: Create battery class and clarify the logic of proceeding battery data
-                    jsonBatteryObject["sc"] = battery.Status == ChargingStatus::Charging;
+        for (const auto& [batteryType, batteryData] : activeDevice->GetBatteryStatus()) {
+            auto jsonBatteryData = nlohmann::json::object();
+            switch (batteryType) {
+                case DeviceBatteryType::Single:
+                    jsonBatteryData["battery"] = batteryData.Battery;
+                    jsonBatteryData["charging"] = batteryData.isCharging;
+                    jsonBatteryData["status"] = batteryData.Status;
+                    jsonBatteryObject["single"] = jsonBatteryData;                
                     break;
 
-                case BatteryType::Right:
-                    jsonBatteryObject["r"] = battery.Status != ChargingStatus::Disconnected ? battery.Battery : -1; //TODO: Create battery class and clarify the logic of proceeding battery data
-                    jsonBatteryObject["rc"] = battery.Status == ChargingStatus::Charging;
+                case DeviceBatteryType::Right:
+                    jsonBatteryData["battery"] = batteryData.Battery;
+                    jsonBatteryData["charging"] = batteryData.isCharging;
+                    jsonBatteryData["status"] = batteryData.Status;
+                    jsonBatteryObject["right"] = jsonBatteryData;  
                     break;
 
-                case BatteryType::Left:
-                    jsonBatteryObject["l"] = battery.Status != ChargingStatus::Disconnected ? battery.Battery : -1; //TODO: Create battery class and clarify the logic of proceeding battery data
-                    jsonBatteryObject["lc"] = battery.Status == ChargingStatus::Charging;
+                case DeviceBatteryType::Left:
+                    jsonBatteryData["battery"] = batteryData.Battery;
+                    jsonBatteryData["charging"] = batteryData.isCharging;
+                    jsonBatteryData["status"] = batteryData.Status;
+                    jsonBatteryObject["left"] = jsonBatteryData;  
                     break;
 
-                case BatteryType::Case:
-                    jsonBatteryObject["c"] = battery.Status != ChargingStatus::Disconnected ? battery.Battery : -1; //TODO: Create battery class and clarify the logic of proceeding battery data
-                    jsonBatteryObject["cc"] = battery.Status == ChargingStatus::Charging;
+                case DeviceBatteryType::Case:
+                    jsonBatteryData["battery"] = batteryData.Battery;
+                    jsonBatteryData["charging"] = batteryData.isCharging;
+                    jsonBatteryData["status"] = batteryData.Status;
+                    jsonBatteryObject["case"] = jsonBatteryData;  
                     break;
             }
         }

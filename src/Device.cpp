@@ -13,7 +13,7 @@ namespace MagicPodsCore {
         if (deviceInterface.contains("Address")) {
             _address = deviceInterface.at("Address").get<std::string>();
             _aapClient = std::make_unique<AapClient>(_address);
-            _aapClient->GetBatteryEvent().Subscribe([this](const BatteryWatcherData& data) {
+            _aapClient->GetBatteryEvent().Subscribe([this](const std::map<BatteryType, BatteryWatcherData>& data) {
                 OnBatteryEvent(data);
             });
             _aapClient->GetAncEvent().Subscribe([this](const AncWatcherData& data) {
@@ -61,9 +61,9 @@ namespace MagicPodsCore {
             _aapClient->SendRequest(AapSetAnc(mode));
     }
 
-    void Device::OnBatteryEvent(const BatteryWatcherData& data) {
+    void Device::OnBatteryEvent(const std::map<BatteryType, BatteryWatcherData>& data) {
         std::lock_guard{_propertyMutex};
-        _batteryStatus[data.Type] = data;
+        _battery.UpdateFromAppleBattery(data);
     }
     
     void Device::OnAncEvent(const AncWatcherData& data) {

@@ -55,6 +55,7 @@ namespace MagicPodsCore {
 
         int startByte = 7;
         std::string readableStr = "";
+        std::map<BatteryType, BatteryWatcherData> appBatteryStatus{};
         for (int i = 0; i < batteryCount; i++) {
             BatteryType batteryType = static_cast<BatteryType>(bytes[startByte]);
             unsigned char battery = bytes[startByte + 2];
@@ -63,10 +64,19 @@ namespace MagicPodsCore {
             
             // REPLACE WITH BATTERY STORAGE LOGIC OR EVENT ONBATTERYCHANGED?
             readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + "\n";
+            
+            // Sometimes AirPods send strange battery
+            battery = battery > 100 ? 100 : battery;
+            battery = battery < 0 ? 0 : battery;
 
-            _event.FireEvent(BatteryWatcherData{_tag, batteryType, charging, battery});
+            struct BatteryWatcherData batteryData;
+            batteryData.Battery = battery;
+            batteryData.Status = charging;
+            batteryData.Tag = _tag;
+            appBatteryStatus[batteryType] = batteryData;
         }
 
+        _event.FireEvent(appBatteryStatus);
         std::cout << readableStr << std::endl;
     }
 
