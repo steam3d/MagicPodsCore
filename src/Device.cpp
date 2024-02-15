@@ -43,6 +43,7 @@ namespace MagicPodsCore {
                     _aapClient->Start();
                 else
                     _aapClient->Stop();
+                    _battery.ClearBattery();
             }
         });
         _deviceProxy->finishRegistration();

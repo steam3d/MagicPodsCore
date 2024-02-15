@@ -3,6 +3,10 @@
 namespace MagicPodsCore {
 
     DeviceBattery::DeviceBattery(bool cached): _cached(cached) {
+        ClearBattery();
+    }
+
+    void DeviceBattery::ClearBattery(){
         struct DeviceBatteryData defaultData;
         defaultData.Battery = 0;
         defaultData.isCharging = false;

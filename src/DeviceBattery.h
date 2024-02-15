@@ -49,5 +49,7 @@ namespace MagicPodsCore {
         }
 
         void UpdateFromAppleBattery(std::map<BatteryType, BatteryWatcherData> appleBattery);
+
+        void ClearBattery();
     };
 }
