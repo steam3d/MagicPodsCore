@@ -41,7 +41,7 @@ namespace MagicPodsCore {
 
         if (isUpdated){
             printf("Battery updated\n");
-            _event.FireEvent(_batteryStatus);
+            _batteryChanged.FireEvent(_batteryStatus);
         }
     }
 
