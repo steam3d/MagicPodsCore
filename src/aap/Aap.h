@@ -186,6 +186,8 @@ namespace MagicPodsCore {
     };
 
     enum class ChargingStatus: unsigned char {
+        // Got this when both AirPods out of the case 
+        Undefined = 0x00,
         Charging = 0x01, 
         NotCharging = 0x02, 
         Disconnected = 0x04, 
