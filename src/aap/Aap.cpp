@@ -113,11 +113,14 @@ namespace MagicPodsCore {
     }
 
     void AapAncWatcher::ProcessBytes(const std::vector<unsigned char>& bytes) {
-        // min length of the battery packet
+        // min length of the anc packet
         if (bytes.size() < 10) return;
 
-        // packet type must be battery
+        // packet type must be Settings
         if (bytes[4] != static_cast<unsigned char>(Cmd::Settings)) return;
+
+        // settings type must be Anc
+        if (bytes[6] != static_cast<unsigned char>(CmdSettings::Anc)) return;
         
         std::cout << _tag << std::endl;
 
