@@ -186,27 +186,28 @@ namespace MagicPodsCore {
     };
 
     enum class ChargingStatus: unsigned char {
+        // Got this when both AirPods out of the case 
+        Undefined = 0x00,
         Charging = 0x01, 
         NotCharging = 0x02, 
         Disconnected = 0x04, 
     };
 
     struct BatteryWatcherData : public WatcherData {
-        BatteryType Type{};
         ChargingStatus Status{};
         short Battery{};
     };
 
     class AapBatteryWatcher : public AapWatcher {
     private:
-        Event<BatteryWatcherData> _event{};
+        Event<std::map<BatteryType, BatteryWatcherData>> _event{};
 
     public:
         AapBatteryWatcher();
         // !MUST BE TESTED ON ALL AIRPOD MODES! 
         void ProcessBytes(const std::vector<unsigned char>& bytes) override;
 
-        Event<BatteryWatcherData>& GetEvent() {
+        Event<std::map<BatteryType, BatteryWatcherData>>& GetEvent() {
             return _event;
         }
 

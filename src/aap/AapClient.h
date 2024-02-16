@@ -39,7 +39,7 @@ namespace MagicPodsCore {
             return _isStarted;
         }
 
-        Event<BatteryWatcherData>& GetBatteryEvent() {
+        Event<std::map<BatteryType, BatteryWatcherData>>& GetBatteryEvent() {
             return BatteryWatcher->GetEvent();
         }
 

@@ -4,6 +4,7 @@
 
 #include "Event.h"
 #include "aap/AapClient.h"
+#include "DeviceBattery.h"
 
 namespace MagicPodsCore {
 
@@ -15,7 +16,7 @@ namespace MagicPodsCore {
         std::string _address{};
         bool _connected{};
         std::string _modalias{};
-        std::map<BatteryType, BatteryWatcherData> _batteryStatus{};
+        DeviceBattery _battery;
         AncMode _ancMode{};
 
         Event<bool> _onConnectedPropertyChangedEvent{};
@@ -48,9 +49,9 @@ namespace MagicPodsCore {
             return _modalias;
         }
 
-        std::map<BatteryType, BatteryWatcherData> GetBatteryStatus() const {
+        std::map<DeviceBatteryType, DeviceBatteryData> GetBatteryStatus() const {
             std::lock_guard lock{_propertyMutex};
-            return _batteryStatus;
+            return _battery.GetBatteryStatus();
         }
 
         AncMode GetAncMode() const {
@@ -69,7 +70,7 @@ namespace MagicPodsCore {
         void SetAnc(AncMode mode);
 
     private:
-        void OnBatteryEvent(const BatteryWatcherData& data);
+        void OnBatteryEvent(const std::map<BatteryType, BatteryWatcherData>& data);
         void OnAncEvent(const AncWatcherData& data);
     };
 

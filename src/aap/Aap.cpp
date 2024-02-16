@@ -55,23 +55,34 @@ namespace MagicPodsCore {
 
         int startByte = 7;
         std::string readableStr = "";
+        std::map<BatteryType, BatteryWatcherData> appBatteryStatus{};
         for (int i = 0; i < batteryCount; i++) {
             BatteryType batteryType = static_cast<BatteryType>(bytes[startByte]);
             unsigned char battery = bytes[startByte + 2];
             ChargingStatus charging = static_cast<ChargingStatus>(bytes[startByte+3]);
-            startByte += 5;
+            startByte += 5;        
             
-            // REPLACE WITH BATTERY STORAGE LOGIC OR EVENT ONBATTERYCHANGED?
-            readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + "\n";
+            // Sometimes AirPods send strange battery
+            battery = battery > 100 ? 100 : battery;
+            battery = battery < 0 ? 0 : battery;
 
-            _event.FireEvent(BatteryWatcherData{_tag, batteryType, charging, battery});
+            struct BatteryWatcherData batteryData;
+            batteryData.Battery = battery;
+            batteryData.Status = charging;
+            batteryData.Tag = _tag;
+            appBatteryStatus[batteryType] = batteryData;
+            
+            readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + "\n";
         }
 
+        _event.FireEvent(appBatteryStatus);
         std::cout << readableStr << std::endl;
     }
 
     std::string AapBatteryWatcher::DummyConvertChargingStatus(ChargingStatus status) {
         switch (status) {
+            case ChargingStatus::Undefined:
+                return "Undefined";
             case ChargingStatus::Charging:
                 return "Charging";
             case ChargingStatus::NotCharging:
