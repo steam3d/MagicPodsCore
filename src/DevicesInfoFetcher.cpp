@@ -67,6 +67,15 @@ namespace MagicPodsCore {
         return devices;
     }
 
+    std::shared_ptr<Device> DevicesInfoFetcher::GetDevice(std::string& deviceAddress) const {
+        for (const auto& [key, value] : _devicesMap) {
+            if (value->GetAddress() == deviceAddress) {
+                return value;
+            }
+        }
+        return nullptr;
+    }
+
     void DevicesInfoFetcher::Connect(const std::string& deviceAddress) {
         for (const auto& [key, value] : _devicesMap) {
             if (value->GetAddress() == deviceAddress) {

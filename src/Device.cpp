@@ -37,8 +37,11 @@ namespace MagicPodsCore {
             //     std::cout << "PropertiesChanged:" << key << std::endl;
             // }
             if (values.contains("Connected")) {
-                _connected = values["Connected"];
-                _onConnectedPropertyChangedEvent.FireEvent(_connected);
+                auto newConnectedValue = values["Connected"].get<bool>();
+                if (_connected != newConnectedValue) {
+                    _connected = newConnectedValue;
+                    _onConnectedPropertyChangedEvent.FireEvent(_connected);
+                }
                 if (_connected)
                     _aapClient->Start();
                 else

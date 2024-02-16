@@ -1,5 +1,6 @@
 #include <iostream>
 #include <App.h>
+#include <json.hpp>
 
 #include "DevicesInfoFetcher.h"
 #include "aap/Aap.h"
@@ -8,7 +9,7 @@
 
 using namespace MagicPodsCore;
 
-nlohmann::json MakeGetDeviceResponse(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto rootObject = nlohmann::json::object();
     auto jsonArray = nlohmann::json::array();
     for (const auto& device : devicesInfoFetcher.GetDevices()) {
@@ -84,28 +85,52 @@ nlohmann::json MakeGetDefaultBluetoothAdapterResponse(auto *ws, const nlohmann::
 void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleGetDevicesRequest" << std::endl; // TODO: delete
 
-    auto response = MakeGetDeviceResponse(ws, json, opCode, devicesInfoFetcher).dump();
+    auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
-void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleConnectDeviceRequest" << std::endl; // TODO: delete
 
     auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
-    devicesInfoFetcher.Connect(deviceAddress);
+    auto device = devicesInfoFetcher.GetDevice(deviceAddress);
 
-    auto response = MakeGetDeviceResponse(ws, json, opCode, devicesInfoFetcher).dump();
-    ws->send(response, opCode, response.length() < 16 * 1024);
+    if (device == nullptr || device->GetConnected()) {
+        auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
+        ws->send(response, opCode, response.length() < 16 * 1024);
+        return;
+    }
+
+    device->GetConnectedPropertyChangedEvent().Subscribe([ws, &json, opCode, &app, &devicesInfoFetcher](bool newValue) {
+        app.getLoop()->defer([ws, &json, opCode, &app, &devicesInfoFetcher](){
+            auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
+            ws->send(response, opCode, response.length() < 16 * 1024);
+        });
+    });
+    
+    device->Connect();
 }
 
-void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleDisconnectDeviceRequest" << std::endl; // TODO: delete
 
     auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
-    devicesInfoFetcher.Disconnect(deviceAddress);
+    auto device = devicesInfoFetcher.GetDevice(deviceAddress);
 
-    auto response = MakeGetDeviceResponse(ws, json, opCode, devicesInfoFetcher).dump();
-    ws->send(response, opCode, response.length() < 16 * 1024);
+    if (device == nullptr || !device->GetConnected()) {
+        auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
+        ws->send(response, opCode, response.length() < 16 * 1024);
+        return;
+    }
+
+    device->GetConnectedPropertyChangedEvent().Subscribe([ws, &json, opCode, &app, &devicesInfoFetcher](bool newValue) {
+        app.getLoop()->defer([ws, &json, opCode, &app, &devicesInfoFetcher]() {
+            auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
+            ws->send(response, opCode, response.length() < 16 * 1024);
+        });
+    });
+    
+    device->Disconnect();
 }
 
 void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
@@ -166,7 +191,7 @@ void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
     std::cout << "HandleGetAll" << std::endl; // TODO: delete
 
     auto rootObject = nlohmann::json::object();
-    auto getDevicesResponseJson = MakeGetDeviceResponse(ws, json, opCode, devicesInfoFetcher);
+    auto getDevicesResponseJson = MakeGetDeviceResponse(devicesInfoFetcher);
     auto getDefaultBluetoothAdapterJson = MakeGetDefaultBluetoothAdapterResponse(ws, json, opCode, devicesInfoFetcher);
     auto getDeckyInfoResponseJson = MakeGetDeckyInfoResponse(ws, json, opCode, devicesInfoFetcher);
     rootObject["headphones"] = getDevicesResponseJson["headphones"];
@@ -177,7 +202,12 @@ void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
-void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+void HandleIncorrectResponse(auto *ws, uWS::OpCode opCode) {
+    std::string emptyResponse{};
+    ws->send(emptyResponse, opCode, emptyResponse.length() < 16 * 1024);
+}
+
+void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
     try {
         auto json = nlohmann::json::parse(message);
 
@@ -185,9 +215,9 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
             if (methodName == "GetDevices")
                 HandleGetDevicesRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "ConnectDevice")
-                HandleConnectDeviceRequest(ws, json, opCode, devicesInfoFetcher);
+                HandleConnectDeviceRequest(ws, json, opCode, app, devicesInfoFetcher);
             else if (methodName == "DisconnectDevice")
-                HandleDisconnectDeviceRequest(ws, json, opCode, devicesInfoFetcher);
+                HandleDisconnectDeviceRequest(ws, json, opCode, app, devicesInfoFetcher);
             else if (methodName == "SetAnc")
                 HandleSetAncRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "GetDefaultBluetoothAdapter")
@@ -200,9 +230,11 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, Devic
                 HandleGetDeckyInfoRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "GetAll")
                 HandleGetAllRequest(ws, json, opCode, devicesInfoFetcher);
+            else
+                HandleIncorrectResponse(ws, opCode);
     }
     catch(const std::exception& exception) {
-        // ignoring incorrect json
+        HandleIncorrectResponse(ws, opCode);
     }
 }
 
@@ -216,7 +248,8 @@ int main() {
 
     /* Keep in mind that uWS::SSLApp({options}) is the same as uWS::App() when compiled without SSL support.
      * You may swap to using uWS:App() if you don't need SSL */
-    uWS::App().ws<PerSocketData>("/*", {
+    uWS::App app{};
+    app.ws<PerSocketData>("/*", {
         /* Settings */
         .compression = uWS::CompressOptions(uWS::DEDICATED_COMPRESSOR_4KB | uWS::DEDICATED_DECOMPRESSOR),
         .maxPayloadLength = 100 * 1024 * 1024,
@@ -231,8 +264,8 @@ int main() {
             /* Open event here, you may access ws->getUserData() which points to a PerSocketData struct */
 
         },
-        .message = [&devicesInfoFetcher](auto *ws, std::string_view message, uWS::OpCode opCode) {
-            HandleRequest(ws, message, opCode, devicesInfoFetcher);
+        .message = [&app, &devicesInfoFetcher](auto *ws, std::string_view message, uWS::OpCode opCode) {
+            HandleRequest(ws, message, opCode, app, devicesInfoFetcher);
 
             /* This is the opposite of what you probably want; compress if message is LARGER than 16 kb
              * the reason we do the opposite here; compress if SMALLER than 16 kb is to allow for 

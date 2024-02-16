@@ -38,6 +38,7 @@ namespace MagicPodsCore {
         // TODO: запретить копирование и перенос
 
         std::set<std::shared_ptr<Device>, DeviceComparator> GetDevices() const;
+        std::shared_ptr<Device> GetDevice(std::string& deviceAddress) const;
         std::shared_ptr<Device> GetActiveDevice() const {
             return _activeDevice;
         }
