@@ -130,7 +130,7 @@ namespace MagicPodsCore {
     
         if (deviceInterface.contains("Modalias") && checkModalias(deviceInterface.at("Modalias").get<std::string>())) {
             auto newDevice = std::make_shared<Device>(objectPath, deviceInterface);
-            newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](bool newValue) {
+            newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
             return newDevice;

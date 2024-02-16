@@ -101,10 +101,11 @@ void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCod
         return;
     }
 
-    device->GetConnectedPropertyChangedEvent().Subscribe([ws, &json, opCode, &app, &devicesInfoFetcher](bool newValue) {
-        app.getLoop()->defer([ws, &json, opCode, &app, &devicesInfoFetcher](){
+    device->GetConnectedPropertyChangedEvent().Subscribe([device, ws, &json, opCode, &app, &devicesInfoFetcher](size_t listenerId, bool newValue) {
+        app.getLoop()->defer([device, ws, &json, opCode, &app, &devicesInfoFetcher, listenerId]() {
             auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
             ws->send(response, opCode, response.length() < 16 * 1024);
+            device->GetConnectedPropertyChangedEvent().Unsubscribe(listenerId);
         });
     });
     
@@ -123,10 +124,11 @@ void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::Op
         return;
     }
 
-    device->GetConnectedPropertyChangedEvent().Subscribe([ws, &json, opCode, &app, &devicesInfoFetcher](bool newValue) {
-        app.getLoop()->defer([ws, &json, opCode, &app, &devicesInfoFetcher]() {
+    device->GetConnectedPropertyChangedEvent().Subscribe([device, ws, &json, opCode, &app, &devicesInfoFetcher](size_t listenerId, bool newValue) {
+        app.getLoop()->defer([device, ws, &json, opCode, &app, &devicesInfoFetcher, listenerId]() {
             auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
             ws->send(response, opCode, response.length() < 16 * 1024);
+            device->GetConnectedPropertyChangedEvent().Unsubscribe(listenerId);
         });
     });
     

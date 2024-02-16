@@ -9,18 +9,18 @@ namespace MagicPodsCore {
     class Event {
     private:
         size_t _idForNewListener{};
-        std::map<size_t, std::function<void(const DataType&)>> _listeners{};
+        std::map<size_t, std::function<void(size_t, const DataType&)>> _listeners{};
 
     public:
         // TODO: обработать перемещение
 
-        size_t Subscribe(std::function<void(const DataType&)>&& listener);
+        size_t Subscribe(std::function<void(size_t, const DataType&)>&& listener);
         void Unsubscribe(size_t listenerId);
         void FireEvent(const DataType& dataType);
     };
 
     template<typename DataType>
-    size_t Event<DataType>::Subscribe(std::function<void(const DataType&)>&& listener) {
+    size_t Event<DataType>::Subscribe(std::function<void(size_t, const DataType&)>&& listener) {
         _listeners.emplace(++_idForNewListener, listener);
         return _idForNewListener;
     }
@@ -34,7 +34,7 @@ namespace MagicPodsCore {
     template<typename DataType>
     void Event<DataType>::FireEvent(const DataType& dataType) {
         for (auto& [key, value] : _listeners)
-            value(dataType);
+            value(key, dataType);
     }
 
 }

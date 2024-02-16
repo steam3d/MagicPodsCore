@@ -13,10 +13,10 @@ namespace MagicPodsCore {
         if (deviceInterface.contains("Address")) {
             _address = deviceInterface.at("Address").get<std::string>();
             _aapClient = std::make_unique<AapClient>(_address);
-            _aapClient->GetBatteryEvent().Subscribe([this](const std::map<BatteryType, BatteryWatcherData>& data) {
+            _aapClient->GetBatteryEvent().Subscribe([this](size_t listenerId, const std::map<BatteryType, BatteryWatcherData>& data) {
                 OnBatteryEvent(data);
             });
-            _aapClient->GetAncEvent().Subscribe([this](const AncWatcherData& data) {
+            _aapClient->GetAncEvent().Subscribe([this](size_t listenerId, const AncWatcherData& data) {
                 OnAncEvent(data);
             });
         }
