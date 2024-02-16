@@ -12,6 +12,7 @@
 
 #include "Device.h"
 #include "Event.h"
+#include "DeviceAnc.h"
 
 namespace MagicPodsCore {
 
@@ -45,7 +46,7 @@ namespace MagicPodsCore {
 
         void Connect(const std::string& deviceAddress);
         void Disconnect(const std::string& deviceAddress);
-        void SetAnc(const std::string& deviceAddress, AncMode mode);
+        void SetAnc(const std::string& deviceAddress, DeviceAncMode mode);
 
         bool IsBluetoothAdapterPowered();
         void EnableBluetoothAdapter();

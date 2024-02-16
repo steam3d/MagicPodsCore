@@ -6,6 +6,7 @@
 #include "aap/Aap.h"
 #include "aap/AapClient.h"
 #include "DeviceBattery.h"
+#include "DeviceAnc.h"
 
 using namespace MagicPodsCore;
 
@@ -64,8 +65,12 @@ nlohmann::json MakeGetDeckyInfoResponse(auto *ws, const nlohmann::json& json, uW
         }
         jsonObject["battery"] = jsonBatteryObject;
         
-        // TODO: REMOVE THIS TWO LINES
+        // TODO: REFACTOR THIS
         auto jsonBatteryObjectCap = nlohmann::json::object();
+        auto ancMode = activeDevice->GetAncMode();
+        if (ancMode != DeviceAncMode::NotAvailable){
+            jsonBatteryObjectCap["anc"] = ancMode;
+        }
         jsonObject["capabilities"] = jsonBatteryObjectCap;
     }
 
@@ -139,7 +144,7 @@ void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
     auto value = json.at("arguments").at("value").template get<int>();
 
     if (value == 1 || value == 2 || value == 3) // TODO: исправить костыль
-        devicesInfoFetcher.SetAnc(deviceAddress, static_cast<AncMode>(value));
+        devicesInfoFetcher.SetAnc(deviceAddress, static_cast<DeviceAncMode>(value));
 }
 
 void HandleGetDefaultBluetoothAdapterRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {

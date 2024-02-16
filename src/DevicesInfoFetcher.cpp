@@ -94,7 +94,7 @@ namespace MagicPodsCore {
         }
     }
 
-    void DevicesInfoFetcher::SetAnc(const std::string& deviceAddress, AncMode mode) {
+    void DevicesInfoFetcher::SetAnc(const std::string& deviceAddress, DeviceAncMode mode) {
         for (const auto& [key, value] : _devicesMap) {
             if (value->GetAddress() == deviceAddress) {
                 value->SetAnc(mode);
