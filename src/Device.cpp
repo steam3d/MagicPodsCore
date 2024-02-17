@@ -44,9 +44,11 @@ namespace MagicPodsCore {
                 }
                 if (_connected)
                     _aapClient->Start();
-                else
+                else{
                     _aapClient->Stop();
                     _battery.ClearBattery();
+                    _anc.ClearAnc();
+                }
             }
         });
         _deviceProxy->finishRegistration();
@@ -60,9 +62,9 @@ namespace MagicPodsCore {
         _deviceProxy->callMethod("Disconnect").onInterface("org.bluez.Device1").dontExpectReply();
     }
 
-    void Device::SetAnc(AncMode mode) {
+    void Device::SetAnc(DeviceAncMode mode) {
         if (_aapClient->IsStarted())
-            _aapClient->SendRequest(AapSetAnc(mode));
+            _aapClient->SendRequest(AapSetAnc(_anc.DeviceAncModeAncModeTo(mode)));        
     }
 
     void Device::OnBatteryEvent(const std::map<BatteryType, BatteryWatcherData>& data) {
@@ -72,7 +74,7 @@ namespace MagicPodsCore {
     
     void Device::OnAncEvent(const AncWatcherData& data) {
         std::lock_guard{_propertyMutex};
-        _ancMode = data.Mode;
+        _anc.UpdateFromAppleAnc(data.Mode);
     }
 
 }

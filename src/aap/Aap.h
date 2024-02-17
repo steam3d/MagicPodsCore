@@ -110,7 +110,7 @@ namespace MagicPodsCore {
     // 02 - on
     // 03 - transparency
     //
-    // Request and responce the same. 
+    // Request and response the same. 
     // Headphones send the same packet after change anc mode.    
     // ---------------------------------------------------------------------------
 

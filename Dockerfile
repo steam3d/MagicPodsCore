@@ -20,6 +20,6 @@ ADD ./CMakeLists.txt /app/CMakeLists.txt
 
 WORKDIR /app/build
 
-RUN set -ex; cmake ../. && cmake --build .
+RUN set -ex; cmake ../. && cmake --build . --config Release
 
 ENTRYPOINT ["./MagicPodsCore"]
