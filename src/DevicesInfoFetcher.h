@@ -33,6 +33,7 @@ namespace MagicPodsCore {
 
         Event<std::set<std::shared_ptr<Device>, DeviceComparator>> _onDevicesAddEvent{};
         Event<std::set<std::shared_ptr<Device>, DeviceComparator>> _onDevicesRemoveEvent{};
+        Event<bool> _onDefaultAdapterChangeEnabled{};
 
     public:
         DevicesInfoFetcher();
@@ -58,6 +59,10 @@ namespace MagicPodsCore {
 
         Event<std::set<std::shared_ptr<Device>, DeviceComparator>>& GetOnDevicesRemoveEvent() {
             return _onDevicesRemoveEvent;
+        }
+
+        Event<bool>& GetOnDefaultAdapterChangeEnabledEvent() {
+            return _onDefaultAdapterChangeEnabled;
         }
 
     private:
