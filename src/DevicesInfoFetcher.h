@@ -31,6 +31,7 @@ namespace MagicPodsCore {
         std::map<sdbus::ObjectPath, std::shared_ptr<Device>> _devicesMap{};
         std::shared_ptr<Device> _activeDevice{};
 
+        Event<std::shared_ptr<Device>> _onActiveDeviceChangedEvent{};
         Event<std::set<std::shared_ptr<Device>, DeviceComparator>> _onDevicesAddEvent{};
         Event<std::set<std::shared_ptr<Device>, DeviceComparator>> _onDevicesRemoveEvent{};
         Event<bool> _onDefaultAdapterChangeEnabled{};
@@ -52,6 +53,10 @@ namespace MagicPodsCore {
         bool IsBluetoothAdapterPowered();
         void EnableBluetoothAdapter();
         void DisableBluetoothAdapter();
+
+        Event<std::shared_ptr<Device>>& GetOnActiveDeviceChangedEvent() {
+            return _onActiveDeviceChangedEvent;
+        }
 
         Event<std::set<std::shared_ptr<Device>, DeviceComparator>>& GetOnDevicesAddEvent() {
             return _onDevicesAddEvent;

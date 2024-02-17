@@ -25,7 +25,7 @@ nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     return rootObject;
 }
 
-nlohmann::json MakeGetDeckyInfoResponse(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+nlohmann::json MakeGetDeckyInfoResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto activeDevice = devicesInfoFetcher.GetActiveDevice();
 
     auto rootObject = nlohmann::json::object();
@@ -190,7 +190,7 @@ void HandleDisableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, 
 void HandleGetDeckyInfoRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleGetDeckyInfoRequest" << std::endl; // TODO: delete
 
-    auto response = MakeGetDeckyInfoResponse(ws, json, opCode, devicesInfoFetcher).dump();
+    auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
@@ -200,7 +200,7 @@ void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
     auto rootObject = nlohmann::json::object();
     auto getDevicesResponseJson = MakeGetDeviceResponse(devicesInfoFetcher);
     auto getDefaultBluetoothAdapterJson = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher);
-    auto getDeckyInfoResponseJson = MakeGetDeckyInfoResponse(ws, json, opCode, devicesInfoFetcher);
+    auto getDeckyInfoResponseJson = MakeGetDeckyInfoResponse(devicesInfoFetcher);
     rootObject["headphones"] = getDevicesResponseJson["headphones"];
     rootObject["defaultbluetooth"] = getDefaultBluetoothAdapterJson["defaultbluetooth"];
     rootObject["info"] = getDeckyInfoResponseJson["info"];
@@ -245,6 +245,46 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
     }
 }
 
+void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
+    auto onBatteryChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, std::map<DeviceBatteryType, DeviceBatteryData> newValues) {
+        if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
+            std::cout << "OnBatteryChanged Broadcast was triggered" << std::endl;
+            app.getLoop()->defer([&app, &devicesInfoFetcher](){
+                auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
+                app.publish("OnBatteryChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+            });
+        }
+    };
+    auto onAncChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, DeviceAncMode newValue) {
+        if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
+            std::cout << "OnAncChanged Broadcast was triggered" << std::endl;
+            app.getLoop()->defer([&app, &devicesInfoFetcher](){
+                auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
+                app.publish("OnAncChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+            });
+        }
+    };
+
+    for (auto& device : devicesInfoFetcher.GetDevices()) {
+        device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, device](size_t listenerId, auto newValues) {
+            onBatteryChangedListener(device, newValues);
+        });
+        device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, device](size_t listenerId, auto newValue) {
+            onAncChangedListener(device, newValue);
+        });
+    }
+    devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onBatteryChangedListener, onAncChangedListener](size_t listenerId, auto newDevices) {
+        for (auto& device : newDevices) {
+            device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, device](size_t listenerId, auto newValues) {
+                onBatteryChangedListener(device, newValues);
+            });
+            device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, device](size_t listenerId, auto newValue) {
+                onAncChangedListener(device, newValue);
+            });
+        }
+    });
+}
+
 int main() {
     DevicesInfoFetcher devicesInfoFetcher{};
 
@@ -256,6 +296,9 @@ int main() {
     /* Keep in mind that uWS::SSLApp({options}) is the same as uWS::App() when compiled without SSL support.
      * You may swap to using uWS:App() if you don't need SSL */
     uWS::App app{};
+
+    SubscribeAndHandleBroadcastEvents(app, devicesInfoFetcher);
+
     app.ws<PerSocketData>("/*", {
         /* Settings */
         .compression = uWS::CompressOptions(uWS::DEDICATED_COMPRESSOR_4KB | uWS::DEDICATED_DECOMPRESSOR),
@@ -267,9 +310,11 @@ int main() {
         .sendPingsAutomatically = true,
         /* Handlers */
         .upgrade = nullptr,
-        .open = [](auto */*ws*/) {
+        .open = [](auto* ws) {
             /* Open event here, you may access ws->getUserData() which points to a PerSocketData struct */
             std::cout << "On open websocket connected" << std::endl;
+            ws->subscribe("OnBatteryChanged");
+            ws->subscribe("OnAncChanged");
         },
         .message = [&app, &devicesInfoFetcher](auto *ws, std::string_view message, uWS::OpCode opCode) {
             HandleRequest(ws, message, opCode, app, devicesInfoFetcher);

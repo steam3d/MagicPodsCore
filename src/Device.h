@@ -50,14 +50,24 @@ namespace MagicPodsCore {
             return _modalias;
         }
 
-        std::map<DeviceBatteryType, DeviceBatteryData> GetBatteryStatus() const {
+        std::map<DeviceBatteryType, DeviceBatteryData> GetBatteryStatus() const { // лучше сразу прокидывать Battery
             std::lock_guard lock{_propertyMutex};
             return _battery.GetBatteryStatus();
         }
 
-        DeviceAncMode GetAncMode() const {
+        DeviceBattery& GetBattery() {
+            std::lock_guard lock{_propertyMutex};
+            return _battery;
+        }
+
+        DeviceAncMode GetAncMode() const { // лучше сразу прокидывать AncStatus
             std::lock_guard lock{_propertyMutex};
             return _anc.GetAncStatus();
+        }
+
+        DeviceAnc& GetAnc() {
+            std::lock_guard lock{_propertyMutex};
+            return _anc;
         }
 
         Event<bool>& GetConnectedPropertyChangedEvent() {

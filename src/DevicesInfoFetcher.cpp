@@ -170,15 +170,24 @@ namespace MagicPodsCore {
     }
 
     void DevicesInfoFetcher::TrySelectNewActiveDevice() {
-        if (_activeDevice != nullptr && (!_devicesMap.contains(_activeDevice->GetAddress()) || !_activeDevice->GetConnected()))
+        bool activeDeviceWasChanged{false};
+
+        if (_activeDevice != nullptr && (!_devicesMap.contains(_activeDevice->GetAddress()) || !_activeDevice->GetConnected())) {
             _activeDevice = nullptr;
+            activeDeviceWasChanged = true;
+        }
 
         if (_activeDevice == nullptr && _devicesMap.size() > 0) {
             for (auto& [address, device] : _devicesMap) {
-                if (device->GetConnected())
+                if (device->GetConnected()) {
                     _activeDevice = device;
+                    activeDeviceWasChanged = true;
+                }
             }
         }
+
+        if (activeDeviceWasChanged)
+            _onActiveDeviceChangedEvent.FireEvent(_activeDevice);
     }
 
     void DevicesInfoFetcher::OnDevicesAdd(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices) {
