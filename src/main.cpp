@@ -264,7 +264,7 @@ int main() {
         .upgrade = nullptr,
         .open = [](auto */*ws*/) {
             /* Open event here, you may access ws->getUserData() which points to a PerSocketData struct */
-
+            std::cout << "On open websocket connected" << std::endl;
         },
         .message = [&app, &devicesInfoFetcher](auto *ws, std::string_view message, uWS::OpCode opCode) {
             HandleRequest(ws, message, opCode, app, devicesInfoFetcher);
@@ -288,6 +288,7 @@ int main() {
         },
         .close = [](auto */*ws*/, int /*code*/, std::string_view /*message*/) {
             /* You may access ws->getUserData() here */
+            std::cout << "On open websocket closed" << std::endl;
         }
     }).listen(9001, [](auto *listen_socket) {
         if (listen_socket) {
