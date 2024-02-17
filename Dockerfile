@@ -15,7 +15,6 @@ RUN apt-get install libbluetooth-dev -y
 
 ADD ./src /app/src
 ADD ./dependencies /app/dependencies
-ADD ./CMakeFiles /app/CMakeFiles
 ADD ./CMakeLists.txt /app/CMakeLists.txt
 
 WORKDIR /app/build
