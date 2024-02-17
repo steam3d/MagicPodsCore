@@ -68,6 +68,7 @@ nlohmann::json MakeGetDeckyInfoResponse(auto *ws, const nlohmann::json& json, uW
         // TODO: REFACTOR THIS
         auto jsonBatteryObjectCap = nlohmann::json::object();
         auto ancMode = activeDevice->GetAncMode();
+        printf("Get anc mode: %u\n", (unsigned char)ancMode);
         if (ancMode != DeviceAncMode::NotAvailable){
             jsonBatteryObjectCap["anc"] = ancMode;
         }

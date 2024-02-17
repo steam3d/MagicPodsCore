@@ -44,10 +44,11 @@ namespace MagicPodsCore {
                 }
                 if (_connected)
                     _aapClient->Start();
-                else
+                else{
                     _aapClient->Stop();
                     _battery.ClearBattery();
                     _anc.ClearAnc();
+                }
             }
         });
         _deviceProxy->finishRegistration();

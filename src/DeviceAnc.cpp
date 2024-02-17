@@ -8,10 +8,10 @@ namespace MagicPodsCore {
 
     void DeviceAnc::UpdateFromAppleAnc(AncMode aapMode){
         DeviceAncMode mode = DeviceAnc::AncModeToDeviceAncMode(aapMode);
-        printf("Trying update mode\n");
+        printf("Trying update anc mode %u -> %u\n", (unsigned char)mode, (unsigned char)_mode);
         if (mode != _mode){
             _mode = mode;
-            printf("Mode updated\n");
+            printf("Updated anc mode: %u\n",  (unsigned char)_mode);
             _modeChanged.FireEvent(_mode);
         }
     }
