@@ -74,9 +74,11 @@ namespace MagicPodsCore {
             return _onConnectedPropertyChangedEvent;
         }
 
-        void Connect();
+        void Connect(); // TODO: может полностью перейти на Async?
+        void ConnectAsync(std::function<void(const sdbus::Error*)>&& callback);
 
-        void Disconnect();
+        void Disconnect(); // TODO: может полностью перейти на Async?
+        void DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback);
 
         void SetAnc(DeviceAncMode mode);
 

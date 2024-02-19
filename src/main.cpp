@@ -107,15 +107,12 @@ void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCod
         return;
     }
 
-    device->GetConnectedPropertyChangedEvent().Subscribe([device, ws, &json, opCode, &app, &devicesInfoFetcher](size_t listenerId, bool newValue) {
-        app.getLoop()->defer([device, ws, &json, opCode, &app, &devicesInfoFetcher, listenerId]() {
+    device->ConnectAsync([device, ws, &json, opCode, &app, &devicesInfoFetcher](const sdbus::Error* error) {
+        app.getLoop()->defer([device, ws, &json, opCode, &app, &devicesInfoFetcher]() {
             auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
             ws->send(response, opCode, response.length() < 16 * 1024);
-            device->GetConnectedPropertyChangedEvent().Unsubscribe(listenerId);
         });
     });
-    
-    device->Connect();
 }
 
 void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
@@ -130,15 +127,12 @@ void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::Op
         return;
     }
 
-    device->GetConnectedPropertyChangedEvent().Subscribe([device, ws, &json, opCode, &app, &devicesInfoFetcher](size_t listenerId, bool newValue) {
-        app.getLoop()->defer([device, ws, &json, opCode, &app, &devicesInfoFetcher, listenerId]() {
+    device->DisconnectAsync([device, ws, &json, opCode, &app, &devicesInfoFetcher](const sdbus::Error* error) {
+        app.getLoop()->defer([device, ws, &json, opCode, &app, &devicesInfoFetcher]() {
             auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
             ws->send(response, opCode, response.length() < 16 * 1024);
-            device->GetConnectedPropertyChangedEvent().Unsubscribe(listenerId);
         });
     });
-    
-    device->Disconnect();
 }
 
 void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
