@@ -110,14 +110,14 @@ namespace MagicPodsCore {
     void DevicesInfoFetcher::EnableBluetoothAdapter() {
         _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke([this](const sdbus::Error* err) {
             std::cout << "Adapter enabled" << std::endl;
-            _onDefaultAdapterChangeEnabled.FireEvent(true);
+            _onDefaultAdapterChangeEnabled.FireEvent(IsBluetoothAdapterPowered());
         });
     }
 
     void DevicesInfoFetcher::DisableBluetoothAdapter() {
         _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke([this](const sdbus::Error* err) {
             std::cout << "Adapter disabled" << std::endl;
-            _onDefaultAdapterChangeEnabled.FireEvent(false);
+            _onDefaultAdapterChangeEnabled.FireEvent(IsBluetoothAdapterPowered());
         });
     }
 
