@@ -56,7 +56,15 @@ namespace MagicPodsCore {
                 OnDevicesRemove(removedDevices);
         });
 
+        _defaultBluetoothAdapterProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
+            if (values.contains("Powered")) {
+                auto newPoweredValue = values["Powered"].get<bool>();
+                _onDefaultAdapterChangeEnabled.FireEvent(newPoweredValue);
+            }
+        });
+
         _rootProxy->finishRegistration();
+        _defaultBluetoothAdapterProxy->finishRegistration();
     }
 
     std::set<std::shared_ptr<Device>, DeviceComparator> DevicesInfoFetcher::GetDevices() const {

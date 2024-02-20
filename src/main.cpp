@@ -260,10 +260,17 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
     };
     auto onActiveDeviceChanged = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device) {
         std::cout << "OnActiveDeviceChanged Broadcast was triggered" << std::endl;
-            app.getLoop()->defer([&app, &devicesInfoFetcher](){
-                auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
-                app.publish("OnActiveDeviceChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
-            });
+        app.getLoop()->defer([&app, &devicesInfoFetcher](){
+            auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
+            app.publish("OnActiveDeviceChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+        });
+    };
+    auto onDefaultAdapterChangeEnabled = [&app, &devicesInfoFetcher](bool newValue) {
+        std::cout << "OnDefaultAdapterChangeEnabled Broadcast was triggered" << std::endl;
+        app.getLoop()->defer([&app, &devicesInfoFetcher](){
+            auto response = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher).dump();
+            app.publish("OnDefaultAdapterChangeEnabled", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+        });
     };
 
     for (auto& device : devicesInfoFetcher.GetDevices()) {
@@ -286,6 +293,9 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
     });
     devicesInfoFetcher.GetOnActiveDeviceChangedEvent().Subscribe([onActiveDeviceChanged](size_t listenerId, auto newDevice) {
         onActiveDeviceChanged(newDevice);
+    });
+    devicesInfoFetcher.GetOnDefaultAdapterChangeEnabledEvent().Subscribe([onDefaultAdapterChangeEnabled](size_t listenerId, bool newValue) {
+        onDefaultAdapterChangeEnabled(newValue);
     });
 }
 
@@ -320,6 +330,7 @@ int main() {
             ws->subscribe("OnBatteryChanged");
             ws->subscribe("OnAncChanged");
             ws->subscribe("OnActiveDeviceChanged");
+            ws->subscribe("OnDefaultAdapterChangeEnabled");
         },
         .message = [&app, &devicesInfoFetcher](auto *ws, std::string_view message, uWS::OpCode opCode) {
             HandleRequest(ws, message, opCode, app, devicesInfoFetcher);
