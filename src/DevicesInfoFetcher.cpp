@@ -170,23 +170,19 @@ namespace MagicPodsCore {
     }
 
     void DevicesInfoFetcher::TrySelectNewActiveDevice() {
-        bool activeDeviceWasChanged{false};
+        auto previousActiveDevice = _activeDevice;
 
-        if (_activeDevice != nullptr && (!_devicesMap.contains(_activeDevice->GetAddress()) || !_activeDevice->GetConnected())) {
+        if (_activeDevice != nullptr && (!_devicesMap.contains(_activeDevice->GetAddress()) || !_activeDevice->GetConnected()))
             _activeDevice = nullptr;
-            activeDeviceWasChanged = true;
-        }
 
         if (_activeDevice == nullptr && _devicesMap.size() > 0) {
             for (auto& [address, device] : _devicesMap) {
-                if (device->GetConnected()) {
+                if (device->GetConnected())
                     _activeDevice = device;
-                    activeDeviceWasChanged = true;
-                }
             }
         }
 
-        if (activeDeviceWasChanged)
+        if (previousActiveDevice != _activeDevice)
             _onActiveDeviceChangedEvent.FireEvent(_activeDevice);
     }
 

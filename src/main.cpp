@@ -258,6 +258,13 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
             });
         }
     };
+    auto onActiveDeviceChanged = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device) {
+        std::cout << "OnActiveDeviceChanged Broadcast was triggered" << std::endl;
+            app.getLoop()->defer([&app, &devicesInfoFetcher](){
+                auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
+                app.publish("OnActiveDeviceChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+            });
+    };
 
     for (auto& device : devicesInfoFetcher.GetDevices()) {
         device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, device](size_t listenerId, auto newValues) {
@@ -276,6 +283,9 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
                 onAncChangedListener(device, newValue);
             });
         }
+    });
+    devicesInfoFetcher.GetOnActiveDeviceChangedEvent().Subscribe([onActiveDeviceChanged](size_t listenerId, auto newDevice) {
+        onActiveDeviceChanged(newDevice);
     });
 }
 
@@ -309,6 +319,7 @@ int main() {
             std::cout << "On open websocket connected" << std::endl;
             ws->subscribe("OnBatteryChanged");
             ws->subscribe("OnAncChanged");
+            ws->subscribe("OnActiveDeviceChanged");
         },
         .message = [&app, &devicesInfoFetcher](auto *ws, std::string_view message, uWS::OpCode opCode) {
             HandleRequest(ws, message, opCode, app, devicesInfoFetcher);
