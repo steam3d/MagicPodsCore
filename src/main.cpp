@@ -154,12 +154,8 @@ void HandleGetDefaultBluetoothAdapterRequest(auto *ws, const nlohmann::json& jso
 void HandleEnableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleEnableDefaultBluetoothAdapter" << std::endl; // TODO: delete
 
-    devicesInfoFetcher.EnableBluetoothAdapter();
-
-    devicesInfoFetcher.GetOnDefaultAdapterChangeEnabledEvent().Subscribe([ws, &app, &devicesInfoFetcher, opCode](size_t listenerId, bool newValue) {
-        app.getLoop()->defer([listenerId, ws, &app, &devicesInfoFetcher, opCode](){
-            devicesInfoFetcher.GetOnDefaultAdapterChangeEnabledEvent().Unsubscribe(listenerId);
-
+    devicesInfoFetcher.EnableBluetoothAdapterAsync([ws, &app, &devicesInfoFetcher, opCode](const sdbus::Error* error) {
+        app.getLoop()->defer([ws, &app, &devicesInfoFetcher, opCode](){
             auto response = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher).dump();
             ws->send(response, opCode, response.length() < 16 * 1024);
         });
@@ -169,12 +165,8 @@ void HandleEnableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, u
 void HandleDisableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
     std::cout << "HandleDisableDefaultBluetoothAdapter" << std::endl; // TODO: delete
 
-    devicesInfoFetcher.DisableBluetoothAdapter();
-
-    devicesInfoFetcher.GetOnDefaultAdapterChangeEnabledEvent().Subscribe([ws, &app, &devicesInfoFetcher, opCode](size_t listenerId, bool newValue) {
-        app.getLoop()->defer([listenerId, ws, &app, &devicesInfoFetcher, opCode](){
-            devicesInfoFetcher.GetOnDefaultAdapterChangeEnabledEvent().Unsubscribe(listenerId);
-
+    devicesInfoFetcher.DisableBluetoothAdapterAsync([ws, &app, &devicesInfoFetcher, opCode](const sdbus::Error* error) {
+        app.getLoop()->defer([ws, &app, &devicesInfoFetcher, opCode](){
             auto response = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher).dump();
             ws->send(response, opCode, response.length() < 16 * 1024);
         });
