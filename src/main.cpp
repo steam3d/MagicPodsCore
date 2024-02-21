@@ -250,16 +250,23 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
             });
         }
     };
+    auto onConnectedChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, bool newValue) {
+        std::cout << "OnConnectedChanged Broadcast was triggered" << std::endl;
+        app.getLoop()->defer([&app, &devicesInfoFetcher]() {
+            auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
+            app.publish("OnConnectedChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+        });
+    };
     auto onActiveDeviceChanged = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device) {
         std::cout << "OnActiveDeviceChanged Broadcast was triggered" << std::endl;
-        app.getLoop()->defer([&app, &devicesInfoFetcher](){
+        app.getLoop()->defer([&app, &devicesInfoFetcher]() {
             auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
             app.publish("OnActiveDeviceChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
         });
     };
     auto onDefaultAdapterChangeEnabled = [&app, &devicesInfoFetcher](bool newValue) {
         std::cout << "OnDefaultAdapterChangeEnabled Broadcast was triggered" << std::endl;
-        app.getLoop()->defer([&app, &devicesInfoFetcher](){
+        app.getLoop()->defer([&app, &devicesInfoFetcher]() {
             auto response = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher).dump();
             app.publish("OnDefaultAdapterChangeEnabled", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
         });
@@ -272,14 +279,20 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
         device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, device](size_t listenerId, auto newValue) {
             onAncChangedListener(device, newValue);
         });
+        device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, device](size_t listenerId, auto newValue) {
+            onConnectedChangedListener(device, newValue);
+        });
     }
-    devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onBatteryChangedListener, onAncChangedListener](size_t listenerId, auto newDevices) {
+    devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onBatteryChangedListener, onAncChangedListener, onConnectedChangedListener](size_t listenerId, auto newDevices) {
         for (auto& device : newDevices) {
             device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, device](size_t listenerId, auto newValues) {
                 onBatteryChangedListener(device, newValues);
             });
             device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, device](size_t listenerId, auto newValue) {
                 onAncChangedListener(device, newValue);
+            });
+            device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, device](size_t listenerId, auto newValue) {
+                onConnectedChangedListener(device, newValue);
             });
         }
     });
@@ -321,6 +334,7 @@ int main() {
             std::cout << "On open websocket connected" << std::endl;
             ws->subscribe("OnBatteryChanged");
             ws->subscribe("OnAncChanged");
+            ws->subscribe("OnConnectedChanged");
             ws->subscribe("OnActiveDeviceChanged");
             ws->subscribe("OnDefaultAdapterChangeEnabled");
         },
