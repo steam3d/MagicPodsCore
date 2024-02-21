@@ -1,17 +1,19 @@
 #include "Aap.h"
 
+#include "Logger.h"
+
 namespace MagicPodsCore {
 
     AapRequest::AapRequest(std::string tag) : _tag{tag} {
     }
 
     void AapRequest::PrintAsHex() {
-        printf("%s \n", _tag.c_str());
+        LOG_RELEASE("%s ", _tag.c_str());
         std::vector<unsigned char> bytes = Request();
         for(int i = 0; i < bytes.size(); i++)
-            printf("%02x", bytes[i]);
-        printf("\n");
-        printf("\n");
+            LOG_RELEASE("%02x", bytes[i]);
+        LOG_RELEASE("");
+        LOG_RELEASE("");
     }
 
     AapInit::AapInit() : AapRequest{"AapInit"} {
@@ -49,7 +51,7 @@ namespace MagicPodsCore {
         // packet type must be battery
         if (bytes[4] != static_cast<unsigned char>(Cmd::Battery)) return;
         
-        std::cout << _tag << std::endl;
+        LOG_RELEASE("%s", _tag.c_str());
         
         int batteryCount = static_cast<int>(bytes[6]);
 
@@ -72,11 +74,11 @@ namespace MagicPodsCore {
             batteryData.Tag = _tag;
             appBatteryStatus[batteryType] = batteryData;
             
-            readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + "\n";
+            readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + "";
         }
 
         _event.FireEvent(appBatteryStatus);
-        std::cout << readableStr << std::endl;
+        LOG_RELEASE("%s", readableStr.c_str());
     }
 
     std::string AapBatteryWatcher::DummyConvertChargingStatus(ChargingStatus status) {
@@ -122,12 +124,12 @@ namespace MagicPodsCore {
         // settings type must be Anc
         if (bytes[6] != static_cast<unsigned char>(CmdSettings::Anc)) return;
         
-        std::cout << _tag << std::endl;
+        LOG_RELEASE("%s", _tag.c_str());
 
         AncMode ancMode = static_cast<AncMode>(bytes[7]);
 
         // REPLACE WITH ANC STORAGE LOGIC OR EVENT ONANCCHANGED?
-        std::cout << DummyConvertAncMode(ancMode) << std::endl;
+        LOG_RELEASE("%s", DummyConvertAncMode(ancMode).c_str());
         _event.FireEvent(AncWatcherData{_tag, ancMode});
     }
 

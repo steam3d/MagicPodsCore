@@ -7,6 +7,7 @@
 #include "aap/AapClient.h"
 #include "DeviceBattery.h"
 #include "DeviceAnc.h"
+#include "Logger.h"
 
 using namespace MagicPodsCore;
 
@@ -68,7 +69,7 @@ nlohmann::json MakeGetDeckyInfoResponse(DevicesInfoFetcher& devicesInfoFetcher) 
         // TODO: REFACTOR THIS
         auto jsonBatteryObjectCap = nlohmann::json::object();
         auto ancMode = activeDevice->GetAncMode();
-        printf("Get anc mode: %u\n", (unsigned char)ancMode);
+        LOG_RELEASE("Get anc mode: %u", static_cast<unsigned char>(ancMode));
         if (ancMode != DeviceAncMode::NotAvailable){
             jsonBatteryObjectCap["anc"] = ancMode;
         }
@@ -89,14 +90,14 @@ nlohmann::json MakeGetDefaultBluetoothAdapterResponse(DevicesInfoFetcher& device
 }
 
 void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleGetDevicesRequest" << std::endl; // TODO: delete
+    LOG_RELEASE("HandleGetDevicesRequest");
 
     auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
 void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleConnectDeviceRequest" << std::endl; // TODO: delete
+    LOG_RELEASE("HandleConnectDeviceRequest");
 
     auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
     auto device = devicesInfoFetcher.GetDevice(deviceAddress);
@@ -116,7 +117,7 @@ void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCod
 }
 
 void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleDisconnectDeviceRequest" << std::endl; // TODO: delete
+    LOG_RELEASE("HandleDisconnectDeviceRequest");
 
     auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
     auto device = devicesInfoFetcher.GetDevice(deviceAddress);
@@ -136,7 +137,8 @@ void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::Op
 }
 
 void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleSetAncRequest" << std::endl; // TODO: delete
+    LOG_RELEASE("HandleSetAncRequest");
+
     auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
     auto value = json.at("arguments").at("value").template get<int>();
 
@@ -145,14 +147,14 @@ void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
 }
 
 void HandleGetDefaultBluetoothAdapterRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleGetDefaultBluetoothAdapterRequest" << std::endl; // TODO: delete
+    LOG_RELEASE("HandleGetDefaultBluetoothAdapterRequest");
     
     auto response = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
 void HandleEnableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleEnableDefaultBluetoothAdapter" << std::endl; // TODO: delete
+    LOG_RELEASE("HandleEnableDefaultBluetoothAdapter");
 
     devicesInfoFetcher.EnableBluetoothAdapterAsync([ws, &app, &devicesInfoFetcher, opCode](const sdbus::Error* error) {
         app.getLoop()->defer([ws, &app, &devicesInfoFetcher, opCode](){
@@ -163,7 +165,7 @@ void HandleEnableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, u
 }
 
 void HandleDisableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleDisableDefaultBluetoothAdapter" << std::endl; // TODO: delete
+    LOG_RELEASE("HandleDisableDefaultBluetoothAdapter");
 
     devicesInfoFetcher.DisableBluetoothAdapterAsync([ws, &app, &devicesInfoFetcher, opCode](const sdbus::Error* error) {
         app.getLoop()->defer([ws, &app, &devicesInfoFetcher, opCode](){
@@ -174,14 +176,14 @@ void HandleDisableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, 
 }
 
 void HandleGetDeckyInfoRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleGetDeckyInfoRequest" << std::endl; // TODO: delete
+    LOG_RELEASE("HandleGetDeckyInfoRequest");
 
     auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
 void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    std::cout << "HandleGetAll" << std::endl; // TODO: delete
+    LOG_RELEASE("HandleGetAll");
 
     auto rootObject = nlohmann::json::object();
     auto getDevicesResponseJson = MakeGetDeviceResponse(devicesInfoFetcher);
@@ -234,7 +236,7 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
 void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
     auto onBatteryChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, std::map<DeviceBatteryType, DeviceBatteryData> newValues) {
         if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
-            std::cout << "OnBatteryChanged Broadcast was triggered" << std::endl;
+            LOG_RELEASE("OnBatteryChanged Broadcast was triggered");
             app.getLoop()->defer([&app, &devicesInfoFetcher](){
                 auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
                 app.publish("OnBatteryChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
@@ -243,7 +245,7 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
     };
     auto onAncChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, DeviceAncMode newValue) {
         if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
-            std::cout << "OnAncChanged Broadcast was triggered" << std::endl;
+            LOG_RELEASE("OnAncChanged Broadcast was triggered");
             app.getLoop()->defer([&app, &devicesInfoFetcher](){
                 auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
                 app.publish("OnAncChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
@@ -251,21 +253,21 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
         }
     };
     auto onConnectedChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, bool newValue) {
-        std::cout << "OnConnectedChanged Broadcast was triggered" << std::endl;
+        LOG_RELEASE("OnConnectedChanged Broadcast was triggered");
         app.getLoop()->defer([&app, &devicesInfoFetcher]() {
             auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
             app.publish("OnConnectedChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
         });
     };
     auto onActiveDeviceChanged = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device) {
-        std::cout << "OnActiveDeviceChanged Broadcast was triggered" << std::endl;
+        LOG_RELEASE("OnActiveDeviceChanged Broadcast was triggered");
         app.getLoop()->defer([&app, &devicesInfoFetcher]() {
             auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
             app.publish("OnActiveDeviceChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
         });
     };
     auto onDefaultAdapterChangeEnabled = [&app, &devicesInfoFetcher](bool newValue) {
-        std::cout << "OnDefaultAdapterChangeEnabled Broadcast was triggered" << std::endl;
+        LOG_RELEASE("OnDefaultAdapterChangeEnabled Broadcast was triggered");
         app.getLoop()->defer([&app, &devicesInfoFetcher]() {
             auto response = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher).dump();
             app.publish("OnDefaultAdapterChangeEnabled", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
@@ -331,7 +333,7 @@ int main() {
         .upgrade = nullptr,
         .open = [](auto* ws) {
             /* Open event here, you may access ws->getUserData() which points to a PerSocketData struct */
-            std::cout << "On open websocket connected" << std::endl;
+            LOG_RELEASE("On open websocket connected");
             ws->subscribe("OnBatteryChanged");
             ws->subscribe("OnAncChanged");
             ws->subscribe("OnConnectedChanged");
@@ -344,7 +346,7 @@ int main() {
             /* This is the opposite of what you probably want; compress if message is LARGER than 16 kb
              * the reason we do the opposite here; compress if SMALLER than 16 kb is to allow for 
              * benchmarking of large message sending without compression */
-            std::cout << "Received:" << message << std::endl; // TODO: delete
+            LOG_RELEASE("Received: %s", std::string{message}.c_str());
         },
         .dropped = [](auto */*ws*/, std::string_view /*message*/, uWS::OpCode /*opCode*/) {
             /* A message was dropped due to set maxBackpressure and closeOnBackpressureLimit limit */
@@ -360,11 +362,11 @@ int main() {
         },
         .close = [](auto */*ws*/, int /*code*/, std::string_view /*message*/) {
             /* You may access ws->getUserData() here */
-            std::cout << "On open websocket closed" << std::endl;
+            LOG_RELEASE("On open websocket closed");
         }
     }).listen(9001, [](auto *listen_socket) {
         if (listen_socket) {
-            std::cout << "Listening on port " << 9001 << std::endl;
+            LOG_RELEASE("Listening on port %d", 9001);
         }
     }).run();
 }

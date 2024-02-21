@@ -1,5 +1,7 @@
 #include "DeviceBattery.h"
 
+#include "Logger.h"
+
 namespace MagicPodsCore {
 
     DeviceBattery::DeviceBattery(bool cached): _cached(cached) {
@@ -38,13 +40,13 @@ namespace MagicPodsCore {
                     break;
                 }
                 // Any update battery must trigger event
-                if (isUpdatedKey == true){
+                if (isUpdatedKey == true) {
                     isUpdated = true;
                 }
         }
 
-        if (isUpdated){
-            printf("Battery updated\n");
+        if (isUpdated) {
+            LOG_RELEASE("Battery updated");
             _batteryChanged.FireEvent(_batteryStatus);
         }
     }
@@ -60,7 +62,7 @@ namespace MagicPodsCore {
             if (_batteryStatus[BatteryType].Status != DeviceBatteryStatus::Cached){
                 // Say UI that battery from cache now
                 _batteryStatus[BatteryType].Status = DeviceBatteryStatus::Cached;
-                printf("Changed to cache");
+                LOG_RELEASE("Changed to cache");
                 return true;
             }
             else{

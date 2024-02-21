@@ -1,5 +1,7 @@
 #include "DeviceAnc.h"
 
+#include "Logger.h"
+
 namespace MagicPodsCore {
 
     void DeviceAnc::ClearAnc(){
@@ -8,10 +10,10 @@ namespace MagicPodsCore {
 
     void DeviceAnc::UpdateFromAppleAnc(AncMode aapMode){
         DeviceAncMode mode = DeviceAnc::AncModeToDeviceAncMode(aapMode);
-        printf("Trying update anc mode %u -> %u\n", (unsigned char)mode, (unsigned char)_mode);
+        LOG_RELEASE("Trying update anc mode %u -> %u", static_cast<unsigned char>(mode), static_cast<unsigned char>(_mode));
         if (mode != _mode){
             _mode = mode;
-            printf("Updated anc mode: %u\n",  (unsigned char)_mode);
+            LOG_RELEASE("Updated anc mode: %u",  static_cast<unsigned char>(_mode));
             _modeChanged.FireEvent(_mode);
         }
     }

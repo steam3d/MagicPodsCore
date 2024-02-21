@@ -3,6 +3,7 @@
 #include "BtVendorIds.h"
 #include "AppleProductIds.h"
 #include "StringUtils.h"
+#include "Logger.h"
 
 #include <regex>
 #include <iostream>
@@ -14,7 +15,7 @@ namespace MagicPodsCore {
         ClearAndFillDevicesMap();
 
         _rootProxy->uponSignal("InterfacesAdded").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces) {
-            std::cout << "OnInterfacesAdded" << std::endl;
+            LOG_DEBUG("OnInterfacesAdded");
 
             std::set<std::shared_ptr<Device>, DeviceComparator> addedDevices{};
 
@@ -40,7 +41,7 @@ namespace MagicPodsCore {
         });
 
         _rootProxy->uponSignal("InterfacesRemoved").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::vector<std::string> array) {
-            std::cout << "OnInterfacesRemoved" << std::endl;
+            LOG_DEBUG("OnInterfacesRemoved");
 
             std::set<std::shared_ptr<Device>, DeviceComparator> removedDevices{};
 
@@ -117,7 +118,7 @@ namespace MagicPodsCore {
 
     void DevicesInfoFetcher::EnableBluetoothAdapter() {
         _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke([this](const sdbus::Error* err) {
-            std::cout << "Adapter enabled" << std::endl;
+            LOG_RELEASE("Adapter enabled");
             _onDefaultAdapterChangeEnabled.FireEvent(IsBluetoothAdapterPowered());
         });
     }
@@ -128,7 +129,7 @@ namespace MagicPodsCore {
 
     void DevicesInfoFetcher::DisableBluetoothAdapter() {
         _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke([this](const sdbus::Error* err) {
-            std::cout << "Adapter disabled" << std::endl;
+            LOG_RELEASE("Adapter disabled");
             _onDefaultAdapterChangeEnabled.FireEvent(IsBluetoothAdapterPowered());
         });
     }
@@ -181,8 +182,7 @@ namespace MagicPodsCore {
 
         TrySelectNewActiveDevice();
 
-        std::cout << "Devices created:" << _devicesMap.size() << std::endl;
-        
+        LOG_RELEASE("Devices created: %zu", _devicesMap.size());
     }
 
     void DevicesInfoFetcher::TrySelectNewActiveDevice() {
@@ -203,17 +203,17 @@ namespace MagicPodsCore {
     }
 
     void DevicesInfoFetcher::OnDevicesAdd(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices) {
-        std::cout << "--- OnDevicesAdd ---" << std::endl;
+        LOG_RELEASE("--- OnDevicesAdd ---");
         for (const auto& device : devices)
-            std::cout << device->GetName() << " " << device->GetAddress() << std::endl;
+            LOG_RELEASE("%s %s",  device->GetName().c_str(), device->GetAddress().c_str());
 
         _onDevicesAddEvent.FireEvent(devices);
     }
 
     void DevicesInfoFetcher::OnDevicesRemove(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices) {
-        std::cout << "--- OnDevicesRemove ---" << std::endl;
+        LOG_RELEASE("--- OnDevicesRemove ---");
         for (const auto& device : devices)
-            std::cout << device->GetName() << " " << device->GetAddress() << std::endl;
+            LOG_RELEASE("%s %s",  device->GetName().c_str(), device->GetAddress().c_str());
 
         _onDevicesRemoveEvent.FireEvent(devices);
     }

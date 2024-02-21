@@ -1,5 +1,7 @@
 #include "Device.h"
+
 #include "StringUtils.h"
+#include "Logger.h"
 
 #include <iostream>
 
@@ -32,10 +34,7 @@ namespace MagicPodsCore {
         }
 
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
-            std::cout << "PropertiesChanged" << std::endl;
-            // for (const auto& [key, value]: values) {
-            //     std::cout << "PropertiesChanged:" << key << std::endl;
-            // }
+            LOG_RELEASE("PropertiesChanged");
             if (values.contains("Connected")) {
                 auto newConnectedValue = values["Connected"].get<bool>();
                 if (_connected != newConnectedValue) {
