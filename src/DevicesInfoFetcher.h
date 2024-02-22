@@ -36,6 +36,8 @@ namespace MagicPodsCore {
         Event<std::set<std::shared_ptr<Device>, DeviceComparator>> _onDevicesRemoveEvent{};
         Event<bool> _onDefaultAdapterChangeEnabled{};
 
+        bool _isBluetoothAdapterPowered{};
+
     public:
         DevicesInfoFetcher();
         // TODO: запретить копирование и перенос
@@ -50,7 +52,9 @@ namespace MagicPodsCore {
         void Disconnect(const std::string& deviceAddress);
         void SetAnc(const std::string& deviceAddress, DeviceAncMode mode);
 
-        bool IsBluetoothAdapterPowered();
+        bool IsBluetoothAdapterPowered() const {
+            return _isBluetoothAdapterPowered;
+        }
         void EnableBluetoothAdapter(); // TODO: выпилить?
         void EnableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback);
         void DisableBluetoothAdapter(); // TODO: выпилить?
