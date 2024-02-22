@@ -306,7 +306,25 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
     });
 }
 
-int main() {
+bool TryToParseArguments(int argc, char** argv) {
+    for (int i = 0; i < argc; ++i) {
+        auto argument = std::string{argv[i]};
+        if (argument == "--version") {
+            LOG_RELEASE("MagicPodsCore 1.0.0");
+            return true;
+        }
+        else if (argument == "--help") {
+            LOG_RELEASE("Write help");
+            return true;
+        }
+    }
+    return false;
+}
+
+int main(int argc, char** argv) {
+    if (TryToParseArguments(argc, argv))
+        return 0;
+
     DevicesInfoFetcher devicesInfoFetcher{};
 
     /* ws->getUserData returns one of these */
