@@ -308,13 +308,15 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
 
 bool TryToParseArguments(int argc, char** argv) {
     for (int i = 0; i < argc; ++i) {
-        auto argument = std::string{argv[i]};
-        if (argument == "--version") {
+        std::string argument{argv[i]};
+        if (argument == "--version" || argument == "-version" || argument == "-v") {
             LOG_RELEASE("MagicPodsCore 1.0.0");
             return true;
         }
-        else if (argument == "--help") {
-            LOG_RELEASE("Write help");
+        else if (argument == "--help" || argument == "-help" || argument == "-h" || argc > 2) {
+            LOG_RELEASE(
+                "Help is under development. For more information and to contact us, please visit magicpods.app.\n"
+                "Developed by Aleksandr Maslov<MagicPods@outlook.com> and Andrei Litvintsev<a.a.litvintsev@gmail.com>");
             return true;
         }
     }
