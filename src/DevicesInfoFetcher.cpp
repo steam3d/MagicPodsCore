@@ -67,6 +67,8 @@ namespace MagicPodsCore {
 
         _rootProxy->finishRegistration();
         _defaultBluetoothAdapterProxy->finishRegistration();
+
+        _isBluetoothAdapterPowered = _defaultBluetoothAdapterProxy->getProperty("Powered").onInterface("org.bluez.Adapter1").get<bool>();
     }
 
     std::set<std::shared_ptr<Device>, DeviceComparator> DevicesInfoFetcher::GetDevices() const {
