@@ -18,12 +18,9 @@ namespace MagicPodsCore {
             return;
         _isStarted = true;
 
-        LOG_RELEASE("AapClient started for %s", _address.c_str());
-
         struct sockaddr_l2 addr = { 0 };
-        const char *sample_text = "L2CAP Simple Example Done";
 
-        LOG_RELEASE("Start Bluetooth L2CAP client, server addr %s", _address.c_str());
+        LOG_RELEASE("Start Bluetooth client, server addr %s", _address.c_str());
 
         /* allocate a socket */
         _socket = socket(AF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
@@ -47,7 +44,7 @@ namespace MagicPodsCore {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(_socket, buffer, sizeof(buffer), 0);
                 if (receivedBytesLength >= 0) {
-                    LOG_RELEASE("o(%zu):%s", receivedBytesLength, bytesToHexString(buffer, receivedBytesLength).c_str());
+                    LOG_DEBUG("o(%zu):%s", receivedBytesLength, bytesToHexString(buffer, receivedBytesLength).c_str());
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
                     
                     BatteryWatcher->ProcessBytes(vectorBuffer);
@@ -57,11 +54,11 @@ namespace MagicPodsCore {
                     break;
                 }
                 else {
-                    LOG_RELEASE("then");
+                    LOG_DEBUG("then");
                 }
             }
 
-            LOG_RELEASE("Thread stopped");
+            LOG_DEBUG("Thread stopped");
         });
         thread.detach();
 
@@ -80,13 +77,13 @@ namespace MagicPodsCore {
 
         close(_socket);
 
-        LOG_RELEASE("AapClient stopped for %s", _address.c_str());
+        LOG_RELEASE("Stop Bluetooth client, server addr %s", _address.c_str());
     }
 
     void AapClient::SendRequest(const AapRequest& aapRequest) {
         auto requestData = aapRequest.Request();
         ssize_t sendedBytesLength = send(_socket, requestData.data(), requestData.size(), 0);
-        LOG_RELEASE("i(%zu):%s", requestData.size(), bytesToHexString(requestData.data(), requestData.size()).c_str());
+        LOG_DEBUG("i(%zu):%s", requestData.size(), bytesToHexString(requestData.data(), requestData.size()).c_str());
     }
 
 }

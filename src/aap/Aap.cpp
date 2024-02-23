@@ -8,12 +8,12 @@ namespace MagicPodsCore {
     }
 
     void AapRequest::PrintAsHex() {
-        LOG_RELEASE("%s ", _tag.c_str());
+        LOG_DEBUG("%s ", _tag.c_str());
         std::vector<unsigned char> bytes = Request();
         for(int i = 0; i < bytes.size(); i++)
-            LOG_RELEASE("%02x", bytes[i]);
-        LOG_RELEASE("");
-        LOG_RELEASE("");
+            LOG_DEBUG("%02x", bytes[i]);
+        LOG_DEBUG("");
+        LOG_DEBUG("");
     }
 
     AapInit::AapInit() : AapRequest{"AapInit"} {
@@ -51,7 +51,7 @@ namespace MagicPodsCore {
         // packet type must be battery
         if (bytes[4] != static_cast<unsigned char>(Cmd::Battery)) return;
         
-        LOG_RELEASE("%s", _tag.c_str());
+        LOG_DEBUG("%s", _tag.c_str());
         
         int batteryCount = static_cast<int>(bytes[6]);
 
@@ -78,7 +78,7 @@ namespace MagicPodsCore {
         }
 
         _event.FireEvent(appBatteryStatus);
-        LOG_RELEASE("%s", readableStr.c_str());
+        LOG_DEBUG("%s", readableStr.c_str());
     }
 
     std::string AapBatteryWatcher::DummyConvertChargingStatus(ChargingStatus status) {
@@ -124,12 +124,12 @@ namespace MagicPodsCore {
         // settings type must be Anc
         if (bytes[6] != static_cast<unsigned char>(CmdSettings::Anc)) return;
         
-        LOG_RELEASE("%s", _tag.c_str());
+        LOG_DEBUG("%s", _tag.c_str());
 
         AncMode ancMode = static_cast<AncMode>(bytes[7]);
 
         // REPLACE WITH ANC STORAGE LOGIC OR EVENT ONANCCHANGED?
-        LOG_RELEASE("%s", DummyConvertAncMode(ancMode).c_str());
+        LOG_DEBUG("%s", DummyConvertAncMode(ancMode).c_str());
         _event.FireEvent(AncWatcherData{_tag, ancMode});
     }
 
