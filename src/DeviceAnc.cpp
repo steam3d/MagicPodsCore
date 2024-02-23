@@ -10,7 +10,7 @@ namespace MagicPodsCore {
 
     void DeviceAnc::UpdateFromAppleAnc(AncMode aapMode){
         DeviceAncMode mode = DeviceAnc::AncModeToDeviceAncMode(aapMode);
-        LOG_RELEASE("Trying update anc mode %u -> %u", static_cast<unsigned char>(mode), static_cast<unsigned char>(_mode));
+        LOG_RELEASE("Trying update anc mode %u -> %u", static_cast<unsigned char>(_mode), static_cast<unsigned char>(mode));
         if (mode != _mode){
             _mode = mode;
             LOG_RELEASE("Updated anc mode: %u",  static_cast<unsigned char>(_mode));
