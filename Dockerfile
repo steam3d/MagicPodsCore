@@ -21,7 +21,8 @@ ADD ./CMakeLists.txt /app/CMakeLists.txt
 
 WORKDIR /app/build
 
-RUN set -ex; cmake ../. && cmake --build . --config Release
+RUN cmake -DCMAKE_BUILD_TYPE=Release ..
+RUN cmake --build .
 
 FROM scratch as copy_results_stage
 
