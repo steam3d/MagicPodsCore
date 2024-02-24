@@ -324,6 +324,9 @@ bool TryToParseArguments(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
+    // fix stdout buffering issue, when python does not receive output
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     if (TryToParseArguments(argc, argv))
         return 0;
 
