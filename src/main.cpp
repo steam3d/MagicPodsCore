@@ -8,6 +8,7 @@
 #include "DeviceBattery.h"
 #include "DeviceAnc.h"
 #include "Logger.h"
+#include "Config.h"
 
 using namespace MagicPodsCore;
 
@@ -310,7 +311,7 @@ bool TryToParseArguments(int argc, char** argv) {
     for (int i = 0; i < argc; ++i) {
         std::string argument{argv[i]};
         if (argument == "--version" || argument == "-version" || argument == "-v") {
-            LOG_RELEASE("MagicPodsCore 1.0.0");
+            LOG_RELEASE(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
             return true;
         }
         else if (argument == "--help" || argument == "-help" || argument == "-h" || argc > 2) {
@@ -329,6 +330,8 @@ int main(int argc, char** argv) {
 
     if (TryToParseArguments(argc, argv))
         return 0;
+
+    LOG_RELEASE(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
 
     DevicesInfoFetcher devicesInfoFetcher{};
 

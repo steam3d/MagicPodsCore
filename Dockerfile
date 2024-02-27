@@ -17,12 +17,13 @@ FROM system_stage AS build_stage
 
 ADD ./src /app/src
 ADD ./dependencies /app/dependencies
+ADD ./config /app/config
 ADD ./CMakeLists.txt /app/CMakeLists.txt
 
 WORKDIR /app/build
 
-RUN cmake -DCMAKE_BUILD_TYPE=Release ..
-RUN cmake --build .
+RUN cmake -DCMAKE_BUILD_TYPE=Release ../
+RUN cmake --build ./
 
 FROM scratch as copy_results_stage
 
