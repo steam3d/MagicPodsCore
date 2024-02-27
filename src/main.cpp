@@ -275,26 +275,26 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
     };
 
     for (auto& device : devicesInfoFetcher.GetDevices()) {
-        device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, device](size_t listenerId, auto newValues) {
-            onBatteryChangedListener(device, newValues);
+        device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValues) {
+            onBatteryChangedListener(weakDevice.lock(), newValues);
         });
-        device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, device](size_t listenerId, auto newValue) {
-            onAncChangedListener(device, newValue);
+        device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
+            onAncChangedListener(weakDevice.lock(), newValue);
         });
-        device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, device](size_t listenerId, auto newValue) {
-            onConnectedChangedListener(device, newValue);
+        device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
+            onConnectedChangedListener(weakDevice.lock(), newValue);
         });
     }
     devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onBatteryChangedListener, onAncChangedListener, onConnectedChangedListener](size_t listenerId, auto newDevices) {
         for (auto& device : newDevices) {
-            device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, device](size_t listenerId, auto newValues) {
-                onBatteryChangedListener(device, newValues);
+            device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValues) {
+                onBatteryChangedListener(weakDevice.lock(), newValues);
             });
-            device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, device](size_t listenerId, auto newValue) {
-                onAncChangedListener(device, newValue);
+            device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
+                onAncChangedListener(weakDevice.lock(), newValue);
             });
-            device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, device](size_t listenerId, auto newValue) {
-                onConnectedChangedListener(device, newValue);
+            device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
+                onConnectedChangedListener(weakDevice.lock(), newValue);
             });
         }
     });
