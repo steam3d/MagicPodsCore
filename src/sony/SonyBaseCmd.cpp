@@ -42,6 +42,6 @@ namespace MagicPodsCore
     void SonyBaseCmd::ProcessResponse(const std::vector<unsigned char> &bytes)
     {
         IsProcessed = true;
-        LOG_RELEASE("Request %s processed", _tag.c_str());
+        LOG_DEBUG("Request %s processed", _tag.c_str());
     }
 }
