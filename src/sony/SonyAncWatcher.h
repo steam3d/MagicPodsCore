@@ -23,8 +23,5 @@ namespace MagicPodsCore
 
     private:
         Event<SonyAncState> _event{};
-        std::string DummyConvertSonyAncSwitch(SonyAncSwitch status);
-        std::string DummyConvertSonyAncFilter(SonyAncFilter status);
-        std::string DummyConvertSonyAncFilterAmbientVoice(SonyAncFilterAmbientVoice status);
     };
 }

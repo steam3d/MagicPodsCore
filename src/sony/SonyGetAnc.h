@@ -72,10 +72,5 @@ namespace MagicPodsCore
         void ProcessResponse(const std::vector<unsigned char> &bytes) override;
     protected:
         std::vector<unsigned char>CreatePacketBody(unsigned char prefix) const override;
-
-    private:
-        std::string DummyConvertSonyAncSwitch(SonyAncSwitch status);
-        std::string DummyConvertSonyAncFilter(SonyAncFilter status);
-        std::string DummyConvertSonyAncFilterAmbientVoice(SonyAncFilterAmbientVoice status);
     };
 }
