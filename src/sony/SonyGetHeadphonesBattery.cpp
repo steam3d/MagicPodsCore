@@ -4,8 +4,9 @@
 
 namespace MagicPodsCore
 {
-    SonyGetHeadphonesBattery::SonyGetHeadphonesBattery() : SonyBaseCmd{"SonyGetHeadphonesBattery"}
+    SonyGetHeadphonesBattery::SonyGetHeadphonesBattery(SonyProductIds model) : SonyBaseCmd{"SonyGetHeadphonesBattery"}
     {
+         SonyGetHeadphonesBattery::model = model;
     }
 
     std::vector<unsigned char> SonyGetHeadphonesBattery::CreatePacketBody(unsigned char prefix) const
@@ -20,21 +21,32 @@ namespace MagicPodsCore
             auto l = bytes[9];
             auto r = bytes[11];
 
-            DeviceBatteryData batteryL;
-            batteryL.isCharging = false;
-            batteryL.Status = l == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
-            batteryL.Battery = l;
+            if (model == SonyProductIds::WH_1000XM4){
+                DeviceBatteryData batteryS;
+                batteryS.isCharging = false;
+                batteryS.Status = l == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
+                batteryS.Battery = l;
 
-            DeviceBatteryData batteryR;
-            batteryR.isCharging = false;
-            batteryR.Status = r == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
-            batteryR.Battery = r;
+                Battery[DeviceBatteryType::Single] = batteryS;
+            }
+            else{
+                DeviceBatteryData batteryL;
+                batteryL.isCharging = false;
+                batteryL.Status = l == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
+                batteryL.Battery = l;
 
-            Battery[DeviceBatteryType::Left] = batteryL;
-            Battery[DeviceBatteryType::Right] = batteryR;
+                DeviceBatteryData batteryR;
+                batteryR.isCharging = false;
+                batteryR.Status = r == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
+                batteryR.Battery = r;
 
+                Battery[DeviceBatteryType::Left] = batteryL;
+                Battery[DeviceBatteryType::Right] = batteryR;
+
+            }
             // Event battery changed
-            LOG_DEBUG("Battery Left: %d Right %d", batteryL.Battery, batteryR.Battery);
+            LOG_DEBUG("Battery Left: %d Right %d", l, r);
+
             SonyBaseCmd::ProcessResponse(bytes);
         }
     }
