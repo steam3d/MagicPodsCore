@@ -1,9 +1,4 @@
 #pragma once
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include <memory>
-#include <vector>
 #include "SonyBaseWatcher.h"
 #include "SonyGetAnc.h"
 #include "../DeviceBattery.h"

@@ -1,9 +1,5 @@
 #pragma once
-#include <stdio.h>
-#include <iostream>
 #include <string>
-#include <memory>
-#include <vector>
 #include "SonyEnums.h"
 
 namespace MagicPodsCore
