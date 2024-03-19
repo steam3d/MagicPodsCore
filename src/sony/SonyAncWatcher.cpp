@@ -24,7 +24,6 @@ namespace MagicPodsCore
                         State.Volume);
 
             _event.FireEvent(State);
-            SonyBaseWatcher::ProcessResponse(bytes);
         }
     }
 }

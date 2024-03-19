@@ -14,6 +14,6 @@ namespace MagicPodsCore
 
     public:
         explicit SonyBaseWatcher(std::string tag);                
-        virtual void ProcessResponse(const std::vector<unsigned char> &bytes);
+        virtual void ProcessResponse(const std::vector<unsigned char> &bytes) = 0;
     };
 }
