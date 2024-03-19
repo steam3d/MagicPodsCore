@@ -24,6 +24,8 @@ add_executable(MagicPodsCore
     src/sony/SonyBaseWatcher.cpp
     src/sony/SonyAncWatcher.cpp
     src/sony/SonyAncHelper.cpp
+    src/sony/SonyEnums.h
+    src/sony/SonyStructs.h
 )
 add_subdirectory(dependencies)
 target_include_directories(MagicPodsCore PRIVATE src dependencies/json ${PROJECT_BINARY_DIR}/src)
