@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 #include "SonyBaseCmd.h"
-#include "SonyGetAnc.h"
+#include "SonyStructs.h"
 
 namespace MagicPodsCore
 {   
