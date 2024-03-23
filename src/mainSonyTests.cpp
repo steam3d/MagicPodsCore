@@ -178,7 +178,7 @@ void TestSonyGetHeadphonesBatteryResponse(SonyProductIds model, std::vector<unsi
     }
 }
 
-int main()
+int Testsmain()
 {
     setvbuf(stdout, NULL, _IONBF, 0);
 

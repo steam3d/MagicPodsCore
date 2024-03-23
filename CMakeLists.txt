@@ -24,6 +24,7 @@ add_executable(MagicPodsCore
     src/sony/SonyBaseWatcher.cpp
     src/sony/SonyAncWatcher.cpp
     src/sony/SonyAncHelper.cpp
+    src/sony/SonyClient.cpp
     src/sony/SonyEnums.h
     src/sony/SonyStructs.h
 )
