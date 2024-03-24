@@ -39,7 +39,8 @@ namespace MagicPodsCore
 
             if (cmd.IsProcessed)
                 break;            
-        }        
+        }  
+        //TODO: Unsubscribe to bytes from headphones cmd.ProcessResponse -=       
     }
 
     void SonyClient::ProcessResponse(const std::vector<unsigned char> &bytes)
