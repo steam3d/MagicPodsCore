@@ -20,6 +20,7 @@ enum class AppleProductIds : unsigned short {
     beatsstudiobuds = 0x2011,
     beatsstudiobudsplus = 0x2016,
     powerbeats4 = 0x200d,
+    beatsstudiopro = 0x2017,
 };
 
 static const AppleProductIds AllAppleProductIds[] = {
@@ -40,5 +41,6 @@ static const AppleProductIds AllAppleProductIds[] = {
     AppleProductIds::beatsfitpro,
     AppleProductIds::beatsstudiobuds,
     AppleProductIds::beatsstudiobudsplus,
-    AppleProductIds::powerbeats4
+    AppleProductIds::powerbeats4,
+    AppleProductIds::beatsstudiopro,
 };
