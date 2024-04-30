@@ -16,6 +16,17 @@ add_executable(MagicPodsCore
     src/DeviceAnc.cpp
     src/aap/Aap.cpp
     src/aap/AapClient.cpp
+    src/sony/SonyBaseCmd.cpp
+    src/sony/SonyGetAnc.cpp
+    src/sony/SonySetAnc.cpp
+    src/sony/SonyGetCaseBattery.cpp
+    src/sony/SonyGetHeadphonesBattery.cpp
+    src/sony/SonyBaseWatcher.cpp
+    src/sony/SonyAncWatcher.cpp
+    src/sony/SonyAncHelper.cpp
+    src/sony/SonyClient.cpp
+    src/sony/SonyEnums.h
+    src/sony/SonyStructs.h
 )
 add_subdirectory(dependencies)
 target_include_directories(MagicPodsCore PRIVATE src dependencies/json ${PROJECT_BINARY_DIR}/src)
