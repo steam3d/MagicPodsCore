@@ -1,3 +1,11 @@
+#
+# MagicPodsCore
+# https://github.com/steam3d/MagicPodsCore
+#
+# Copyright: 2020-2024 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+# License: GNU General Public License v3.0
+#
+
 from typing import Type
 from aap.enums.enums import Cmd, NotificationsMode
 from aap.packets.packet import Packet
@@ -22,7 +30,7 @@ class Notifications(Packet):
 
         Then the iPhone receives some packets and sends:
         040004000f00ffffffff
-        
+
         My guess is that the iPhone checks the capabilities of the AirPods and sends an additional packet based on them.   
     """
     def __init__(self, option: Type[NotificationsMode]):

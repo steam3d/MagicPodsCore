@@ -1,3 +1,11 @@
+#
+# MagicPodsCore
+# https://github.com/steam3d/MagicPodsCore
+#
+# Copyright: 2020-2024 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+# License: GNU General Public License v3.0
+#
+
 from aap.enums.enums import Cmd, BatteryType, BatteryChargingStatus
 from aap.watchers.watcher import Watcher
 
