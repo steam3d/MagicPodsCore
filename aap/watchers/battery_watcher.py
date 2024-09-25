@@ -66,7 +66,7 @@ class BatteryWatcher(Watcher):
 
         battery_count = b_arr[6]
         start_byte = 7
-
+        batt_string = "BatteryWatcher: "
         for i in range(battery_count):
             if not any(value == b_arr[start_byte] for value in BatteryType):
                 print("Unknown battery type value", b_arr[start_byte])
@@ -80,7 +80,9 @@ class BatteryWatcher(Watcher):
 
             battery_type = BatteryType(b_arr[start_byte])
             battery_level = max(0, min(b_arr[start_byte + 2], 100))         
-            status = self.get_enum_name(b_arr[start_byte + 3], BatteryChargingStatus)
-            print(battery_type.name,battery_level,status)                        
-            
+            status = self.get_enum_name(b_arr[start_byte + 3], BatteryChargingStatus)                                 
+            batt_string += f"{battery_type.name} {battery_level} {status}, "
+
             start_byte += 5
+        
+        print(batt_string)

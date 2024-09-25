@@ -37,4 +37,4 @@ class AncControlWatcher(Watcher):
             return
         
         mode = self.get_enum_name(b_arr[7], AncMode)
-        print(mode)
+        print("AncControlWatcher:", mode)
