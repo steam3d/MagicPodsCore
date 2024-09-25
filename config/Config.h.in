@@ -1,2 +1,0 @@
-#cmakedefine CMAKE_PROJECT_NAME "@CMAKE_PROJECT_NAME@"
-#cmakedefine MagicPodsCore_VERSION "@MagicPodsCore_VERSION@"

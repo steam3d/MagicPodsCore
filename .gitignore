@@ -4,3 +4,9 @@ build/
 
 # Docker builder
 MagicPodsCore
+
+# python
+__pycache__/
+*.pyc
+.env
+.DS_Store
