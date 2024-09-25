@@ -1,6 +1,7 @@
 import re
 import bluetooth
 
+from aap.enums.enums import NotificationsMode
 from aap.packets.Init import Init
 from aap.packets.notifications import Notifications
 
