@@ -104,8 +104,10 @@ class TreeApp(App):
     async def on_tree_node_selected(self, event:Tree.NodeSelected) -> None:                        
         node = event.node        
         if node.allow_expand == False:
-            #self.pprint(node.label)
-            print(node.label)
+            bts = node.data.to_bytes()
+            self.service.WriteDirectly(bts)
+            #await self.service.Write(bts)
+            self.pprint(bts.hex(), color="green")
     
     def pprint(self, text, color = "") -> None:                        
         self.list_view.append(ListItem(Static(Text(str(text), style=color))))

@@ -20,9 +20,11 @@ class Service:
         for callback in self.subscribers:
             callback(message)
 
-    async def Write(self, bytes):
+    async def Write(self, bytes:bytes):
         await self.command_queue.put(bytes)
 
+    def WriteDirectly(self, bytes:bytes):
+        self.writer.write(bytes)
 
     async def _receive_handler(self):
         while self.running:            
@@ -31,7 +33,7 @@ class Service:
                 #print(f"Incoming AACP Message: {response.hex()}")
                 self.notify_subscribers(response)
 
-
+    # This method executes only after reading. If the socket does not have anything to read, this method will get stuck forever.
     async def _send_handler(self):
         while self.running:
             command = await self.command_queue.get()
