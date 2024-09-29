@@ -51,17 +51,16 @@ class Service:
         self.reader, self.writer = await asyncio.open_connection(sock=sock)        
 
     async def start(self):
-        print(f"Connecting to {self.address} ...")
+        print(f"Connecting to {self.address}")
         self.command_queue = asyncio.Queue()        
         await self.connect()
         
         receiver_task = asyncio.create_task(self._receive_handler())
         sender_task = asyncio.create_task(self._send_handler())
-        print("Sending init and notification packets...")
+        print("Sending init and notification packets")
         #TODO: remove. Testing only
         self.WriteDirectly(b"\x00\x00\x04\x00\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-        time.sleep(0.25) # Without a pause, the packet will not be sent
-        print("Sending init and notification packets...")
+        time.sleep(0.25) # Without a pause, the packet will not be sent        
         self.WriteDirectly(b"\x04\x00\x04\x00\x0f\x00\xff\xff\xff\xff")
         
         try:
