@@ -5,27 +5,31 @@ A console application for controlling AirPods and a description of the AAP proto
 
 > If you are using MagicPodsDecky, please use the Decky branch for backward compatibility. The backend will be rewritten in Python in the master branch.
 
-## ⚙️ Compatibility
+## 💾 Installation
 
-Linux only.
+Install the required packages:
 
-### Supported Modes
-- AirPods 1
-- AirPods 2
-- AirPods 3
-- AirPods 4 ANC
-- AirPods Pro
-- AirPods Pro 2
-- AirPods Max
-- AirPods Max 2024
-- Beats Headphones
+```
+pip3 install asyncio textual
+```
 
-### Supported Features
-- Noise Control
-  - Noise Cancelling
-  - Transparency
-  - Off
-- Accurate Battery Status
+Clone the repository:
+
+```
+git clone https://github.com/steam3d/MagicPodsCore.git
+```
+
+Go to the repository directory:
+
+```
+cd MagicPodsCore
+```
+
+Run `main.py` and pass your AirPods' MAC address as an argument:
+
+```
+python3 main.py AA:BB:CC:DD:00:00
+```
 
 ## 🚀 Getting Started
 
@@ -53,31 +57,27 @@ Use the `Tab` key to select the logger panel. Use the arrow keys to move between
 
 Use the `Tab` key to select the input field. Write the hex packet and press `Enter` to send it to the AirPods.
 
-## 💾 Installation
+## ⚙️ Compatibility
 
-Install the required packages:
+Linux only.
 
-```
-pip3 install asyncio textual
-```
+### Supported Modes
+- AirPods 1
+- AirPods 2
+- AirPods 3
+- AirPods 4 ANC
+- AirPods Pro
+- AirPods Pro 2
+- AirPods Max
+- AirPods Max 2024
+- Beats Headphones
 
-Clone the repository:
-
-```
-git clone https://github.com/steam3d/MagicPodsCore.git
-```
-
-Go to the repository directory:
-
-```
-cd MagicPodsCore
-```
-
-Run `main.py` and pass your AirPods' MAC address as an argument:
-
-```
-python3 main.py AA:BB:CC:DD:00:00
-```
+### Supported Features
+- Noise Control
+  - Noise Cancelling
+  - Transparency
+  - Off
+- Accurate Battery Status
 
 ## 💖 Community
 
