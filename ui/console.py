@@ -1,3 +1,4 @@
+import re
 import threading
 from rich.text import Text
 from textual.app import App, ComposeResult
@@ -120,9 +121,15 @@ class TreeApp(App):
         self.pprint(f"Auto scroll {self.auto_scroll}", "red")
 
     def on_input_submitted(self, event: Input.Submitted) -> None:    
-        input_text =  event.input.value
-        self.pprint(input_text, "green")
-        event.input.value = ""
+        try:
+            text = event.input.value
+            bts = bytes(int(b,16) for b in re.findall('..',text))
+            self.service.WriteDirectly(bts)
+            self.pprint(text, "green")
+        except Exception as e:
+            print(f"An error occurred in receive_handler: {e}")
+        finally:
+            event.input.value = ""
 
     def action_clear(self) -> None:
         self.list_view.clear()
