@@ -5,7 +5,7 @@ A console application for controlling AirPods and a description of the AAP proto
 
 > If you are using MagicPodsDecky, please use the Decky branch for backward compatibility. The backend will be rewritten in Python in the master branch.
 
-## Compatibility
+## ⚙️ Compatibility
 
 Linux only.
 
@@ -28,6 +28,10 @@ Linux only.
 - Accurate Battery Status
 
 ## 🚀 Getting Started
+
+Connect your AirPods and run the Python script (see the installation section). The console application will connect to the headphones, and you're ready to go.
+
+Interface is divided into the following parts:
 
 ### Header
 
@@ -75,5 +79,6 @@ Run `main.py` and pass your AirPods' MAC address as an argument:
 python3 main.py AA:BB:CC:DD:00:00
 ```
 
-💖 Community
+## 💖 Community
+
 Join the [MagicPods Discord](https://discord.com/invite/UyY4PY768V) server
