@@ -1,0 +1,20 @@
+#tree-view {
+    scrollbar-gutter: stable;
+    overflow: auto;
+    width: auto;
+    height: 100%;
+    dock: left;
+    display: block;
+    max-width: 50%;
+    min-width: 15%;
+}
+
+CodeBrowser.-show-tree #tree-view {
+    display: block;
+    max-width: 50%;
+}
+
+Input#dictionary-search {
+    dock: bottom;
+    margin: 0 -1;
+}
