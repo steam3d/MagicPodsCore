@@ -37,13 +37,13 @@ class TreeApp(App):
 
     BINDINGS = [
         ("a", "auto_scroll", "Auto scroll"),
+        ("s", "trim_strings", "Trim strings"),
         ("c", "clear", "Clear"),
         ("t", "toggle_root", "Toggle root"),
     ]
     
     auto_scroll = True
-
-
+    trim_strings = True
 
     def __init__(self, service:Service,  packets: dict):
         super().__init__()
@@ -120,6 +120,10 @@ class TreeApp(App):
         self.auto_scroll = not self.auto_scroll
         self.pprint(f"Auto scroll {self.auto_scroll}", "red")
 
+    def action_trim_strings(self) -> None:
+        self.trim_strings = not self.trim_strings
+        self.pprint(f"Trim strings {self.trim_strings}", "red")
+
     def on_input_submitted(self, event: Input.Submitted) -> None:    
         try:
             text = event.input.value
@@ -131,7 +135,7 @@ class TreeApp(App):
         finally:
             event.input.value = ""
 
-    def action_clear(self) -> None:
+    def action_clear(self) -> None:        
         self.list_view.clear()
 
     def action_toggle_root(self) -> None:
@@ -142,4 +146,9 @@ class TreeApp(App):
         self.pprint(message.strip())
 
     def handle_message(self, message):
-        self.pprint(message.hex()[0:100], color="bright_cyan")
+        hex = message.hex()
+        if self.trim_strings:
+            if (len(hex) > 100):
+                hex = hex[0:100] + "..."
+        
+        self.pprint(hex, color="bright_cyan")
