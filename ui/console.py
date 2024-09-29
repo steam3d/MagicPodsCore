@@ -133,4 +133,4 @@ class TreeApp(App):
         self.pprint(message.strip())
 
     def handle_message(self, message):
-        self.pprint(message.hex(), color="bright_cyan")
+        self.pprint(message.hex()[0:100], color="bright_cyan")
