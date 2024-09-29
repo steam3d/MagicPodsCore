@@ -46,4 +46,6 @@ class BatteryChargingStatus(IntEnum):
     """Sometimes AirPods sends it when both AirPods out of the case"""
     Charging = 0x01
     NotCharging = 0x02
+    Undefined1 = 0x03
+    """Sometimes AirPods sends it when both AirPods out of the case"""
     Disconnected = 0x04    
