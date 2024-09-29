@@ -13,6 +13,7 @@ class AncControlWatcher(Watcher):
     """
     AncControlWatcher uses the same packet as AncControl
     """
+    mode = -1 
     def __init__(self):
         self.tag = "AncControlWatcher"
 
@@ -37,4 +38,5 @@ class AncControlWatcher(Watcher):
             return
         
         mode = self.get_enum_name(b_arr[7], AncMode)
-        print("AncControlWatcher:", mode)
+        self.mode = b_arr[7]
+        #print("AncControlWatcher:", mode)

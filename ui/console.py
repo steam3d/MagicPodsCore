@@ -5,6 +5,9 @@ from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, Tree
 from textual.containers import Container
 from textual.widgets import Input, ListView, ListItem, Footer, Header, Static
+from aap.enums.enums import AncMode, BatteryType
+from aap.watchers.anc_control_watcher import AncControlWatcher
+from aap.watchers.battery_watcher import BatteryWatcher
 from bt.service import Service
 import asyncio
 import io, sys
@@ -50,8 +53,11 @@ class TreeApp(App):
         self.redirector = RedirectOutput(self.handle_print)    
         self.packets = packets
         self.service = service
-        self.service.subscribe(self.handle_message)
-
+        self.service.subscribe(self.handle_message)        
+        self.battery = BatteryWatcher()    
+        self.service.subscribe(self.battery.process_response)
+        self.anc = AncControlWatcher()
+        self.service.subscribe(self.anc.process_response)
 
     async def on_ready(self):
         self.redirector.start()
@@ -73,7 +79,7 @@ class TreeApp(App):
 
         yield Header()
         self.title = "Header Application"
-        self.sub_title = "With title and sub-title"
+        #self.sub_title = "With title and sub-title"
 
         tree = Tree("AAP packets", id="tree-view")
 
@@ -152,3 +158,11 @@ class TreeApp(App):
                 hex = hex[0:100] + "..."
         
         self.pprint(hex, color="bright_cyan")
+        
+        battery_string = ""
+        for name, battery, status in self.battery.battery:
+            short_name = next((enum_value.name for enum_value in BatteryType if enum_value.value == name), "")[0:1]
+            battery_string += f"{short_name}:{battery}% {status}, "
+        
+        mode = next((enum_value.name for enum_value in AncMode if enum_value.value == self.anc.mode), "")
+        self.title = f"{self.service.address}({mode}) - {battery_string}" 

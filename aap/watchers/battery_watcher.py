@@ -50,6 +50,7 @@ class BatteryWatcher(Watcher):
 
     This pattern is repeated for each individual battery in the AirPods.    
     """
+    battery = []
     def __init__(self):
         self.tag = "BatteryWatcher"
 
@@ -66,6 +67,7 @@ class BatteryWatcher(Watcher):
 
         battery_count = b_arr[6]
         start_byte = 7
+        battery = []
         batt_string = "BatteryWatcher: "
         for i in range(battery_count):
             if not any(value == b_arr[start_byte] for value in BatteryType):
@@ -82,7 +84,9 @@ class BatteryWatcher(Watcher):
             battery_level = max(0, min(b_arr[start_byte + 2], 100))         
             status = self.get_enum_name(b_arr[start_byte + 3], BatteryChargingStatus)                                 
             batt_string += f"{battery_type.name} {battery_level} {status}, "
-
+            battery.append((battery_type, battery_level,status))
             start_byte += 5
         
-        print(batt_string)
+        self.battery = battery
+        #print(self.battery)
+        #print(batt_string)
