@@ -11,7 +11,7 @@ if __name__ == "__main__":
         "Init": Init(),
         "Notifications": [
             ("Unknown1", Notifications(NotificationsMode.Unknown1)),
-            ("Unknown1", Notifications(NotificationsMode.Unknown2))
+            ("Unknown2", Notifications(NotificationsMode.Unknown2))
         ], 
         "Noise control": [
             ("Noise cancelling", AncControl(AncMode.On)),

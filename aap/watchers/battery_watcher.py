@@ -53,8 +53,17 @@ class BatteryWatcher(Watcher):
     battery = []
     def __init__(self):
         self.tag = "BatteryWatcher"
+        self.subscribers = []
 
-    # TODO: add event
+    def subscribe(self, callback):        
+        self.subscribers.append(callback)
+
+    def unsubscribe(self, callback):        
+        self.subscribers.remove(callback)
+
+    def notify_subscribers(self, battery):        
+        for callback in self.subscribers:
+            callback(battery)
 
     def process_response(self, b_arr):
         # Minimum packet length
@@ -88,5 +97,6 @@ class BatteryWatcher(Watcher):
             start_byte += 5
         
         self.battery = battery
+        self.notify_subscribers(battery)
         #print(self.battery)
         #print(batt_string)

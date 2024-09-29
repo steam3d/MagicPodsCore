@@ -16,8 +16,17 @@ class AncControlWatcher(Watcher):
     mode = -1 
     def __init__(self):
         self.tag = "AncControlWatcher"
+        self.subscribers = []
 
-    # TODO: add event
+    def subscribe(self, callback):        
+        self.subscribers.append(callback)
+
+    def unsubscribe(self, callback):        
+        self.subscribers.remove(callback)
+
+    def notify_subscribers(self, mode):        
+        for callback in self.subscribers:
+            callback(mode)
 
     def process_response(self, b_arr):
         # Minimum packet length
@@ -38,5 +47,6 @@ class AncControlWatcher(Watcher):
             return
         
         mode = self.get_enum_name(b_arr[7], AncMode)
-        self.mode = b_arr[7]
         #print("AncControlWatcher:", mode)
+        self.mode = b_arr[7]
+        self.notify_subscribers(mode)

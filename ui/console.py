@@ -20,7 +20,6 @@ class RedirectOutput:
 
     def start(self):        
         sys.stdout = self
-        print("test")
 
     def stop(self):        
         sys.stdout = self.original_stdout        
@@ -41,7 +40,7 @@ class TreeApp(App):
     BINDINGS = [
         ("a", "auto_scroll", "Auto scroll"),
         ("s", "trim_strings", "Trim strings"),
-        ("c", "clear", "Clear"),
+        #("c", "clear", "Clear"),
         ("t", "toggle_root", "Toggle root"),
     ]
     
@@ -54,15 +53,15 @@ class TreeApp(App):
         self.packets = packets
         self.service = service
         self.service.subscribe(self.handle_message)        
-        self.battery = BatteryWatcher()    
+        self.battery = BatteryWatcher() 
+        self.battery.subscribe(self.handle_events)   
         self.service.subscribe(self.battery.process_response)
         self.anc = AncControlWatcher()
+        self.anc.subscribe(self.handle_events) 
         self.service.subscribe(self.anc.process_response)
 
     async def on_ready(self):
         self.redirector.start()
-        print("Welcome to the Textual app!")
-        print("This is redirected output.")
 
         def run_loop(loop):
             asyncio.set_event_loop(loop)
@@ -78,7 +77,7 @@ class TreeApp(App):
     def compose(self) -> ComposeResult:
 
         yield Header()
-        self.title = "Header Application"
+        self.title = "MagicPodsCore alpha demo"
         #self.sub_title = "With title and sub-title"
 
         tree = Tree("AAP packets", id="tree-view")
@@ -157,12 +156,13 @@ class TreeApp(App):
             if (len(hex) > 100):
                 hex = hex[0:100] + "..."
         
-        self.pprint(hex, color="bright_cyan")
-        
+        self.pprint(hex, color="bright_cyan")                
+    
+    def handle_events(self, message):
         battery_string = ""
         for name, battery, status in self.battery.battery:
             short_name = next((enum_value.name for enum_value in BatteryType if enum_value.value == name), "")[0:1]
             battery_string += f"{short_name}:{battery}% {status}, "
         
         mode = next((enum_value.name for enum_value in AncMode if enum_value.value == self.anc.mode), "")
-        self.title = f"{self.service.address}({mode}) - {battery_string}" 
+        self.title = f"{self.service.address} Noise control:{mode}, {battery_string}" 

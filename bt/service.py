@@ -1,5 +1,6 @@
 import asyncio
 import socket
+import time
 
 class Service:
     def __init__(self, address: str, psm: int):        
@@ -58,8 +59,10 @@ class Service:
         sender_task = asyncio.create_task(self._send_handler())
         print("Sending init and notification packets...")
         #TODO: remove. Testing only
-        await self.Write(b"\x00\x00\x04\x00\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-        await self.Write(b"\x04\x00\x04\x00\x0f\x00\xff\xff\xff\xff")
+        self.WriteDirectly(b"\x00\x00\x04\x00\x01\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+        time.sleep(0.25) # Without a pause, the packet will not be sent
+        print("Sending init and notification packets...")
+        self.WriteDirectly(b"\x04\x00\x04\x00\x0f\x00\xff\xff\xff\xff")
         
         try:
             await asyncio.gather(receiver_task, sender_task)
