@@ -61,7 +61,7 @@ Use the `Tab` key to select the input field. Write the hex packet and press `Ent
 
 Linux only.
 
-### Supported Modes
+### Supported Models
 - AirPods 1
 - AirPods 2
 - AirPods 3
