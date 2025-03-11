@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <iomanip>
+#include <vector>
 
 namespace MagicPodsCore {
 
@@ -38,5 +39,23 @@ namespace MagicPodsCore {
             ss << std::hex << std::setw(4) << std::setfill('0') << value;
             return ss.str();
         }
+
+        inline static const char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+        static std::string BytesToHexString(const unsigned char *data, int len)
+        {
+            std::string s(len * 2, ' ');
+            for (int i = 0; i < len; ++i) {
+            s[2 * i] = hexmap[(data[i] & 0xF0) >> 4];
+            s[2 * i + 1] = hexmap[data[i] & 0x0F];
+            }
+            return s;
+        };
+
+        static std::string BytesToHexString(const std::vector<unsigned char>& data)
+        {
+            return BytesToHexString(data.data(), data.size());
+        };
     };
 }
