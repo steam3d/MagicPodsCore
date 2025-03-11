@@ -84,10 +84,11 @@ namespace MagicPodsCore{
     
     GalaxyBudsModelIds GalaxyBudsHelper::GetModelFromName(std::string name)
     {
-        std::string _name = StringUtils::ToLowerCase(name);
-        if (_name.empty())
+        if (name.empty())
             return GalaxyBudsModelIds::Unknown;
-
+        
+        std::string _name = StringUtils::ToLowerCase(name);
+        
         if (_name.find("galaxy buds (") != std::string::npos)
         {
             return GalaxyBudsModelIds::GalaxyBuds;
@@ -153,7 +154,7 @@ namespace MagicPodsCore{
                     ss << std::hex << hexId;
                     ss >> id;
 
-                    if (std::find(GalaxyBudsModelIdsArray.begin(), GalaxyBudsModelIdsArray.end(), id) != GalaxyBudsModelIdsArray.end())
+                    if (!ss.fail() && std::find(GalaxyBudsModelIdsArray.begin(), GalaxyBudsModelIdsArray.end(), id) != GalaxyBudsModelIdsArray.end())
                     {
                         GalaxyBudsColoredModelIds coloredModel = static_cast<GalaxyBudsColoredModelIds>(id);
                         GalaxyBudsModelIds model = this->GetModelFromColoredModel(coloredModel);
