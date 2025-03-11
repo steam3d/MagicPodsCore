@@ -3,6 +3,7 @@
 #include <string>
 #include <algorithm>
 #include <cstdio>
+#include <iomanip>
 
 namespace MagicPodsCore {
 
@@ -29,6 +30,13 @@ namespace MagicPodsCore {
             char buffer[512];
             int stringLength = std::sprintf(buffer, format.c_str(), args...);
             return std::string(buffer, stringLength);
+        }
+
+        // 327 -> 0147
+        static std::string int16ToHex(int16_t value) {
+            std::stringstream ss;
+            ss << std::hex << std::setw(4) << std::setfill('0') << value;
+            return ss.str();
         }
     };
 }

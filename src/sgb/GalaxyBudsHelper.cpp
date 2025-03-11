@@ -2,13 +2,6 @@
 #include <iostream>
 
 namespace MagicPodsCore{
-    std::string GalaxyBudsHelper::toLowerCase(const std::string& str){
-        std::string newStr = str;
-        std::transform(newStr.begin(), newStr.end(), newStr.begin(), [](unsigned char c) {
-            return std::tolower(c);
-        });
-        return newStr;
-    }
 
     GalaxyBudsModelIds GalaxyBudsHelper::GetModelFromColoredModel(GalaxyBudsColoredModelIds coloredModel)
     {
@@ -91,7 +84,7 @@ namespace MagicPodsCore{
     
     GalaxyBudsModelIds GalaxyBudsHelper::GetModelFromName(std::string name)
     {
-        std::string _name = this->toLowerCase(name);
+        std::string _name = StringUtils::ToLowerCase(name);
         if (_name.empty())
             return GalaxyBudsModelIds::Unknown;
 
@@ -141,7 +134,7 @@ namespace MagicPodsCore{
         std::vector<std::string> _guids;
         _guids.reserve(guids.size());
         std::transform(guids.begin(), guids.end(), std::back_inserter(_guids), [this](const std::string& guid) {
-            return this->toLowerCase(guid);
+            return StringUtils::ToLowerCase(guid);
         });
 
         if (std::find(_guids.begin(), _guids.end(), GALAXYBUDSNEW) != _guids.end()) {
