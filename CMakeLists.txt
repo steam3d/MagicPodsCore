@@ -9,7 +9,9 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 configure_file(config/Config.h.in src/Config.h)
 
 add_executable(MagicPodsCore 
-    src/main.cpp
+    src/test_main.cpp
+    src/client/Client.cpp
+
     src/DevicesInfoFetcher.cpp
     src/Device.cpp
     src/DeviceBattery.cpp
