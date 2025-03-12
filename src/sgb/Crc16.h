@@ -27,7 +27,7 @@ namespace MagicPodsCore {
                 0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8, 0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
                 };
         public:
-            uint16_t Checksum(const std::vector<unsigned char>& data);
-            std::vector<unsigned char> Checksum(GalaxyBudsMsgIds msgId, const std::vector<unsigned char>& payload);
+            static uint16_t Checksum(const std::vector<unsigned char>& data);
+            static std::vector<unsigned char> Checksum(GalaxyBudsMsgIds msgId, const std::vector<unsigned char>& payload);
     };
 }
