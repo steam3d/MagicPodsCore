@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GalaxyBudsModelIds.h"
-#include "GalaxyBudsResponseData.h"
-#include "GalaxyBudsMsgTypes.h"
+#include "enums/GalaxyBudsModelIds.h"
+#include "structs/GalaxyBudsResponseData.h"
+#include "enums/GalaxyBudsMsgTypes.h"
 #include "Crc16.h"
 #include <vector>
 #include <optional>

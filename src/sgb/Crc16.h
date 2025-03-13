@@ -1,10 +1,11 @@
 #pragma once
-#include "GalaxyBudsMsgIds.h"
+#include "enums/GalaxyBudsMsgIds.h"
 #include <vector>
 #include <array>
 #include <cstdint>
 
-namespace MagicPodsCore {
+namespace MagicPodsCore{
+
     class Crc16{
         private:
             static inline constexpr std::array<uint16_t, 256> crc16Tab =

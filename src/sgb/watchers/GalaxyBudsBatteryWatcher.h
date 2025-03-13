@@ -1,9 +1,9 @@
 #pragma once
-#include "GalaxyBudsModelIds.h"
-#include "GalaxyBudsResponseData.h"
-#include "GalaxyBudsMsgIds.h"
+#include "../../Event.h"
+#include "../enums/GalaxyBudsModelIds.h"
+#include "../enums/GalaxyBudsMsgIds.h"
+#include "../structs/GalaxyBudsResponseData.h"
 #include "vector"
-#include "../Event.h"
 
 namespace MagicPodsCore{
     //DO NOT USE IT LIKE THIS. ONLY FOR TESTING.

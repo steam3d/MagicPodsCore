@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../StringUtils.h"
-#include "GalaxyBudsMsgIds.h"
-#include "GalaxyBudsMsgTypes.h"
+#include "../../StringUtils.h"
+#include "../enums/GalaxyBudsMsgIds.h"
+#include "../enums/GalaxyBudsMsgTypes.h"
 #include <vector>
 #include <iostream>
 #include <sstream>

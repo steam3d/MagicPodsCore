@@ -1,10 +1,11 @@
 #pragma once
-#include "GalaxyBudsMsgIds.h"
-#include "GalaxyBudsModelIds.h"
-#include "GalaxyBudsAnc.h"
+#include "../enums/GalaxyBudsMsgIds.h"
+#include "../enums/GalaxyBudsModelIds.h"
+#include "../enums/GalaxyBudsAnc.h"
 #include <vector>
 
 namespace MagicPodsCore{
+    
     class GalaxyBudsSetAnc
     {
         public:

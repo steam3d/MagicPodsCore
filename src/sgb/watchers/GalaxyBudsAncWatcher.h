@@ -1,13 +1,14 @@
 #pragma once
-#include "GalaxyBudsModelIds.h"
-#include "GalaxyBudsResponseData.h"
-#include "GalaxyBudsMsgIds.h"
-#include "GalaxyBudsAnc.h"
+#include "../../Event.h"
+#include "../enums/GalaxyBudsModelIds.h"
+#include "../enums/GalaxyBudsMsgIds.h"
+#include "../enums/GalaxyBudsAnc.h"
+#include "../structs/GalaxyBudsResponseData.h"
 #include <optional>
 #include "vector"
-#include "../Event.h"
 
 namespace MagicPodsCore{
+
     class GalaxyBudsAncWatcher
     {
         private:

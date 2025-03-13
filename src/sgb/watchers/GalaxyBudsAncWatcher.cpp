@@ -1,7 +1,6 @@
 #include "GalaxyBudsAncWatcher.h"
 
-namespace MagicPodsCore
-{
+namespace MagicPodsCore{
 
     std::optional<GalaxyBudsAnc> GalaxyBudsAncWatcher::ExtractState(unsigned char b)
     {
