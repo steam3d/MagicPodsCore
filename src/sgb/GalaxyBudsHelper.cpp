@@ -1,7 +1,8 @@
 #include "GalaxyBudsHelper.h"
 #include <iostream>
 
-namespace MagicPodsCore{
+namespace MagicPodsCore
+{
 
     GalaxyBudsModelIds GalaxyBudsHelper::GetModelFromColoredModel(GalaxyBudsColoredModelIds coloredModel)
     {
@@ -38,7 +39,6 @@ namespace MagicPodsCore{
                  coloredModel == GalaxyBudsColoredModelIds::GalaxyBudsProWhite)
         {
             return GalaxyBudsModelIds::GalaxyBudsPro;
-
         }
         else if (coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds2White ||
                  coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds2Black ||
@@ -131,24 +131,26 @@ namespace MagicPodsCore{
         }
     }
 
-    std::pair<GalaxyBudsModelIds, std::string> GalaxyBudsHelper::SearchModelColor(const std::vector<std::string>& guids, std::string name){
+    std::pair<GalaxyBudsModelIds, std::string> GalaxyBudsHelper::SearchModelColor(const std::vector<std::string> &guids, std::string name)
+    {
         std::vector<std::string> _guids;
         _guids.reserve(guids.size());
-        std::transform(guids.begin(), guids.end(), std::back_inserter(_guids), [this](const std::string& guid) {
-            return StringUtils::ToLowerCase(guid);
-        });
+        std::transform(guids.begin(), guids.end(), std::back_inserter(_guids), [this](const std::string &guid)
+                       { return StringUtils::ToLowerCase(guid); });
 
-        if (std::find(_guids.begin(), _guids.end(), GALAXYBUDSNEW) != _guids.end()) {
+        if (std::find(_guids.begin(), _guids.end(), GALAXYBUDSNEW) != _guids.end())
+        {
 
-            auto it = std::find_if(_guids.begin(), _guids.end(), [](const std::string& guidStr) {
-                return guidStr.find(deviceIdPrefix) == 0;
-            });
+            auto it = std::find_if(_guids.begin(), _guids.end(), [](const std::string &guidStr)
+                                   { return guidStr.find(deviceIdPrefix) == 0; });
 
-            if (it != _guids.end()) {
+            if (it != _guids.end())
+            {
                 std::string foundGuid = *it;
-                std::string hexId = foundGuid.substr(deviceIdPrefix.length()); //MUST BE LOWERCASE
+                std::string hexId = foundGuid.substr(deviceIdPrefix.length()); // MUST BE LOWERCASE
 
-                if(!hexId.empty() && hexId.length() == 4) {
+                if (!hexId.empty() && hexId.length() == 4)
+                {
                     int16_t id;
                     std::stringstream ss;
                     ss << std::hex << hexId;
@@ -158,50 +160,63 @@ namespace MagicPodsCore{
                     {
                         GalaxyBudsColoredModelIds coloredModel = static_cast<GalaxyBudsColoredModelIds>(id);
                         GalaxyBudsModelIds model = this->GetModelFromColoredModel(coloredModel);
-                        return { model, hexId };
+                        return {model, hexId};
                     }
                 }
-                else {
+                else
+                {
                     if (std::find(_guids.begin(), _guids.end(), HANDSFREESERVICECLASS) != _guids.end() &&
-                        std::find(_guids.begin(), _guids.end(), LEAUDIO) != _guids.end()){
-                            return { GalaxyBudsModelIds::GalaxyBuds2Pro, ""};
+                        std::find(_guids.begin(), _guids.end(), LEAUDIO) != _guids.end())
+                    {
+                        return {GalaxyBudsModelIds::GalaxyBuds2Pro, ""};
                     }
-                    else {
-                        return { GalaxyBudsModelIds::GalaxyBuds2, ""};
+                    else
+                    {
+                        return {GalaxyBudsModelIds::GalaxyBuds2, ""};
                     }
                 }
             }
-            };
+        };
 
-        return { this->GetModelFromName(name), ""};
+        return {this->GetModelFromName(name), ""};
     }
 
-    std::string GalaxyBudsHelper::GetServiceGuid(GalaxyBudsModelIds model){
-        if (model == GalaxyBudsModelIds::GalaxyBuds){
+    std::string GalaxyBudsHelper::GetServiceGuid(GalaxyBudsModelIds model)
+    {
+        if (model == GalaxyBudsModelIds::GalaxyBuds)
+        {
             return std::string(GALAXYBUDSLEGASY);
         }
-        else if (model == GalaxyBudsModelIds::GalaxyBudsPlus) {
+        else if (model == GalaxyBudsModelIds::GalaxyBudsPlus)
+        {
             return std::string(GALAXYBUDS);
         }
-        else if (model == GalaxyBudsModelIds::GalaxyBudsLive) {
+        else if (model == GalaxyBudsModelIds::GalaxyBudsLive)
+        {
             return std::string(GALAXYBUDS);
         }
-        else if (model == GalaxyBudsModelIds::GalaxyBudsPro) {
+        else if (model == GalaxyBudsModelIds::GalaxyBudsPro)
+        {
             return std::string(GALAXYBUDS);
         }
-        else if (model == GalaxyBudsModelIds::GalaxyBuds2) {
+        else if (model == GalaxyBudsModelIds::GalaxyBuds2)
+        {
             return std::string(GALAXYBUDSNEW);
         }
-        else if (model == GalaxyBudsModelIds::GalaxyBuds2Pro) {
+        else if (model == GalaxyBudsModelIds::GalaxyBuds2Pro)
+        {
             return std::string(GALAXYBUDSNEW);
         }
-        else if (model == GalaxyBudsModelIds::GalaxyBuds3) {
+        else if (model == GalaxyBudsModelIds::GalaxyBuds3)
+        {
             return std::string(GALAXYBUDSNEW);
         }
-        else if (model == GalaxyBudsModelIds::GalaxyBuds3Pro) {
+        else if (model == GalaxyBudsModelIds::GalaxyBuds3Pro)
+        {
             return std::string(GALAXYBUDSNEW);
         }
-        else {
+        else
+        {
             return "";
         }
     }

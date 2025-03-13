@@ -1,6 +1,7 @@
 #include "GalaxyBudsAncWatcher.h"
 
-namespace MagicPodsCore{
+namespace MagicPodsCore
+{
 
     std::optional<GalaxyBudsAnc> GalaxyBudsAncWatcher::ExtractState(unsigned char b)
     {
@@ -59,7 +60,7 @@ namespace MagicPodsCore{
         if (data.Payload.size() <= 1)
             return std::nullopt;
 
-        if (data.Payload[0] != static_cast<unsigned char>(GalaxyBudsMsgIds::NOISE_CONTROLS))            
+        if (data.Payload[0] != static_cast<unsigned char>(GalaxyBudsMsgIds::NOISE_CONTROLS))
             return std::nullopt;
 
         return ExtractState(data.Payload[1]);
@@ -85,7 +86,7 @@ namespace MagicPodsCore{
         if (stateOpt.has_value())
         {
             GalaxyBudsAnc state = stateOpt.value();
-                _ancChanged.FireEvent(state);            
+            _ancChanged.FireEvent(state);
         }
     }
 

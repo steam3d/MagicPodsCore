@@ -1,13 +1,15 @@
 #include "GalaxyBudsBatteryWatcher.h"
 
-namespace MagicPodsCore{
+namespace MagicPodsCore
+{
 
     bool GalaxyBudsBatteryWatcher::IsCaseBatterySupport(GalaxyBudsModelIds model)
     {
         return !(model == GalaxyBudsModelIds::GalaxyBuds || model == GalaxyBudsModelIds::Unknown);
     }
 
-    void GalaxyBudsBatteryWatcher::ConvertBattery(std::vector<DeviceBatteryData>& battery, unsigned char l, unsigned char r, unsigned char c, unsigned char charging){
+    void GalaxyBudsBatteryWatcher::ConvertBattery(std::vector<DeviceBatteryData> &battery, unsigned char l, unsigned char r, unsigned char c, unsigned char charging)
+    {
 
         DeviceBatteryData left;
         left.Type = DeviceBatteryType::Left;
@@ -34,14 +36,17 @@ namespace MagicPodsCore{
         }
     }
 
-    std::vector<DeviceBatteryData> GalaxyBudsBatteryWatcher::Process_EXTENDED_STATUS_UPDATED(GalaxyBudsResponseData data){
+    std::vector<DeviceBatteryData> GalaxyBudsBatteryWatcher::Process_EXTENDED_STATUS_UPDATED(GalaxyBudsResponseData data)
+    {
 
         std::vector<DeviceBatteryData> battery;
-        if (data.Id != GalaxyBudsMsgIds::EXTENDED_STATUS_UPDATED){
+        if (data.Id != GalaxyBudsMsgIds::EXTENDED_STATUS_UPDATED)
+        {
             return battery;
         };
 
-        if (data.Payload.size() <= 3){
+        if (data.Payload.size() <= 3)
+        {
             return battery;
         }
 
@@ -49,7 +54,7 @@ namespace MagicPodsCore{
         unsigned char batteryL = data.Payload[2];
         unsigned char batteryR = data.Payload[3];
 
-        unsigned char batteryC = 255; //Custom state. Case is not available. 225 = -1
+        unsigned char batteryC = 255; // Custom state. Case is not available. 225 = -1
         unsigned char chargingStatus = 0;
 
         if (model == GalaxyBudsModelIds::GalaxyBudsPlus)
@@ -111,19 +116,21 @@ namespace MagicPodsCore{
     {
         std::vector<DeviceBatteryData> battery;
 
-        if (data.Id != GalaxyBudsMsgIds::STATUS_UPDATED){
+        if (data.Id != GalaxyBudsMsgIds::STATUS_UPDATED)
+        {
             return battery;
         }
 
-        if (data.Payload.size() <= 3){
+        if (data.Payload.size() <= 3)
+        {
             return battery;
         }
 
         unsigned char batteryL = data.Payload[1];
         unsigned char batteryR = data.Payload[2];
 
-        unsigned char batteryC = 255; //Custom state. Case is not available. 225 = -1
-        unsigned char chargingStatus = 0; //Custom state. Default charging state is not charging
+        unsigned char batteryC = 255;     // Custom state. Case is not available. 225 = -1
+        unsigned char chargingStatus = 0; // Custom state. Default charging state is not charging
 
         if (model == GalaxyBudsModelIds::GalaxyBudsPlus)
         {
@@ -180,19 +187,22 @@ namespace MagicPodsCore{
         return battery;
     }
 
-    void GalaxyBudsBatteryWatcher::ProcessResponse(GalaxyBudsResponseData data){
+    void GalaxyBudsBatteryWatcher::ProcessResponse(GalaxyBudsResponseData data)
+    {
 
         if (data.Id == GalaxyBudsMsgIds::EXTENDED_STATUS_UPDATED)
         {
             std::vector<DeviceBatteryData> battery = Process_EXTENDED_STATUS_UPDATED(data);
-            if (battery.size() > 0){
+            if (battery.size() > 0)
+            {
                 _batteryChanged.FireEvent(battery);
             }
         }
         else if (data.Id == GalaxyBudsMsgIds::STATUS_UPDATED)
         {
             std::vector<DeviceBatteryData> battery = Process_STATUS_UPDATED(data);
-            if (battery.size() > 0){
+            if (battery.size() > 0)
+            {
                 _batteryChanged.FireEvent(battery);
             }
         }

@@ -14,7 +14,7 @@ namespace MagicPodsCore {
             case GalaxyBudsAnc::Off:
             case GalaxyBudsAnc::AmbientSound:
             case GalaxyBudsAnc::NoiseReduction:
-            case GalaxyBudsAnc::Adaptive:                
+            case GalaxyBudsAnc::Adaptive:
                 return true;
             default:
                 return false;
