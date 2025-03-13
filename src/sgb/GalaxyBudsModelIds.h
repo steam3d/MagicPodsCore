@@ -3,7 +3,7 @@
 namespace MagicPodsCore {
 
     enum class GalaxyBudsModelIds: unsigned char{
-        Unknown = 0,        
+        Unknown = 0,
         GalaxyBuds = 1,
         GalaxyBudsPlus = 2,
         GalaxyBudsLive = 3,

@@ -16,7 +16,7 @@ namespace MagicPodsCore {
             case GalaxyBudsMsgIds::STATUS_UPDATED:
             case GalaxyBudsMsgIds::EXTENDED_STATUS_UPDATED:
             case GalaxyBudsMsgIds::NOISE_CONTROLS_UPDATE:
-            case GalaxyBudsMsgIds::NOISE_CONTROLS:            
+            case GalaxyBudsMsgIds::NOISE_CONTROLS:
                 return true;
             default:
                 return false;

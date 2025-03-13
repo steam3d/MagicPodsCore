@@ -55,7 +55,7 @@ namespace MagicPodsCore{
         for (uint16_t i = 0; i < payloadSize; i++){
             crcData.push_back(buffer[4+i]);
         }
-        
+
         //Swap crc1 and crc2
         crcData.push_back(buffer[3 + payloadSize + 2]);
         crcData.push_back(buffer[3 + payloadSize + 1]);
@@ -114,11 +114,11 @@ namespace MagicPodsCore{
 
         writer.push_back(static_cast<unsigned char>(id));
         writer.insert(writer.end(), std::begin(payload), std::end(payload));
-        
+
         std::vector<unsigned char> crc = Crc16::Checksum(id, payload);
         writer.insert(writer.end(), std::begin(crc), std::end(crc));
         writer.push_back(endOfMessage);
-        
+
         return writer;
     }
 }

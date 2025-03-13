@@ -19,7 +19,7 @@ namespace MagicPodsCore
             inline static const std::string GALAXYBUDSLEGASY      = "00001102-0000-1000-8000-00805f9b34fd";
             inline static const std::string LEAUDIO               = "0000184e-0000-1000-8000-00805f9b34fb";
             inline static const std::string HANDSFREESERVICECLASS = "0000111e-0000-1000-8000-00805f9b34fb";
-            inline static const std::string deviceIdPrefix        = "d908aab5-7a90-4cbe-8641-86a553db";            
+            inline static const std::string deviceIdPrefix        = "d908aab5-7a90-4cbe-8641-86a553db";
         private:
             GalaxyBudsModelIds GetModelFromColoredModel(GalaxyBudsColoredModelIds coloredModel);
             GalaxyBudsModelIds GetModelFromName(std::string name);

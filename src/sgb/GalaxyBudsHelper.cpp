@@ -81,14 +81,14 @@ namespace MagicPodsCore{
             return GalaxyBudsModelIds::Unknown;
         }
     }
-    
+
     GalaxyBudsModelIds GalaxyBudsHelper::GetModelFromName(std::string name)
     {
         if (name.empty())
             return GalaxyBudsModelIds::Unknown;
-        
+
         std::string _name = StringUtils::ToLowerCase(name);
-        
+
         if (_name.find("galaxy buds (") != std::string::npos)
         {
             return GalaxyBudsModelIds::GalaxyBuds;
@@ -172,7 +172,7 @@ namespace MagicPodsCore{
                 }
             }
             };
-            
+
         return { this->GetModelFromName(name), ""};
     }
 
@@ -187,19 +187,19 @@ namespace MagicPodsCore{
             return std::string(GALAXYBUDS);
         }
         else if (model == GalaxyBudsModelIds::GalaxyBudsPro) {
-            return std::string(GALAXYBUDS);            
+            return std::string(GALAXYBUDS);
         }
         else if (model == GalaxyBudsModelIds::GalaxyBuds2) {
-            return std::string(GALAXYBUDSNEW);            
+            return std::string(GALAXYBUDSNEW);
         }
         else if (model == GalaxyBudsModelIds::GalaxyBuds2Pro) {
-            return std::string(GALAXYBUDSNEW);               
+            return std::string(GALAXYBUDSNEW);
         }
         else if (model == GalaxyBudsModelIds::GalaxyBuds3) {
-            return std::string(GALAXYBUDSNEW);               
+            return std::string(GALAXYBUDSNEW);
         }
         else if (model == GalaxyBudsModelIds::GalaxyBuds3Pro) {
-            return std::string(GALAXYBUDSNEW);               
+            return std::string(GALAXYBUDSNEW);
         }
         else {
             return "";

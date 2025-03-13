@@ -90,7 +90,7 @@ namespace MagicPodsCore
         }
     }
 
-    static bool IsSupport(GalaxyBudsModelIds model)
+    bool GalaxyBudsAncWatcher::IsSupport(GalaxyBudsModelIds model)
     {
         return (model == GalaxyBudsModelIds::GalaxyBudsLive ||
                 model == GalaxyBudsModelIds::GalaxyBudsPro ||
@@ -101,7 +101,7 @@ namespace MagicPodsCore
                 model == GalaxyBudsModelIds::GalaxyBuds3Pro);
     }
 
-    static std::vector<GalaxyBudsAnc> GetAncModesFor(GalaxyBudsModelIds model)
+    std::vector<GalaxyBudsAnc> GalaxyBudsAncWatcher::GetAncModesFor(GalaxyBudsModelIds model)
     {
         if (model == GalaxyBudsModelIds::GalaxyBudsLive ||
             model == GalaxyBudsModelIds::GalaxyBuds3)

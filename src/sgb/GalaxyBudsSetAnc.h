@@ -11,5 +11,5 @@ namespace MagicPodsCore{
             const std::vector<unsigned char>Payload;
             const GalaxyBudsMsgIds Id = GalaxyBudsMsgIds::NOISE_CONTROLS;
             explicit GalaxyBudsSetAnc(GalaxyBudsAnc mode): Payload{static_cast<unsigned char>(mode)} {}
-    };    
+    };
 }

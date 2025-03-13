@@ -61,7 +61,7 @@ namespace MagicPodsCore {
         //Buds3
         GalaxyBuds3Silver = 333,
         GalaxyBuds3White = 334,
-        
+
         //Buds3Pro
         GalaxyBuds3ProSilver = 340,
         GalaxyBuds3ProWhite = 341
@@ -70,7 +70,7 @@ namespace MagicPodsCore {
     inline constexpr static std::array<int16_t, 41> GalaxyBudsModelIdsArray = {
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsUnknown),
-    
+
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusBlue),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusPink),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusBlack),
@@ -80,7 +80,7 @@ namespace MagicPodsCore {
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusDeepBlue),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusOlympic),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusPurple),
-    
+
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveBlack),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveWhite),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveBronze),
@@ -88,12 +88,12 @@ namespace MagicPodsCore {
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveBlue),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveThomBrown),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveGrey),
-    
+
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsProBlack),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsProSilver),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsProViolet),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsProWhite),
-    
+
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2White),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Black),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Yellow),
@@ -104,17 +104,17 @@ namespace MagicPodsCore {
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2AbsoluteBlack),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Grey),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Unknown),
-    
+
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2ProGrey),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2ProWhite),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2ProViolet),
-    
+
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsFeGraphite),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsFeWhite),
-    
+
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3Silver),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3White),
-    
+
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3ProSilver),
         static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3ProWhite)
     };

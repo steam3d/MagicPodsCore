@@ -1,15 +1,14 @@
 #include "GalaxyBudsBatteryWatcher.h"
 
-
 namespace MagicPodsCore{
 
     bool GalaxyBudsBatteryWatcher::IsCaseBatterySupport(GalaxyBudsModelIds model)
     {
         return !(model == GalaxyBudsModelIds::GalaxyBuds || model == GalaxyBudsModelIds::Unknown);
     }
-    
-    void GalaxyBudsBatteryWatcher::ConvertBattery(std::vector<DeviceBatteryData>& battery, unsigned char l, unsigned char r, unsigned char c, unsigned char charging){           
-        
+
+    void GalaxyBudsBatteryWatcher::ConvertBattery(std::vector<DeviceBatteryData>& battery, unsigned char l, unsigned char r, unsigned char c, unsigned char charging){
+
         DeviceBatteryData left;
         left.Type = DeviceBatteryType::Left;
         left.Battery = static_cast<short>(l);
@@ -32,18 +31,18 @@ namespace MagicPodsCore{
             _case.IsCharging = (charging & 0b00000001) != 0;
             _case.Status = c == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
             battery.push_back(_case);
-        }        
+        }
     }
-    
+
     std::vector<DeviceBatteryData> GalaxyBudsBatteryWatcher::Process_EXTENDED_STATUS_UPDATED(GalaxyBudsResponseData data){
-        
+
         std::vector<DeviceBatteryData> battery;
         if (data.Id != GalaxyBudsMsgIds::EXTENDED_STATUS_UPDATED){
             return battery;
         };
-        
+
         if (data.Payload.size() <= 3){
-            return battery;        
+            return battery;
         }
 
         unsigned char revision = data.Payload[0];
@@ -104,11 +103,11 @@ namespace MagicPodsCore{
                 chargingStatus = data.Payload[42];
         }
 
-        ConvertBattery(battery, batteryL, batteryR, batteryC, chargingStatus);       
+        ConvertBattery(battery, batteryL, batteryR, batteryC, chargingStatus);
         return battery;
     }
 
-    std::vector<DeviceBatteryData> GalaxyBudsBatteryWatcher::Process_STATUS_UPDATED(GalaxyBudsResponseData data)    
+    std::vector<DeviceBatteryData> GalaxyBudsBatteryWatcher::Process_STATUS_UPDATED(GalaxyBudsResponseData data)
     {
         std::vector<DeviceBatteryData> battery;
 
@@ -177,7 +176,7 @@ namespace MagicPodsCore{
                 chargingStatus = data.Payload[7];
         }
 
-        ConvertBattery(battery, batteryL, batteryR, batteryC, chargingStatus);       
+        ConvertBattery(battery, batteryL, batteryR, batteryC, chargingStatus);
         return battery;
     }
 

@@ -24,10 +24,10 @@ namespace MagicPodsCore{
             }
 
             explicit GalaxyBudsAncWatcher(GalaxyBudsModelIds model): model(model) {}
-            
+
             void ProcessResponse(GalaxyBudsResponseData data);
             static bool IsSupport(GalaxyBudsModelIds model);
-            static std::vector<GalaxyBudsAnc> GetAncModesFor(GalaxyBudsModelIds model);                      
+            static std::vector<GalaxyBudsAnc> GetAncModesFor(GalaxyBudsModelIds model);
     };
 
 }
