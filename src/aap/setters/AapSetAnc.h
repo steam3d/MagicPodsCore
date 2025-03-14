@@ -2,6 +2,7 @@
 
 #include "../enums/AapAncMode.h"
 #include "../enums/AapCmd.h"
+#include "../enums/AapCmdSettings.h"
 #include "AapRequest.h"
 
 namespace MagicPodsCore

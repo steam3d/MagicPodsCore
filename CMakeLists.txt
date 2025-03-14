@@ -12,10 +12,16 @@ add_executable(MagicPodsCore
     src/main.cpp
     src/DevicesInfoFetcher.cpp
     src/Device.cpp
-    src/DeviceBattery.cpp
-    src/DeviceAnc.cpp
-    src/aap/Aap.cpp
+    src/device/DeviceBattery.cpp
+    src/DeviceAnc.cpp    
     src/aap/AapClient.cpp
+    src/aap/setters/AapEnableNotifications.cpp
+    src/aap/setters/AapInit.cpp
+    src/aap/setters/AapRequest.cpp
+    src/aap/setters/AapSetAnc.cpp
+    src/aap/watchers/AapAncWatcher.cpp
+    src/aap/watchers/AapBatteryWatcher.cpp
+    src/aap/watchers/AapWatcher.cpp
 )
 add_subdirectory(dependencies)
 target_include_directories(MagicPodsCore PRIVATE src dependencies/json ${PROJECT_BINARY_DIR}/src)

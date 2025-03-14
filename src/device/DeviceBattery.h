@@ -2,10 +2,9 @@
 
 #include "../Event.h"
 #include "../Logger.h"
-#include "../enums/DeviceBatteryStatus.h"
-#include "../enums/DeviceBatteryType.h"
-#include "../structs/DeviceBatteryData.h"
-#include "aap/AapClient.h"
+#include "enums/DeviceBatteryStatus.h"
+#include "enums/DeviceBatteryType.h"
+#include "structs/DeviceBatteryData.h"
 
 namespace MagicPodsCore
 {

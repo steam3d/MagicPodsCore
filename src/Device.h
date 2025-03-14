@@ -3,9 +3,13 @@
 #include <sdbus-c++/sdbus-c++.h>
 
 #include "Event.h"
+#include "device/structs/DeviceBatteryData.h"
+#include "device/enums/DeviceBatteryType.h"
+#include "aap/setters/AapSetAnc.h"
 #include "aap/AapClient.h"
-#include "DeviceBattery.h"
+#include "device/DeviceBattery.h"
 #include "DeviceAnc.h"
+#include <vector>
 
 namespace MagicPodsCore {
 
@@ -50,7 +54,7 @@ namespace MagicPodsCore {
             return _modalias;
         }
 
-        std::map<DeviceBatteryType, DeviceBatteryData> GetBatteryStatus() const { // лучше сразу прокидывать Battery
+        std::vector<DeviceBatteryData> GetBatteryStatus() const { // лучше сразу прокидывать Battery
             std::lock_guard lock{_propertyMutex};
             return _battery.GetBatteryStatus();
         }
@@ -83,7 +87,7 @@ namespace MagicPodsCore {
         void SetAnc(DeviceAncMode mode);
 
     private:
-        void OnBatteryEvent(const std::map<BatteryType, BatteryWatcherData>& data);
+        void OnBatteryEvent(const std::vector<DeviceBatteryData>& data);
         void OnAncEvent(const AncWatcherData& data);
     };
 

@@ -6,7 +6,7 @@ namespace MagicPodsCore
     {
     }
 
-    void ConvertBattery(std::vector<DeviceBatteryData> &batteryData, AapBatteryType type, AapChargingStatus status, unsigned char battery)
+    void AapBatteryWatcher::ConvertBattery(std::vector<DeviceBatteryData> &batteryData, AapBatteryType type, AapChargingStatus status, unsigned char battery)
     {        
         DeviceBatteryType dtype;
         switch (type)

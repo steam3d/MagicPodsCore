@@ -8,7 +8,7 @@ namespace MagicPodsCore {
         _mode = DeviceAncMode::NotAvailable;
     }
 
-    void DeviceAnc::UpdateFromAppleAnc(AncMode aapMode){
+    void DeviceAnc::UpdateFromAppleAnc(AapAncMode aapMode){
         DeviceAncMode mode = DeviceAnc::AncModeToDeviceAncMode(aapMode);
         LOG_RELEASE("Trying update anc mode %u -> %u", static_cast<unsigned char>(_mode), static_cast<unsigned char>(mode));
         if (mode != _mode){
@@ -18,17 +18,17 @@ namespace MagicPodsCore {
         }
     }
 
-    DeviceAncMode DeviceAnc::AncModeToDeviceAncMode(AncMode aapMode){
+    DeviceAncMode DeviceAnc::AncModeToDeviceAncMode(AapAncMode aapMode){
         DeviceAncMode mode;
         switch (aapMode)
         {
-            case AncMode::Off:
+            case AapAncMode::Off:
                 mode = DeviceAncMode::Off;
                 break;        
-            case AncMode::Tra:
+            case AapAncMode::Tra:
                 mode = DeviceAncMode::Tra;
                 break;    
-            case AncMode::On:
+            case AapAncMode::On:
                 mode = DeviceAncMode::On;
                 break;    
             default:
@@ -39,21 +39,21 @@ namespace MagicPodsCore {
         return mode;
     }
 
-    AncMode DeviceAnc::DeviceAncModeAncModeTo(DeviceAncMode mode){
-        AncMode aapMode;
+    AapAncMode DeviceAnc::DeviceAncModeAncModeTo(DeviceAncMode mode){
+        AapAncMode aapMode;
         switch (mode)
         {
             case DeviceAncMode::Off:
-                aapMode = AncMode::Off;
+                aapMode = AapAncMode::Off;
                 break;        
             case DeviceAncMode::Tra:
-                aapMode = AncMode::Tra;
+                aapMode = AapAncMode::Tra;
                 break;    
             case DeviceAncMode::On:
-                aapMode = AncMode::On;
+                aapMode = AapAncMode::On;
                 break;    
             default:
-                aapMode = AncMode::Off;
+                aapMode = AapAncMode::Off;
                 break;
         }
         

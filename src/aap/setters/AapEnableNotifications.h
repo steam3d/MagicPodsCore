@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../enums/AapCmd.h"
+#include "../enums/AapNotificationsMode.h"
 #include "AapRequest.h"
-#include "AapNotificationsMode.h"
 
 namespace MagicPodsCore
 {

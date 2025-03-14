@@ -8,7 +8,7 @@
 
 #include "AapClient.h"
 
-#include "Logger.h"
+#include "../Logger.h"
 
 #include <thread>
 #include <sys/ioctl.h>
@@ -52,7 +52,7 @@ namespace MagicPodsCore {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(_socket, buffer, sizeof(buffer), 0);
                 if (receivedBytesLength >= 0) {
-                    LOG_DEBUG("o(%zu):%s", receivedBytesLength, bytesToHexString(buffer, receivedBytesLength).c_str()); // deprecated bytesToHexString use StringUtils::BytesToHexString
+                    LOG_DEBUG("o(%zu):%s", receivedBytesLength, StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str()); // deprecated bytesToHexString use StringUtils::BytesToHexString
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
                     
                     BatteryWatcher->ProcessBytes(vectorBuffer);
@@ -73,7 +73,7 @@ namespace MagicPodsCore {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         SendRequest(AapInit{});
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        SendRequest(AapEnableNotifications{NotificationsMode::Unknown1});
+        SendRequest(AapEnableNotifications{AapNotificationsMode::Unknown1});
     }
 
     void AapClient::Stop() {
@@ -91,7 +91,7 @@ namespace MagicPodsCore {
     void AapClient::SendRequest(const AapRequest& aapRequest) {
         auto requestData = aapRequest.Request();
         ssize_t sendedBytesLength = send(_socket, requestData.data(), requestData.size(), 0);
-        LOG_DEBUG("i(%zu):%s", requestData.size(), bytesToHexString(requestData.data(), requestData.size()).c_str());
+        LOG_DEBUG("i(%zu):%s", requestData.size(), StringUtils::BytesToHexString(requestData.data(), requestData.size()).c_str());
     }
 
 }

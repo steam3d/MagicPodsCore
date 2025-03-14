@@ -1,4 +1,4 @@
-#include "AapEnableNotifications.h";
+#include "AapEnableNotifications.h"
 
 namespace MagicPodsCore
 {

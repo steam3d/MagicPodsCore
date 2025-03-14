@@ -1,14 +1,15 @@
 #include <iostream>
-#include <App.h>
 #include <json.hpp>
+#include <App.h>
 
 #include "DevicesInfoFetcher.h"
-#include "aap/Aap.h"
 #include "aap/AapClient.h"
-#include "DeviceBattery.h"
+#include "device/DeviceBattery.h"
 #include "DeviceAnc.h"
 #include "Logger.h"
 #include "Config.h"
+
+
 
 using namespace MagicPodsCore;
 
@@ -40,14 +41,14 @@ nlohmann::json MakeGetDeckyInfoResponse(DevicesInfoFetcher& devicesInfoFetcher) 
         jsonObject["connected"] = activeDevice->GetConnected();
 
         auto jsonBatteryObject = nlohmann::json::object();
-        for (const auto& [batteryType, batteryData] : activeDevice->GetBatteryStatus()) {
+        for (const auto& batteryData : activeDevice->GetBatteryStatus()) {
             
             auto jsonBatteryData = nlohmann::json::object();
             jsonBatteryData["battery"] = batteryData.Battery;
-            jsonBatteryData["charging"] = batteryData.isCharging;
+            jsonBatteryData["charging"] = batteryData.IsCharging;
             jsonBatteryData["status"] = batteryData.Status;
             
-            switch (batteryType) {
+            switch (batteryData.Type) {
                 case DeviceBatteryType::Single:
                     jsonBatteryObject["single"] = jsonBatteryData;                
                     break;
@@ -235,7 +236,7 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
 }
 
 void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    auto onBatteryChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, std::map<DeviceBatteryType, DeviceBatteryData> newValues) {
+    auto onBatteryChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, std::vector<DeviceBatteryData> newValues) {
         if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
             LOG_RELEASE("OnBatteryChanged Broadcast was triggered");
             app.getLoop()->defer([&app, &devicesInfoFetcher](){

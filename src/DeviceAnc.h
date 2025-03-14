@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Event.h"
+#include "aap/enums/AapAncMode.h"
 #include "aap/AapClient.h"
 
 namespace MagicPodsCore {
@@ -27,13 +28,13 @@ namespace MagicPodsCore {
             return _mode;
         }
 
-        void UpdateFromAppleAnc(AncMode aapMode);
+        void UpdateFromAppleAnc(AapAncMode aapMode);
 
         void ClearAnc();
 
-        AncMode DeviceAncModeAncModeTo(DeviceAncMode mode);
+        AapAncMode DeviceAncModeAncModeTo(DeviceAncMode mode);
 
     private:
-        DeviceAncMode AncModeToDeviceAncMode(AncMode aapMode);
+        DeviceAncMode AncModeToDeviceAncMode(AapAncMode aapMode);
     };
 }

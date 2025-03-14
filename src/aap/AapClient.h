@@ -8,8 +8,11 @@
 
 #pragma once
 
-#include "Aap.h"
-
+#include "setters/AapRequest.h"
+#include "setters/AapInit.h"
+#include "setters/AapEnableNotifications.h"
+#include "watchers/AapAncWatcher.h"
+#include "watchers/AapBatteryWatcher.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -23,6 +26,8 @@
 #include <thread>
 #include <array>
 #include <memory>
+#include <mutex>
+#include "../StringUtils.h"
 
 namespace MagicPodsCore {
 
@@ -47,7 +52,7 @@ namespace MagicPodsCore {
             return _isStarted;
         }
 
-        Event<std::map<BatteryType, BatteryWatcherData>>& GetBatteryEvent() {
+        Event<std::vector<DeviceBatteryData>>& GetBatteryEvent() {
             return BatteryWatcher->GetEvent();
         }
 
@@ -68,19 +73,6 @@ namespace MagicPodsCore {
             }
 
             return bytes;
-        }
-
-        inline static const char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
-        std::string bytesToHexString(unsigned char *data, int len)
-        {
-            std::string s(len * 2, ' ');
-            for (int i = 0; i < len; ++i) {
-                s[2 * i] = hexmap[(data[i] & 0xF0) >> 4];
-                s[2 * i + 1] = hexmap[data[i] & 0x0F];
-            }
-            return s;
         }
     };
 
