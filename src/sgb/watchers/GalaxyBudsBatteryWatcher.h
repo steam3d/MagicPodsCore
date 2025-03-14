@@ -1,43 +1,16 @@
 #pragma once
+
 #include "../../Event.h"
 #include "../enums/GalaxyBudsModelIds.h"
 #include "../enums/GalaxyBudsMsgIds.h"
 #include "../structs/GalaxyBudsResponseData.h"
+#include "../../device/enums/DeviceBatteryType.h"
+#include "../../device/enums/DeviceBatteryStatus.h"
+#include "../../device/structs/DeviceBatteryData.h"
 #include "vector"
 
 namespace MagicPodsCore
 {
-    // DO NOT USE IT LIKE THIS. ONLY FOR TESTING.
-    // MUST BE REMOVED
-    enum class DeviceBatteryType : unsigned char
-    {
-        Single = 0x01,
-        Right = 0x02,
-        Left = 0x04,
-        Case = 0x08,
-    };
-
-    enum class DeviceBatteryStatus : unsigned char
-    {
-        // Hidden in UI
-        NotAvailable = 0x00,
-        // Opacity is zero in UI (usable for popup animation)
-        Disconnected = 0x01,
-        // Show in UI
-        Connected = 0x02,
-        // Showing battery last updated info even if battery already disconnected.
-        Cached = 0x03,
-    };
-
-    struct DeviceBatteryData
-    {
-        DeviceBatteryType Type{};
-        bool IsCharging{};
-        DeviceBatteryStatus Status{};
-        short Battery{};
-    };
-    //////////////////////////////////////////////////////////////////////////
-
     class GalaxyBudsBatteryWatcher
     {
     private:

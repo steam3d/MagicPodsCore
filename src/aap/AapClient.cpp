@@ -52,7 +52,7 @@ namespace MagicPodsCore {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(_socket, buffer, sizeof(buffer), 0);
                 if (receivedBytesLength >= 0) {
-                    LOG_DEBUG("o(%zu):%s", receivedBytesLength, bytesToHexString(buffer, receivedBytesLength).c_str());
+                    LOG_DEBUG("o(%zu):%s", receivedBytesLength, bytesToHexString(buffer, receivedBytesLength).c_str()); // deprecated bytesToHexString use StringUtils::BytesToHexString
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
                     
                     BatteryWatcher->ProcessBytes(vectorBuffer);

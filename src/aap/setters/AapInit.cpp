@@ -1,0 +1,13 @@
+#include "AapInit.h"
+
+namespace MagicPodsCore
+{
+    AapInit::AapInit() : AapRequest{"AapInit"}
+    {
+    }
+
+    std::vector<unsigned char> AapInit::Request() const
+    {
+        return std::vector<unsigned char>{0x00, 0x00, 0x04, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    }
+}

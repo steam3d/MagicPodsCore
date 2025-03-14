@@ -11,27 +11,27 @@ namespace MagicPodsCore
     void GalaxyBudsBatteryWatcher::ConvertBattery(std::vector<DeviceBatteryData> &battery, unsigned char l, unsigned char r, unsigned char c, unsigned char charging)
     {
 
-        DeviceBatteryData left;
-        left.Type = DeviceBatteryType::Left;
-        left.Battery = static_cast<short>(l);
-        left.IsCharging = (charging & 0b00010000) != 0;
-        left.Status = l == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
+        DeviceBatteryData left(
+            DeviceBatteryType::Left,
+            l == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected,
+            static_cast<short>(l),
+            (charging & 0b00010000) != 0);
         battery.push_back(left);
 
-        DeviceBatteryData right;
-        right.Type = DeviceBatteryType::Right;
-        right.Battery = static_cast<short>(r);
-        right.IsCharging = (charging & 0b00000100) != 0;
-        right.Status = r == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
+        DeviceBatteryData right(
+            DeviceBatteryType::Right,
+            r == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected,
+            static_cast<short>(r),
+            (charging & 0b00000100) != 0);
         battery.push_back(right);
 
         if (c != 255)
         {
-            DeviceBatteryData _case;
-            _case.Type = DeviceBatteryType::Case;
-            _case.Battery = static_cast<short>(c);
-            _case.IsCharging = (charging & 0b00000001) != 0;
-            _case.Status = c == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected;
+            DeviceBatteryData _case(
+                DeviceBatteryType::Case,
+                c == 0 ? DeviceBatteryStatus::Disconnected : DeviceBatteryStatus::Connected,
+                static_cast<short>(c),
+                (charging & 0b00000001) != 0);
             battery.push_back(_case);
         }
     }
