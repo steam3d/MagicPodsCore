@@ -25,10 +25,10 @@ namespace MagicPodsCore {
             case AapAncMode::Off:
                 mode = DeviceAncMode::Off;
                 break;        
-            case AapAncMode::Tra:
+            case AapAncMode::Transparency:
                 mode = DeviceAncMode::Tra;
                 break;    
-            case AapAncMode::On:
+            case AapAncMode::Anc:
                 mode = DeviceAncMode::On;
                 break;    
             default:
@@ -47,10 +47,10 @@ namespace MagicPodsCore {
                 aapMode = AapAncMode::Off;
                 break;        
             case DeviceAncMode::Tra:
-                aapMode = AapAncMode::Tra;
+                aapMode = AapAncMode::Transparency;
                 break;    
             case DeviceAncMode::On:
-                aapMode = AapAncMode::On;
+                aapMode = AapAncMode::Anc;
                 break;    
             default:
                 aapMode = AapAncMode::Off;

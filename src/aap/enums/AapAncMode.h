@@ -6,8 +6,9 @@ namespace MagicPodsCore
     enum class AapAncMode
     {
         Off = 0x01,
-        On = 0x02,
-        Tra = 0x03
+        Anc = 0x02,
+        Transparency = 0x03,
+        Adaptive = 0x04,
     };
 
 }

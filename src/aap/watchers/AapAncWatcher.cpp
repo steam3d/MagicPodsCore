@@ -33,11 +33,11 @@ namespace MagicPodsCore
     {
         switch (mode)
         {
-        case AapAncMode::On:
+        case AapAncMode::Anc:
             return "On";
         case AapAncMode::Off:
             return "Off";
-        case AapAncMode::Tra:
+        case AapAncMode::Transparency:
             return "Tra";
         default:
             return "Unknown";

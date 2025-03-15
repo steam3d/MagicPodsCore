@@ -1,7 +1,7 @@
 #include "DevicesInfoFetcher.h"
 
 #include "BtVendorIds.h"
-#include "AppleProductIds.h"
+#include "aap/enums/AapModelIds.h"
 #include "StringUtils.h"
 #include "Logger.h"
 
@@ -139,7 +139,7 @@ namespace MagicPodsCore {
 
     std::shared_ptr<Device> DevicesInfoFetcher::TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) {
         const static auto checkModalias = [](const std::string& modalias) -> bool {
-            for (auto& appleProductId : AllAppleProductIds) {
+            for (auto& appleProductId : AllAapModelsIds) {
                 std::string upperCaseActualModalias = modalias;
                 std::transform(upperCaseActualModalias.begin(), upperCaseActualModalias.end(), upperCaseActualModalias.begin(), [](unsigned char c){ return std::toupper(c); });
                 std::string upperCaseTargetModalias = StringUtils::Format("v%04Xp%04X", static_cast<unsigned short>(BtVendorIds::Apple), static_cast<unsigned short>(appleProductId));

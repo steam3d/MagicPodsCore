@@ -3,6 +3,8 @@
 #include "../enums/AapAncMode.h"
 #include "../enums/AapCmd.h"
 #include "../enums/AapCmdSettings.h"
+#include "../enums/AapModelIds.h"
+#include "AapInitExt.h"
 #include "AapRequest.h"
 
 namespace MagicPodsCore
@@ -32,5 +34,6 @@ namespace MagicPodsCore
     public:
         AapSetAnc(AapAncMode mode);
         std::vector<unsigned char> Request() const override;
+        static std::vector<AapAncMode> GetAncModes(unsigned short model);
     };
 }
