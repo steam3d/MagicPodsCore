@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <iomanip>
 #include <vector>
+#include <cstdint>
 
 namespace MagicPodsCore {
 
@@ -74,33 +75,33 @@ namespace MagicPodsCore {
             int byte_index = 0;
             for (int i = 0; uuid_str[i] != '\0'; i++) {
                 if (uuid_str[i] == '-') continue;  // Пропускаем дефисы
-        
+
                 // Преобразуем два символа (hex) в байт
                 unsigned int byte;
                 std::sscanf(&uuid_str[i], "%2x", &byte);
                 uuid_bytes[byte_index++] = (uint8_t)byte;
-        
+
                 // Переходим на два символа вперед
                 i++;
             }
         }
-        
+
         // void print_uuid_bytes(const uint8_t *uuid_bytes) {
         //     for (int i = 0; i < 16; i++) {
         //         std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)uuid_bytes[i] << " ";
         //     }
         //     std::cout << std::dec << std::endl;
         // }
-        
+
         // int main() {
         //     const char *uuid_str = "d8308c4e-9469-4051-8adc-7a2663e415e2";
         //     uint8_t uuid_bytes[16] = {0};
-        
+
         //     uuid_string_to_bytes(uuid_str, uuid_bytes);
-            
+
         //     std::cout << "UUID в байтах: ";
         //     print_uuid_bytes(uuid_bytes);
-        
+
         //     return 0;
         // }
     };
