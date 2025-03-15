@@ -1,8 +1,10 @@
 #pragma once
 
-namespace MagicPodsCore {
+namespace MagicPodsCore
+{
 
-    enum class GalaxyBudsModelIds: unsigned char{
+    enum class GalaxyBudsModelIds : unsigned short
+    {
         Unknown = 0,
         GalaxyBuds = 1,
         GalaxyBudsPlus = 2,

@@ -131,11 +131,36 @@ namespace MagicPodsCore
         }
     }
 
+    bool GalaxyBudsHelper::IsGalaxyBudsDevice(const std::vector<std::string> &guids)
+    {
+        std::vector<std::string> _guids;
+        _guids.reserve(guids.size());
+        std::transform(guids.begin(), guids.end(), std::back_inserter(_guids), [](const std::string &guid)
+                       { return StringUtils::ToLowerCase(guid); });
+
+        if (std::find(_guids.begin(), _guids.end(), GALAXYBUDSNEW) != _guids.end())
+        {
+            return true;
+        }
+        else if (std::find(_guids.begin(), _guids.end(), GALAXYBUDS) != _guids.end())
+        {
+            return true;
+        }
+        else if (std::find(_guids.begin(), _guids.end(), GALAXYBUDSLEGASY) != _guids.end())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     std::pair<GalaxyBudsModelIds, std::string> GalaxyBudsHelper::SearchModelColor(const std::vector<std::string> &guids, std::string name)
     {
         std::vector<std::string> _guids;
         _guids.reserve(guids.size());
-        std::transform(guids.begin(), guids.end(), std::back_inserter(_guids), [this](const std::string &guid)
+        std::transform(guids.begin(), guids.end(), std::back_inserter(_guids), [](const std::string &guid)
                        { return StringUtils::ToLowerCase(guid); });
 
         if (std::find(_guids.begin(), _guids.end(), GALAXYBUDSNEW) != _guids.end())
@@ -159,7 +184,7 @@ namespace MagicPodsCore
                     if (!ss.fail() && std::find(GalaxyBudsModelIdsArray.begin(), GalaxyBudsModelIdsArray.end(), id) != GalaxyBudsModelIdsArray.end())
                     {
                         GalaxyBudsColoredModelIds coloredModel = static_cast<GalaxyBudsColoredModelIds>(id);
-                        GalaxyBudsModelIds model = this->GetModelFromColoredModel(coloredModel);
+                        GalaxyBudsModelIds model = GalaxyBudsHelper::GetModelFromColoredModel(coloredModel);
                         return {model, hexId};
                     }
                 }
@@ -178,7 +203,7 @@ namespace MagicPodsCore
             }
         };
 
-        return {this->GetModelFromName(name), ""};
+        return {GalaxyBudsHelper::GetModelFromName(name), ""};
     }
 
     std::string GalaxyBudsHelper::GetServiceGuid(GalaxyBudsModelIds model)

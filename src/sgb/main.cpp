@@ -46,7 +46,7 @@ bool TestFindByGuid1()
         std::string(GalaxyBudsHelper::GALAXYBUDSNEW),
     };
     GalaxyBudsHelper helper;
-    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = helper.SearchModelColor(guids, "");
+    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "");
 
     return pairModelColor.first == GalaxyBudsModelIds::GalaxyBuds2Pro &&
            pairModelColor.second == StringUtils::int16ToHex(static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2ProWhite));
@@ -59,7 +59,7 @@ bool TestFindByGuid2()
         std::string(GalaxyBudsHelper::GALAXYBUDSNEW),
     };
     GalaxyBudsHelper helper;
-    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = helper.SearchModelColor(guids, "");
+    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "");
 
     return pairModelColor.first == GalaxyBudsModelIds::GalaxyBuds3Pro &&
            pairModelColor.second == StringUtils::int16ToHex(static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3ProSilver));
@@ -73,8 +73,7 @@ bool TestFindByGuid3()
         std::string(GalaxyBudsHelper::HANDSFREESERVICECLASS),
         std::string(GalaxyBudsHelper::LEAUDIO),
     };
-    GalaxyBudsHelper helper;
-    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = helper.SearchModelColor(guids, "");
+    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "");
 
     return pairModelColor.first == GalaxyBudsModelIds::GalaxyBuds2Pro &&
            pairModelColor.second == "";
@@ -86,8 +85,7 @@ bool TestFindByGuid4()
         "d908aab5-7a90-4cbe-8641-86a553db-X",
         std::string(GalaxyBudsHelper::GALAXYBUDSNEW),
     };
-    GalaxyBudsHelper helper;
-    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = helper.SearchModelColor(guids, "");
+    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "");
 
     return pairModelColor.first == GalaxyBudsModelIds::GalaxyBuds2 &&
            pairModelColor.second == "";
@@ -96,8 +94,7 @@ bool TestFindByGuid4()
 bool TestFindByName1()
 {
     std::vector<std::string> guids = {};
-    GalaxyBudsHelper helper;
-    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = helper.SearchModelColor(guids, "Samsung Galaxy Buds+ (user)");
+    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Samsung Galaxy Buds+ (user)");
 
     return pairModelColor.first == GalaxyBudsModelIds::GalaxyBudsPlus &&
            pairModelColor.second == "";
@@ -106,8 +103,7 @@ bool TestFindByName1()
 bool TestFindByName2()
 {
     std::vector<std::string> guids = {};
-    GalaxyBudsHelper helper;
-    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = helper.SearchModelColor(guids, "Galaxy Buds2 (user)");
+    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Galaxy Buds2 (user)");
 
     return pairModelColor.first == GalaxyBudsModelIds::GalaxyBuds2 &&
            pairModelColor.second == "";
@@ -116,8 +112,7 @@ bool TestFindByName2()
 bool TestFindByName3()
 {
     std::vector<std::string> guids = {};
-    GalaxyBudsHelper helper;
-    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = helper.SearchModelColor(guids, "Samsung Galaxy Buds2 Pro (user))");
+    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Samsung Galaxy Buds2 Pro (user))");
 
     return pairModelColor.first == GalaxyBudsModelIds::GalaxyBuds2Pro &&
            pairModelColor.second == "";
@@ -126,8 +121,7 @@ bool TestFindByName3()
 bool TestFindByName4()
 {
     std::vector<std::string> guids = {};
-    GalaxyBudsHelper helper;
-    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = helper.SearchModelColor(guids, "Galaxy Buds3 (user)");
+    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Galaxy Buds3 (user)");
 
     return pairModelColor.first == GalaxyBudsModelIds::GalaxyBuds3 &&
            pairModelColor.second == "";
@@ -136,8 +130,7 @@ bool TestFindByName4()
 bool TestFindByName5()
 {
     std::vector<std::string> guids = {};
-    GalaxyBudsHelper helper;
-    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = helper.SearchModelColor(guids, "Samsung Galaxy Buds3 Pro (user)");
+    std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Samsung Galaxy Buds3 Pro (user)");
 
     return pairModelColor.first == GalaxyBudsModelIds::GalaxyBuds3Pro &&
            pairModelColor.second == "";
