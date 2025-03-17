@@ -36,7 +36,7 @@ namespace MagicPodsCore
         }
     }
 
-    std::vector<DeviceBatteryData> GalaxyBudsBatteryWatcher::Process_EXTENDED_STATUS_UPDATED(GalaxyBudsResponseData data)
+    std::vector<DeviceBatteryData> GalaxyBudsBatteryWatcher::Process_EXTENDED_STATUS_UPDATED(const GalaxyBudsResponseData &data)
     {
 
         std::vector<DeviceBatteryData> battery;
@@ -112,7 +112,7 @@ namespace MagicPodsCore
         return battery;
     }
 
-    std::vector<DeviceBatteryData> GalaxyBudsBatteryWatcher::Process_STATUS_UPDATED(GalaxyBudsResponseData data)
+    std::vector<DeviceBatteryData> GalaxyBudsBatteryWatcher::Process_STATUS_UPDATED(const GalaxyBudsResponseData &data)
     {
         std::vector<DeviceBatteryData> battery;
 
@@ -187,7 +187,7 @@ namespace MagicPodsCore
         return battery;
     }
 
-    void GalaxyBudsBatteryWatcher::ProcessResponse(GalaxyBudsResponseData data)
+    void GalaxyBudsBatteryWatcher::ProcessResponse(const GalaxyBudsResponseData &data)
     {
 
         if (data.Id == GalaxyBudsMsgIds::EXTENDED_STATUS_UPDATED)

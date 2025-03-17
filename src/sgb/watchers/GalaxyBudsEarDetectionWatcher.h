@@ -20,8 +20,8 @@ namespace MagicPodsCore
         GalaxyBudsModelIds model;
         Event<GalaxyBudsEarDetectionStateArgs> _earDetectionStateChanged{};
         std::optional<GalaxyBudsEarDetectionStateArgs> ExtractState(unsigned char b);
-        std::optional<GalaxyBudsEarDetectionStateArgs> Process_EXTENDED_STATUS_UPDATED(GalaxyBudsResponseData data);
-        std::optional<GalaxyBudsEarDetectionStateArgs> Process_STATUS_UPDATED(GalaxyBudsResponseData data);
+        std::optional<GalaxyBudsEarDetectionStateArgs> Process_EXTENDED_STATUS_UPDATED(const GalaxyBudsResponseData &data);
+        std::optional<GalaxyBudsEarDetectionStateArgs> Process_STATUS_UPDATED(const GalaxyBudsResponseData &data);
 
     public:
         Event<GalaxyBudsEarDetectionStateArgs> &GetEarDetectionStateChangedEvent()
@@ -31,6 +31,6 @@ namespace MagicPodsCore
 
         explicit GalaxyBudsEarDetectionWatcher(GalaxyBudsModelIds model) : model(model) {}
 
-        void ProcessResponse(GalaxyBudsResponseData data);
+        void ProcessResponse(const GalaxyBudsResponseData &data);
     };
 }

@@ -17,13 +17,13 @@ namespace MagicPodsCore
         GalaxyBudsModelIds model;
         Event<std::vector<DeviceBatteryData>> _batteryChanged{};
         void ConvertBattery(std::vector<DeviceBatteryData> &battery, unsigned char l, unsigned char r, unsigned char c, unsigned char charging);
-        std::vector<DeviceBatteryData> Process_EXTENDED_STATUS_UPDATED(GalaxyBudsResponseData data);
-        std::vector<DeviceBatteryData> Process_STATUS_UPDATED(GalaxyBudsResponseData data);
+        std::vector<DeviceBatteryData> Process_EXTENDED_STATUS_UPDATED(const GalaxyBudsResponseData &data);
+        std::vector<DeviceBatteryData> Process_STATUS_UPDATED(const GalaxyBudsResponseData &data);
 
     public:
         explicit GalaxyBudsBatteryWatcher(GalaxyBudsModelIds model) : model(model) {}
         bool IsCaseBatterySupport(GalaxyBudsModelIds model);
-        void ProcessResponse(GalaxyBudsResponseData data);
+        void ProcessResponse(const GalaxyBudsResponseData &data);
         Event<std::vector<DeviceBatteryData>> &GetBatteryChangedEvent()
         {
             return _batteryChanged;

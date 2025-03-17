@@ -57,7 +57,7 @@ namespace MagicPodsCore
         return std::nullopt;
     }
 
-    std::optional<GalaxyBudsEarDetectionStateArgs> GalaxyBudsEarDetectionWatcher::Process_EXTENDED_STATUS_UPDATED(GalaxyBudsResponseData data)
+    std::optional<GalaxyBudsEarDetectionStateArgs> GalaxyBudsEarDetectionWatcher::Process_EXTENDED_STATUS_UPDATED(const GalaxyBudsResponseData &data)
     {
         if (data.Id != GalaxyBudsMsgIds::EXTENDED_STATUS_UPDATED)
             return std::nullopt;
@@ -68,7 +68,7 @@ namespace MagicPodsCore
         return ExtractState(data.Payload[6]);
     }
 
-    std::optional<GalaxyBudsEarDetectionStateArgs> GalaxyBudsEarDetectionWatcher::Process_STATUS_UPDATED(GalaxyBudsResponseData data)
+    std::optional<GalaxyBudsEarDetectionStateArgs> GalaxyBudsEarDetectionWatcher::Process_STATUS_UPDATED(const GalaxyBudsResponseData &data)
     {
         if (data.Id != GalaxyBudsMsgIds::STATUS_UPDATED)
             return std::nullopt;
@@ -79,7 +79,7 @@ namespace MagicPodsCore
         return ExtractState(data.Payload[5]);
     }
 
-    void GalaxyBudsEarDetectionWatcher::ProcessResponse(GalaxyBudsResponseData data)
+    void GalaxyBudsEarDetectionWatcher::ProcessResponse(const GalaxyBudsResponseData &data)
     {
         if (data.Id == GalaxyBudsMsgIds::EXTENDED_STATUS_UPDATED)
         {

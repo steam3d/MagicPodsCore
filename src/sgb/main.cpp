@@ -197,13 +197,13 @@ bool TestAnc1()
 
     std::promise<GalaxyBudsAnc> ancPromise;
     std::future<GalaxyBudsAnc> ancFuture = ancPromise.get_future();
-    size_t listenerId = watcher.GetBatteryChangedEvent().Subscribe([&ancPromise](size_t, const GalaxyBudsAnc &ancData)
+    size_t listenerId = watcher.GetAncChangedEvent().Subscribe([&ancPromise](size_t, const GalaxyBudsAnc &ancData)
                                                                    { ancPromise.set_value(ancData); });
 
     watcher.ProcessResponse(data);
     GalaxyBudsAnc ancData = ancFuture.get();
 
-    watcher.GetBatteryChangedEvent().Unsubscribe(listenerId);
+    watcher.GetAncChangedEvent().Unsubscribe(listenerId);
 
     return ancData == GalaxyBudsAnc::AmbientSound;
 }
@@ -222,13 +222,13 @@ bool TestAnc2()
 
     std::promise<GalaxyBudsAnc> ancPromise;
     std::future<GalaxyBudsAnc> ancFuture = ancPromise.get_future();
-    size_t listenerId = watcher.GetBatteryChangedEvent().Subscribe([&ancPromise](size_t, const GalaxyBudsAnc &ancData)
+    size_t listenerId = watcher.GetAncChangedEvent().Subscribe([&ancPromise](size_t, const GalaxyBudsAnc &ancData)
                                                                    { ancPromise.set_value(ancData); });
 
     watcher.ProcessResponse(data);
     GalaxyBudsAnc ancData = ancFuture.get();
 
-    watcher.GetBatteryChangedEvent().Unsubscribe(listenerId);
+    watcher.GetAncChangedEvent().Unsubscribe(listenerId);
 
     return ancData == GalaxyBudsAnc::Off;
 }
@@ -247,13 +247,13 @@ bool TestAnc3()
 
     std::promise<GalaxyBudsAnc> ancPromise;
     std::future<GalaxyBudsAnc> ancFuture = ancPromise.get_future();
-    size_t listenerId = watcher.GetBatteryChangedEvent().Subscribe([&ancPromise](size_t, const GalaxyBudsAnc &ancData)
+    size_t listenerId = watcher.GetAncChangedEvent().Subscribe([&ancPromise](size_t, const GalaxyBudsAnc &ancData)
                                                                    { ancPromise.set_value(ancData); });
 
     watcher.ProcessResponse(data);
     GalaxyBudsAnc ancData = ancFuture.get();
 
-    watcher.GetBatteryChangedEvent().Unsubscribe(listenerId);
+    watcher.GetAncChangedEvent().Unsubscribe(listenerId);
 
     return ancData == GalaxyBudsAnc::Off;
 }
@@ -272,13 +272,13 @@ bool TestAnc4()
 
     std::promise<GalaxyBudsAnc> ancPromise;
     std::future<GalaxyBudsAnc> ancFuture = ancPromise.get_future();
-    size_t listenerId = watcher.GetBatteryChangedEvent().Subscribe([&ancPromise](size_t, const GalaxyBudsAnc &ancData)
+    size_t listenerId = watcher.GetAncChangedEvent().Subscribe([&ancPromise](size_t, const GalaxyBudsAnc &ancData)
                                                                    { ancPromise.set_value(ancData); });
 
     watcher.ProcessResponse(data);
     GalaxyBudsAnc ancData = ancFuture.get();
 
-    watcher.GetBatteryChangedEvent().Unsubscribe(listenerId);
+    watcher.GetAncChangedEvent().Unsubscribe(listenerId);
 
     return ancData == GalaxyBudsAnc::NoiseReduction;
 }
@@ -568,6 +568,12 @@ int main()
     Test("GalaxyBudsBatteryWatcher.TestBattery1", TestBattery1());
     Test("GalaxyBudsBatteryWatcher.TestBattery2", TestBattery2());
     Test("GalaxyBudsBatteryWatcher.TestBattery3", TestBattery3());
+
+    std::string modalias = "bluetooth:v004Cp200EdB087";
+    size_t vi = modalias.find("v");
+    size_t pi = modalias.find("p");
+    size_t di = modalias.find("d");
+
 
     return 0;
 }
