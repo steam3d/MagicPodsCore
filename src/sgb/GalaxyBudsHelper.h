@@ -16,6 +16,7 @@ namespace MagicPodsCore
     public:
         static bool IsGalaxyBudsDevice(const std::vector<std::string> &guids);
         static std::pair<GalaxyBudsModelIds, std::string> SearchModelColor(const std::vector<std::string> &guids, std::string name);
+        static std::string GetServiceGuid(GalaxyBudsModelIds model);
         inline static const std::string GALAXYBUDSNEW = "2e73a4ad-332d-41fc-90e2-16bef06523f2";
         inline static const std::string GALAXYBUDS = "00001101-0000-1000-8000-00805f9b34fb";
         inline static const std::string GALAXYBUDSLEGASY = "00001102-0000-1000-8000-00805f9b34fd";
@@ -26,6 +27,5 @@ namespace MagicPodsCore
     private:
         static GalaxyBudsModelIds GetModelFromColoredModel(GalaxyBudsColoredModelIds coloredModel);
         static GalaxyBudsModelIds GetModelFromName(std::string name);
-        static std::string GetServiceGuid(GalaxyBudsModelIds model);
     };
 }

@@ -4,7 +4,7 @@
 
 namespace MagicPodsCore {
 
-    enum class GalaxyBudsColoredModelIds: int16_t {
+    enum class GalaxyBudsColoredModelIds: unsigned short {
         Unknown = 0,
 
         //Buds
@@ -67,55 +67,55 @@ namespace MagicPodsCore {
         GalaxyBuds3ProWhite = 341
     };
 
-    inline constexpr static std::array<int16_t, 41> GalaxyBudsModelIdsArray = {
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsUnknown),
+    inline constexpr static std::array<unsigned short, 41> GalaxyBudsModelIdsArray = {
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsUnknown),
 
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusBlue),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusPink),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusBlack),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusWhite),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusThomBrown),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusRed),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusDeepBlue),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusOlympic),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsPlusPurple),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsPlusBlue),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsPlusPink),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsPlusBlack),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsPlusWhite),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsPlusThomBrown),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsPlusRed),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsPlusDeepBlue),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsPlusOlympic),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsPlusPurple),
 
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveBlack),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveWhite),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveBronze),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveRed),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveBlue),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveThomBrown),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsLiveGrey),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsLiveBlack),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsLiveWhite),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsLiveBronze),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsLiveRed),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsLiveBlue),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsLiveThomBrown),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsLiveGrey),
 
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsProBlack),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsProSilver),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsProViolet),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsProWhite),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsProBlack),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsProSilver),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsProViolet),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsProWhite),
 
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2White),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Black),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Yellow),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Green),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Violet),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2ThomBrown),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2MaisonKitsune),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2AbsoluteBlack),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Grey),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2Unknown),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2White),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2Black),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2Yellow),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2Green),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2Violet),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2ThomBrown),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2MaisonKitsune),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2AbsoluteBlack),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2Grey),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2Unknown),
 
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2ProGrey),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2ProWhite),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2ProViolet),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2ProGrey),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2ProWhite),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2ProViolet),
 
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsFeGraphite),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBudsFeWhite),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsFeGraphite),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsFeWhite),
 
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3Silver),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3White),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3Silver),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3White),
 
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3ProSilver),
-        static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3ProWhite)
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3ProSilver),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3ProWhite)
     };
 }

@@ -21,7 +21,7 @@ namespace MagicPodsCore
         std::optional<GalaxyBudsAnc> Process_UNIVERSAL_MSG_ID_ACKNOWLEDGEMENT(GalaxyBudsResponseData data);
 
     public:
-        Event<GalaxyBudsAnc> &GetBatteryChangedEvent()
+        Event<GalaxyBudsAnc> &GetAncChangedEvent()
         {
             return _ancChanged;
         }

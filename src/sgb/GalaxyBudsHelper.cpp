@@ -176,7 +176,7 @@ namespace MagicPodsCore
 
                 if (!hexId.empty() && hexId.length() == 4)
                 {
-                    int16_t id;
+                    unsigned short id;
                     std::stringstream ss;
                     ss << std::hex << hexId;
                     ss >> id;
