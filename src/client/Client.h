@@ -3,7 +3,7 @@
 // https://github.com/steam3d/MagicPodsCore
 //
 // Copyright: 2020-2024 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
-// License: AGPL-3.O 
+// License: AGPL-3.O
 //
 
 #pragma once
@@ -29,6 +29,7 @@
 #include <array>
 #include <memory>
 #include <optional>
+#include <mutex>
 
 namespace MagicPodsCore {
 
@@ -40,10 +41,10 @@ namespace MagicPodsCore {
 
         int _socket{};
         bool _isStarted{false};
-        
+
         std::mutex _startStopMutex{};
 
-        Event<std::vector<unsigned char>> _onReceviedDataEvent{};
+        Event<std::vector<unsigned char>> _onReceivedDataEvent{};
 
     public:
         void Start();
@@ -53,11 +54,11 @@ namespace MagicPodsCore {
             return _isStarted;
         }
 
-        Event<std::vector<unsigned char>>& GetOnReceviedDataEvent() {
-            return _onReceviedDataEvent;
+        Event<std::vector<unsigned char>>& GetOnReceivedDataEvent() {
+            return _onReceivedDataEvent;
         }
 
-        void SendRequest(const IRequest& request);    
+        void SendData(const std::vector<unsigned char>& data);
 
     private:
         inline bool ConnectToSocketL2CAP();
@@ -78,5 +79,5 @@ namespace MagicPodsCore {
     // rfcomm (address, uuid)
     // l2cap (addres, port)
     // Return uuid list ()
-    // Event 
+    // Event
 }

@@ -46,7 +46,7 @@ namespace MagicPodsCore {
                     LOG_DEBUG("o(%zu):%s", receivedBytesLength, StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
                     
-                    _onReceviedDataEvent.FireEvent(vectorBuffer);
+                    _onReceivedDataEvent.FireEvent(vectorBuffer);
                 }
                 else if (receivedBytesLength < 0) {
                     LOG_DEBUG("stop listening");
@@ -79,10 +79,10 @@ namespace MagicPodsCore {
         LOG_RELEASE("Stop Bluetooth client, server addr %s", _address.c_str());
     }
 
-    void Client::SendRequest(const IRequest& request) {
-        auto requestData = request.GetRequestData();
-        ssize_t sendedBytesLength = send(_socket, requestData.data(), requestData.size(), 0);
-        LOG_DEBUG("i(%zu):%s", requestData.size(), StringUtils::BytesToHexString(requestData.data(), requestData.size()).c_str());
+    void Client::SendData(const std::vector<unsigned char>& data){
+        ssize_t sendedBytesLength = send(_socket, data.data(), data.size(), 0);
+        LOG_DEBUG("i(%zu):%s", data.size(), StringUtils::BytesToHexString(data.data(), data.size()).c_str());
+        
     }
 
     bool Client::ConnectToSocketL2CAP() {
