@@ -1,0 +1,27 @@
+#pragma once
+
+namespace MagicPodsCore
+{
+    //Universal parameters for UI
+    enum class DeviceAncModes : unsigned char
+    {
+        Off = 1,
+        Transparency = 2,
+        Adaptive = 4,
+        WindCancellation = 8,
+        NoiseCancellation = 16,
+    };
+
+    static bool isValidDeviceAncModesType(unsigned char value){
+        switch (static_cast<DeviceAncModes>(value)) {
+            case DeviceAncModes::Off:
+            case DeviceAncModes::Transparency:
+            case DeviceAncModes::Adaptive:
+            case DeviceAncModes::WindCancellation:
+            case DeviceAncModes::NoiseCancellation:
+                return true;
+            default:
+                return false;
+        }
+    }
+}

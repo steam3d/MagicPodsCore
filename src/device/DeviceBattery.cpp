@@ -82,4 +82,37 @@ namespace MagicPodsCore
             _batteryChanged.FireEvent(_batteryStatus);
         }
     }
+
+    nlohmann::json DeviceBattery::CreateJsonBody()
+    {
+        auto bodyJson = nlohmann::json::object();
+        for (const auto &batteryData : GetBatteryStatus())
+        {
+
+            auto jsonBatteryData = nlohmann::json::object();
+            jsonBatteryData["battery"] = batteryData.Battery;
+            jsonBatteryData["charging"] = batteryData.IsCharging;
+            jsonBatteryData["status"] = batteryData.Status;
+
+            switch (batteryData.Type)
+            {
+            case DeviceBatteryType::Single:
+                bodyJson["single"] = jsonBatteryData;
+                break;
+
+            case DeviceBatteryType::Right:
+                bodyJson["right"] = jsonBatteryData;
+                break;
+
+            case DeviceBatteryType::Left:
+                bodyJson["left"] = jsonBatteryData;
+                break;
+
+            case DeviceBatteryType::Case:
+                bodyJson["case"] = jsonBatteryData;
+                break;
+            }
+        }
+        return bodyJson;
+    }
 }

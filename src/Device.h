@@ -7,8 +7,10 @@
 #include "device/enums/DeviceBatteryType.h"
 #include "aap/setters/AapSetAnc.h"
 #include "aap/AapClient.h"
+#include "client/Client.h"
 #include "device/DeviceBattery.h"
 #include "DeviceAnc.h"
+#include "device/capabilities/Capability.h"
 #include <vector>
 
 namespace MagicPodsCore {
@@ -18,17 +20,24 @@ namespace MagicPodsCore {
         std::unique_ptr<sdbus::IProxy> _deviceProxy{};
 
         std::string _name{};
-        std::string _address{};
         bool _connected{};
-        std::string _modalias{};
+        unsigned short _vendorId = 0;
+        unsigned short _productId = 0; //model
+        std::string _modaliasString{};
         DeviceBattery _battery;
         DeviceAnc _anc{};
-
+        
         Event<bool> _onConnectedPropertyChangedEvent{};
-
+        
         std::unique_ptr<AapClient> _aapClient{};
-
+        
+        
+    protected:
         mutable std::mutex _propertyMutex{};
+        std::unique_ptr<Client> _client{};
+        std::string _address{};
+        std::vector<Capability> capabilities;
+        
 
     public:
         Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
@@ -49,9 +58,19 @@ namespace MagicPodsCore {
             return _connected;
         }
         
-        std::string GetModalias() const {
+        std::string GetModaliasString() const {
             std::lock_guard lock{_propertyMutex};
-            return _modalias;
+            return _modaliasString;
+        }
+
+        virtual unsigned short GetVendorId() const {
+            std::lock_guard lock{_propertyMutex};
+            return _vendorId;
+        }
+
+        virtual unsigned short GetProductId() const {
+            std::lock_guard lock{_propertyMutex};
+            return _productId;
         }
 
         std::vector<DeviceBatteryData> GetBatteryStatus() const { // лучше сразу прокидывать Battery

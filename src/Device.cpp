@@ -30,8 +30,10 @@ namespace MagicPodsCore {
         }
 
         if (deviceInterface.contains("Modalias")) {
-            _modalias = deviceInterface.at("Modalias").get<std::string>();
+            _modaliasString = deviceInterface.at("Modalias").get<std::string>();
         }
+
+        //TODO parse modalias as Product and Vendor
 
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
             LOG_RELEASE("PropertiesChanged");

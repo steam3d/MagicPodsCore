@@ -5,6 +5,7 @@
 #include "enums/DeviceBatteryStatus.h"
 #include "enums/DeviceBatteryType.h"
 #include "structs/DeviceBatteryData.h"
+#include <json.hpp>
 
 namespace MagicPodsCore
 {
@@ -30,6 +31,7 @@ namespace MagicPodsCore
 
         void UpdateBattery(const std::vector<DeviceBatteryData> &batteryArray);
         void ClearBattery();
+        nlohmann::json CreateJsonBody();
 
     private:
         bool UpdateKey(const DeviceBatteryData &battery);
