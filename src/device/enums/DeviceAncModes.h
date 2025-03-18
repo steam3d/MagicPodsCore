@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace MagicPodsCore
 {
     //Universal parameters for UI
