@@ -106,13 +106,13 @@ namespace MagicPodsCore {
         }
     }
 
-    void DevicesInfoFetcher::SetAnc(const std::string& deviceAddress, DeviceAncMode mode) {
-        for (const auto& [key, value] : _devicesMap) {
-            if (value->GetAddress() == deviceAddress) {
-                value->SetAnc(mode);
-                break;
-            }
-        }
+    void DevicesInfoFetcher::SetAnc(const std::string& deviceAddress, DeviceAncModes mode) {
+        //for (const auto& [key, value] : _devicesMap) {
+        //    if (value->GetAddress() == deviceAddress) {
+        //        value->SetAnc(mode);
+        //        break;
+        //    }
+        //}
     }
 
     void DevicesInfoFetcher::EnableBluetoothAdapter() {
@@ -137,13 +137,15 @@ namespace MagicPodsCore {
         _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke(callback);
     }
 
-    std::shared_ptr<Device> DevicesInfoFetcher::TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) {
+    std::shared_ptr<Device> DevicesInfoFetcher::TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) {        
         const static auto checkModalias = [](const std::string& modalias) -> bool {
             for (auto& appleProductId : AllAapModelsIds) {
                 std::string upperCaseActualModalias = modalias;
                 std::transform(upperCaseActualModalias.begin(), upperCaseActualModalias.end(), upperCaseActualModalias.begin(), [](unsigned char c){ return std::toupper(c); });
                 std::string upperCaseTargetModalias = StringUtils::Format("v%04Xp%04X", static_cast<unsigned short>(BtVendorIds::Apple), static_cast<unsigned short>(appleProductId));
-                std::transform(upperCaseTargetModalias.begin(), upperCaseTargetModalias.end(), upperCaseTargetModalias.begin(), [](unsigned char c){ return std::toupper(c); });
+                std::transform(upperCaseTargetModalias.begin(), upperCaseTargetModalias.end(), upperCaseTargetModalias.begin(), [](unsigned char c){ return std::toupper(c); });                
+
+
                 if (upperCaseActualModalias.contains(upperCaseTargetModalias))
                     return true;
             }
@@ -151,7 +153,9 @@ namespace MagicPodsCore {
         };
     
         if (deviceInterface.contains("Modalias") && checkModalias(deviceInterface.at("Modalias").get<std::string>())) {
-            auto newDevice = std::make_shared<Device>(objectPath, deviceInterface);
+            //auto newDevice = std::make_shared<Device>(objectPath, deviceInterface);
+            //auto newDevice = std::make_shared<AapDevice>(objectPath, deviceInterface);
+            auto newDevice = AapDevice::Create(objectPath, deviceInterface);
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });

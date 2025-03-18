@@ -1,4 +1,5 @@
 #include "DeviceBattery.h"
+#include "enums/DeviceBatteryType.h"
 
 namespace MagicPodsCore
 {
@@ -78,7 +79,7 @@ namespace MagicPodsCore
 
         if (isUpdated)
         {
-            LOG_RELEASE("Battery updated: %s", ToString(_batteryStatus));
+            LOG_RELEASE("Battery updated: %s", ToString(_batteryStatus).c_str());
             _batteryChanged.FireEvent(_batteryStatus);
         }
     }
@@ -116,7 +117,7 @@ namespace MagicPodsCore
         return bodyJson;
     }
 
-    std::string ToString(std::vector<DeviceBatteryData> battery)
+    std::string DeviceBattery::ToString(std::vector<DeviceBatteryData> battery)
     {
         std::string batteryString;
         for (const auto &batteryData : battery)

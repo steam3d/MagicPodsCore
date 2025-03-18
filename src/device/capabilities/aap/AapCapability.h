@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../Capability.h"
-#include "../../device/AapDevice.h"
-#include "../../aap/setters/AapRequest.h"
-
+#include "../../../aap/setters/AapRequest.h"
+#include "../../AapDevice.h"
+class AapDevice;
 
 namespace MagicPodsCore
 {

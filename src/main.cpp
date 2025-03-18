@@ -3,9 +3,8 @@
 #include <App.h>
 
 #include "DevicesInfoFetcher.h"
-#include "aap/AapClient.h"
 #include "device/DeviceBattery.h"
-#include "DeviceAnc.h"
+#include "device/enums/DeviceAncModes.h"
 #include "Logger.h"
 #include "Config.h"
 
@@ -30,57 +29,10 @@ nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
 
 nlohmann::json MakeGetDeckyInfoResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto activeDevice = devicesInfoFetcher.GetActiveDevice();
+    if (activeDevice)
+        return nlohmann::json{{"info", activeDevice->GetAsJson()}};        
 
-    auto rootObject = nlohmann::json::object();
-    auto jsonObject = nlohmann::json::object();
-
-
-    if (activeDevice) {
-        jsonObject["name"] = activeDevice->GetName();
-        jsonObject["address"] = activeDevice->GetAddress();
-        jsonObject["connected"] = activeDevice->GetConnected();
-
-        auto jsonBatteryObject = nlohmann::json::object();
-        for (const auto& batteryData : activeDevice->GetBatteryStatus()) {
-            
-            auto jsonBatteryData = nlohmann::json::object();
-            jsonBatteryData["battery"] = batteryData.Battery;
-            jsonBatteryData["charging"] = batteryData.IsCharging;
-            jsonBatteryData["status"] = batteryData.Status;
-            
-            switch (batteryData.Type) {
-                case DeviceBatteryType::Single:
-                    jsonBatteryObject["single"] = jsonBatteryData;                
-                    break;
-
-                case DeviceBatteryType::Right:
-                    jsonBatteryObject["right"] = jsonBatteryData;  
-                    break;
-
-                case DeviceBatteryType::Left:
-                    jsonBatteryObject["left"] = jsonBatteryData;  
-                    break;
-
-                case DeviceBatteryType::Case:
-                    jsonBatteryObject["case"] = jsonBatteryData;  
-                    break;
-            }
-        }
-        jsonObject["battery"] = jsonBatteryObject;
-        
-        // TODO: REFACTOR THIS
-        auto jsonBatteryObjectCap = nlohmann::json::object();
-        auto ancMode = activeDevice->GetAncMode();
-        LOG_RELEASE("Get anc mode: %u", static_cast<unsigned char>(ancMode));
-        if (ancMode != DeviceAncMode::NotAvailable){
-            jsonBatteryObjectCap["anc"] = ancMode;
-        }
-        jsonObject["capabilities"] = jsonBatteryObjectCap;
-    }
-
-    rootObject["info"] = jsonObject;
-
-    return rootObject;
+    return {};
 }
 
 nlohmann::json MakeGetDefaultBluetoothAdapterResponse(DevicesInfoFetcher& devicesInfoFetcher) {
@@ -145,7 +97,7 @@ void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
     auto value = json.at("arguments").at("value").template get<int>();
 
     if (value == 1 || value == 2 || value == 3) // TODO: исправить костыль
-        devicesInfoFetcher.SetAnc(deviceAddress, static_cast<DeviceAncMode>(value));
+        devicesInfoFetcher.SetAnc(deviceAddress, static_cast<DeviceAncModes>(value));
 }
 
 void HandleGetDefaultBluetoothAdapterRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
@@ -236,7 +188,7 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
 }
 
 void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    auto onBatteryChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, std::vector<DeviceBatteryData> newValues) {
+    auto onCapabilityChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, const Capability& newValues) {
         if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
             LOG_RELEASE("OnBatteryChanged Broadcast was triggered");
             app.getLoop()->defer([&app, &devicesInfoFetcher](){
@@ -245,15 +197,15 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
             });
         }
     };
-    auto onAncChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, DeviceAncMode newValue) {
-        if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
-            LOG_RELEASE("OnAncChanged Broadcast was triggered");
-            app.getLoop()->defer([&app, &devicesInfoFetcher](){
-                auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
-                app.publish("OnAncChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
-            });
-        }
-    };
+    //auto onAncChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, DeviceAncMode newValue) {
+    //    if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
+    //        LOG_RELEASE("OnAncChanged Broadcast was triggered");
+    //        app.getLoop()->defer([&app, &devicesInfoFetcher](){
+    //            auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
+    //            app.publish("OnAncChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+    //        });
+    //    }
+    //};
     auto onConnectedChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, bool newValue) {
         LOG_RELEASE("OnConnectedChanged Broadcast was triggered");
         app.getLoop()->defer([&app, &devicesInfoFetcher]() {
@@ -277,24 +229,25 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
     };
 
     for (auto& device : devicesInfoFetcher.GetDevices()) {
-        device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValues) {
-            onBatteryChangedListener(weakDevice.lock(), newValues);
+        device->GetCapabilityChangedEvent().Subscribe([onCapabilityChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto& newValues) {
+            onCapabilityChangedListener(weakDevice.lock(), newValues);
         });
-        device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
-            onAncChangedListener(weakDevice.lock(), newValue);
-        });
+        //device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
+        //    onAncChangedListener(weakDevice.lock(), newValue);
+        //});
         device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
             onConnectedChangedListener(weakDevice.lock(), newValue);
         });
     }
-    devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onBatteryChangedListener, onAncChangedListener, onConnectedChangedListener](size_t listenerId, auto newDevices) {
+    //devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onCapabilityChangedListener, onAncChangedListener, onConnectedChangedListener](size_t listenerId, auto newDevices) {
+    devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onCapabilityChangedListener, onConnectedChangedListener](size_t listenerId, auto newDevices) {
         for (auto& device : newDevices) {
-            device->GetBattery().GetBatteryChangedEvent().Subscribe([onBatteryChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValues) {
-                onBatteryChangedListener(weakDevice.lock(), newValues);
+            device->GetCapabilityChangedEvent().Subscribe([onCapabilityChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto& newValues) {
+                onCapabilityChangedListener(weakDevice.lock(), newValues);
             });
-            device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
-                onAncChangedListener(weakDevice.lock(), newValue);
-            });
+            //device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
+            //    onAncChangedListener(weakDevice.lock(), newValue);
+            //});
             device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
                 onConnectedChangedListener(weakDevice.lock(), newValue);
             });

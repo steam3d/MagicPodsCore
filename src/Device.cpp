@@ -34,9 +34,6 @@ namespace MagicPodsCore {
             _address = deviceInterface.at("Address").get<std::string>();
         }
 
-        clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
-                                                        { OnResponseDataReceived(data); }); //Possible error
-
         if (deviceInterface.contains("Connected")) {
             _connected = deviceInterface.at("Connected").get<bool>();
         }
@@ -50,7 +47,11 @@ namespace MagicPodsCore {
 
     void Device::Init()
     {
+        LOG_RELEASE("Init");
         SubscribeCapabilitiesChanges();
+
+        clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
+        { OnResponseDataReceived(data); }); //Possible error
 
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
             LOG_RELEASE("PropertiesChanged");
@@ -60,19 +61,25 @@ namespace MagicPodsCore {
                     _connected = newConnectedValue;
                     _onConnectedPropertyChangedEvent.FireEvent(_connected);
                 }
-                if (_connected)
-                    _client->Start();
+                if (_connected){                    
+                    _client->Start(); 
+                    LOG_RELEASE("_client started 1");                   
+                }
                 else{
                     _client->Stop();
-                    throw std::runtime_error("TODO ADD RESETTING CAPABILITIES");                    
+                    LOG_RELEASE("_client stopped 1");
+                    //throw std::runtime_error("TODO ADD RESETTING CAPABILITIES");                    
                 }
             }
         });
 
         _deviceProxy->finishRegistration();
-
-        if (_connected)
+        LOG_RELEASE("_client started %s", _connected ? "true" : "false");
+        LOG_DEBUG("_client started %s", _connected ? "true" : "false");
+        if (_connected){
             _client->Start();
+            LOG_RELEASE("_client started 0");
+        }
     }
 
     Device::~Device()

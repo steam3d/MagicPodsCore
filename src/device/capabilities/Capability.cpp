@@ -2,6 +2,12 @@
 
 namespace MagicPodsCore
 {
+    nlohmann::json Capability::CreateJsonBody()
+    {
+        //Build crash if use abstract method
+        return nlohmann::json();
+    }
+
     nlohmann::json Capability::GetAsJson()
     {
         if (!isAvailable)
@@ -14,5 +20,8 @@ namespace MagicPodsCore
         //json[name] = bodyJson;
 
         return nlohmann::json{{name, bodyJson}};
+    }
+    void Capability::SetFromJson(nlohmann::json json)
+    {
     }
 }

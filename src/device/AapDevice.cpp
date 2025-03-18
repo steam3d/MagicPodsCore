@@ -1,4 +1,8 @@
 #include "AapDevice.h"
+#include "capabilities/aap/AapAncCapability.h"
+#include "capabilities/aap/AapBatteryCapability.h"
+#include "../aap/setters/AapInit.h"
+#include "../aap/setters/AapEnableNotifications.h"
 
 namespace MagicPodsCore
 {
@@ -24,6 +28,12 @@ namespace MagicPodsCore
         auto device = new AapDevice(objectPath, deviceInterface);
         device->_client = Client::CreateL2CAP(device->_address, 0x1001);
         device->Init();
+        
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        device->SendData(AapInit{});
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        device->SendData(AapEnableNotifications{AapNotificationsMode::Unknown1});
+
         return std::unique_ptr<AapDevice>(device);
     }
 }

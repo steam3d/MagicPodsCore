@@ -18,6 +18,10 @@ namespace MagicPodsCore
             return AapAncMode::Anc;
         case DeviceAncModes::Adaptive:
             return AapAncMode::Adaptive;
+
+        // It will never be called, but it is added to avoid a build warning.
+        default:
+            return AapAncMode::Off;
         }
     }
 
@@ -33,6 +37,10 @@ namespace MagicPodsCore
             return DeviceAncModes::NoiseCancellation;
         case AapAncMode::Adaptive:
             return DeviceAncModes::Adaptive;
+        
+        // It will never be called, but it is added to avoid a build warning.
+        default:
+            return DeviceAncModes::Off;
         }
     }
 
@@ -84,7 +92,7 @@ namespace MagicPodsCore
             {
                 AapAncMode nativeMode = DeviceAncModesToAapAncMode(static_cast<DeviceAncModes>(value));
                 SendData(AapSetAnc(nativeMode));
-                LOG_DEBUG("AapAncCapability::SetFromJson set option to %s", AapAncModeToString(nativeMode));
+                LOG_DEBUG("AapAncCapability::SetFromJson set option to %s", AapAncModeToString(nativeMode).c_str());
             }
             else
             {
