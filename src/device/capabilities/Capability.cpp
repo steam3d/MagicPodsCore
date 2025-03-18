@@ -5,14 +5,14 @@ namespace MagicPodsCore
     nlohmann::json Capability::GetAsJson()
     {
         if (!isAvailable)
-            return nlohmann::json{};
+            return {};
 
         auto bodyJson = Capability::CreateJsonBody();
         bodyJson["IsReadOnly"] = isReadOnly;
 
-        auto json = nlohmann::json::object();
-        json[name] = bodyJson;
+        //auto json = nlohmann::json::object();
+        //json[name] = bodyJson;
 
-        return json;
+        return nlohmann::json{{name, bodyJson}};
     }
 }
