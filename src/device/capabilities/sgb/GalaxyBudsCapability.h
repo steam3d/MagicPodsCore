@@ -12,7 +12,7 @@ namespace MagicPodsCore
     class GalaxyBudsCapability : public Capability
     {
     private:
-        size_t GalaxyBudsResponseDataRecivedId;
+        size_t responseDataRecivedId;
     
     protected:
         GalaxyBudsDevice &device;

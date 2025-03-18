@@ -9,12 +9,14 @@ namespace MagicPodsCore
     {
     private:
         DeviceBattery battery;
+        size_t batteryChangedEventId;
+
         GalaxyBudsBatteryWatcher watcher;
-        size_t GetBatteryChangedEventId;
+        size_t watcherBatteryChangedEventId;
 
     protected:
         nlohmann::json CreateJsonBody() override;
-        void OnReceivedData(const GalaxyBudsResponseData &data);    
+        void OnReceivedData(const GalaxyBudsResponseData &data);
 
     public:
         explicit GalaxyBudsBatteryCapability(GalaxyBudsDevice &device);

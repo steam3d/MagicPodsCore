@@ -2,19 +2,6 @@
 
 namespace MagicPodsCore
 {
-
-    GalaxyBudsBatteryCapability::GalaxyBudsBatteryCapability(GalaxyBudsDevice &device) : GalaxyBudsCapability("battery", true, device),
-                                                                                         battery(true),
-                                                                                         watcher(GalaxyBudsBatteryWatcher(static_cast<GalaxyBudsModelIds>(device.GetProductId())))
-    {
-        this->GetBatteryChangedEventId = this->watcher.GetBatteryChangedEvent().Subscribe([this](size_t id, std::vector<DeviceBatteryData> b)
-                                                         {
-            if (!isAvailable)
-                isAvailable = true;
-
-            battery.UpdateBattery(b); });
-    }
-
     nlohmann::json GalaxyBudsBatteryCapability::CreateJsonBody()
     {
         return battery.CreateJsonBody();
@@ -25,8 +12,26 @@ namespace MagicPodsCore
         watcher.ProcessResponse(data);
     }
 
-    GalaxyBudsBatteryCapability::~GalaxyBudsBatteryCapability(){
-        watcher.GetBatteryChangedEvent().Unsubscribe(GetBatteryChangedEventId);
+    GalaxyBudsBatteryCapability::GalaxyBudsBatteryCapability(GalaxyBudsDevice &device) : GalaxyBudsCapability("battery", true, device),
+                                                                                         battery(true),
+                                                                                         watcher(GalaxyBudsBatteryWatcher(static_cast<GalaxyBudsModelIds>(device.GetProductId())))
+    {
+        batteryChangedEventId = battery.GetBatteryChangedEvent().Subscribe([this](size_t id, std::vector<DeviceBatteryData> b){
+            if (!isAvailable)
+                isAvailable = true;
+
+            _onChanged.FireEvent(*this);
+            LOG_DEBUG("AapAncCapability::GetBatteryChangedEvent");
+        });
+
+        watcherBatteryChangedEventId = watcher.GetBatteryChangedEvent().Subscribe([this](size_t id, std::vector<DeviceBatteryData> b){
+            battery.UpdateBattery(b); });
+    }
+
+    GalaxyBudsBatteryCapability::~GalaxyBudsBatteryCapability()
+    {
+        battery.GetBatteryChangedEvent().Unsubscribe(batteryChangedEventId);
+        watcher.GetBatteryChangedEvent().Unsubscribe(watcherBatteryChangedEventId);
     }
 
 }

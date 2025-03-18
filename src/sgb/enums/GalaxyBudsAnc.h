@@ -20,4 +20,19 @@ namespace MagicPodsCore {
                 return false;
         }
     }
+
+    static std::string GalaxyBudsAncToString(GalaxyBudsAnc value)
+    {
+        switch (value)
+        {
+        case GalaxyBudsAnc::Off:
+            return "Off";
+        case GalaxyBudsAnc::AmbientSound:
+            return "AmbientSound";
+        case GalaxyBudsAnc::Adaptive:
+            return "Adaptive";
+        case GalaxyBudsAnc::NoiseReduction:
+            return "NoiseReduction";
+        }
+    }
 }
