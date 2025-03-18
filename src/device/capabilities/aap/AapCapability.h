@@ -2,6 +2,7 @@
 
 #include "../Capability.h"
 #include "../../device/AapDevice.h"
+#include "../../aap/setters/AapRequest.h"
 
 
 namespace MagicPodsCore
