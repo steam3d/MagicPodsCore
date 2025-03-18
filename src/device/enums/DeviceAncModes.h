@@ -41,6 +41,8 @@ namespace MagicPodsCore
             return "WindCancellation";
         case DeviceAncModes::NoiseCancellation:
             return "NoiseCancellation";
+        default:
+            return "Unknown value";
         }
     }
 }

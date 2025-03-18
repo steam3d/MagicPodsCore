@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace MagicPodsCore
 {
     // Byte 7 indicates the anc mode
@@ -23,6 +25,8 @@ namespace MagicPodsCore
             return "Adaptive";
         case AapAncMode::Anc:
             return "WindCancellation";
+        default:
+            return "Unknown value";
         }
     }
 }

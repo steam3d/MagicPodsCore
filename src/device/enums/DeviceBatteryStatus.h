@@ -28,6 +28,8 @@ namespace MagicPodsCore
             return "Connected";
         case DeviceBatteryStatus::Cached:
             return "Cached";
+        default:
+            return "Unknown value";
         }
     }
 }
