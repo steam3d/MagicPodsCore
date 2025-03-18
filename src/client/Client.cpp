@@ -43,7 +43,7 @@ namespace MagicPodsCore {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(_socket, buffer, sizeof(buffer), 0);
                 if (receivedBytesLength >= 0) {
-                    LOG_DEBUG("o(%zu):%s", receivedBytesLength, StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
+                    LOG_DEBUG("r:%s", StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
                     
                     _onReceivedDataEvent.FireEvent(vectorBuffer);
@@ -81,7 +81,7 @@ namespace MagicPodsCore {
 
     void Client::SendData(const std::vector<unsigned char>& data){
         ssize_t sendedBytesLength = send(_socket, data.data(), data.size(), 0);
-        LOG_DEBUG("i(%zu):%s", data.size(), StringUtils::BytesToHexString(data.data(), data.size()).c_str());
+        LOG_DEBUG("s:%s",StringUtils::BytesToHexString(data.data(), data.size()).c_str());
         
     }
 
