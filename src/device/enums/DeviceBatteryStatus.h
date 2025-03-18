@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace MagicPodsCore
 {
     enum class DeviceBatteryStatus : unsigned char
