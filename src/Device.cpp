@@ -1,32 +1,44 @@
 #include "Device.h"
 
-#include "StringUtils.h"
-#include "Logger.h"
-
-#include <iostream>
-
 namespace MagicPodsCore {
+    void Device::SubscribeCapabilitiesChanges()
+    {
+        for (auto& c: capabilities){
+            size_t id = c.GetChangedEvent().Subscribe([this](size_t id, const Capability &capability)
+            {
+                _onCapabilityChangedEvent.FireEvent(capability);
+            });
+            capabilityEventIds.push_back(id);
+        }
+    }
 
-    Device::Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) : _deviceProxy{sdbus::createProxy("org.bluez", objectPath)}, _battery(true) {
-        if (deviceInterface.contains("Name")) {           
+    void Device::UnsubscribeCapabilitiesChanges()
+    {
+        if (capabilityEventIds.size() != capabilities.size())
+            throw std::runtime_error("Size of capabilityEventIds and capabilities different");
+
+        for (int i=0; i<capabilities.size(); i++){
+            auto& c = capabilities[i];
+            c.GetChangedEvent().Unsubscribe(capabilityEventIds[i]);
+        }
+        capabilityEventIds.clear();
+    }
+
+    Device::Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface): _deviceProxy{sdbus::createProxy("org.bluez", objectPath)}
+    {
+        if (deviceInterface.contains("Name")) {
             _name = deviceInterface.at("Name").get<std::string>();
         }
 
         if (deviceInterface.contains("Address")) {
             _address = deviceInterface.at("Address").get<std::string>();
-            _aapClient = std::make_unique<AapClient>(_address);
-            _aapClient->GetBatteryEvent().Subscribe([this](size_t listenerId, const std::vector<DeviceBatteryData>& data) {
-                OnBatteryEvent(data);
-            });
-            _aapClient->GetAncEvent().Subscribe([this](size_t listenerId, const AncWatcherData& data) {
-                OnAncEvent(data);
-            });
         }
+
+        clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
+                                                        { OnResponseDataReceived(data); }); //Possible error
 
         if (deviceInterface.contains("Connected")) {
             _connected = deviceInterface.at("Connected").get<bool>();
-            if (_connected)
-                _aapClient->Start();
         }
 
         if (deviceInterface.contains("Modalias")) {
@@ -34,6 +46,11 @@ namespace MagicPodsCore {
         }
 
         //TODO parse modalias as Product and Vendor
+    }
+
+    void Device::Init()
+    {
+        SubscribeCapabilitiesChanges();
 
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
             LOG_RELEASE("PropertiesChanged");
@@ -44,15 +61,24 @@ namespace MagicPodsCore {
                     _onConnectedPropertyChangedEvent.FireEvent(_connected);
                 }
                 if (_connected)
-                    _aapClient->Start();
+                    _client->Start();
                 else{
-                    _aapClient->Stop();
-                    _battery.ClearBattery();
-                    _anc.ClearAnc();
+                    _client->Stop();
+                    throw std::runtime_error("TODO ADD RESETTING CAPABILITIES");                    
                 }
             }
         });
+
         _deviceProxy->finishRegistration();
+
+        if (_connected)
+            _client->Start();
+    }
+
+    Device::~Device()
+    {
+        _client->GetOnReceivedDataEvent().Unsubscribe(clientReceivedDataEventId);
+        UnsubscribeCapabilitiesChanges();
     }
 
     void Device::Connect() {
@@ -71,19 +97,24 @@ namespace MagicPodsCore {
         _deviceProxy->callMethodAsync("Disconnect").withTimeout(std::chrono::seconds(10)).onInterface("org.bluez.Device1").uponReplyInvoke(callback);
     }
 
-    void Device::SetAnc(DeviceAncMode mode) {
-        if (_aapClient->IsStarted())
-            _aapClient->SendRequest(AapSetAnc(_anc.DeviceAncModeAncModeTo(mode)));        
-    }
+    nlohmann::json Device::GetAsJson()
+    {
+        auto capabilitiesJson = nlohmann::json::object();
+        auto deviceJson = nlohmann::json::object();
 
-    void Device::OnBatteryEvent(const std::vector<DeviceBatteryData>& data) {
-        std::lock_guard{_propertyMutex};
-        _battery.UpdateBattery(data);
-    }
-    
-    void Device::OnAncEvent(const AncWatcherData& data) {
-        std::lock_guard{_propertyMutex};
-        _anc.UpdateFromAppleAnc(data.Mode);
-    }
+        deviceJson["name"] = GetName();
+        deviceJson["address"] = GetAddress();
+        deviceJson["connected"] = GetConnected();
 
+        for (auto& capability : capabilities)
+        {
+            auto capabilityJson = capability.GetAsJson();
+            if (!capabilityJson.empty())
+            capabilitiesJson.update(capabilityJson);
+        }
+
+        deviceJson["capabilities"] = capabilitiesJson;
+
+        return deviceJson;
+    }
 }
