@@ -8,21 +8,16 @@
 
 namespace MagicPodsCore
 {
-    struct AncWatcherData : public WatcherData
-    {
-        AapAncMode Mode{};
-    };
-
     class AapAncWatcher : public AapWatcher
     {
     private:
-        Event<AncWatcherData> _event{};
+        Event<AapAncMode> _event{};
 
     public:
         AapAncWatcher();
-        void ProcessBytes(const std::vector<unsigned char> &bytes) override;
+        void ProcessResponse(const std::vector<unsigned char> &data) override;
 
-        Event<AncWatcherData> &GetEvent()
+        Event<AapAncMode> &GetEvent()
         {
             return _event;
         }

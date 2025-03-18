@@ -5,11 +5,7 @@
 #include <vector>
 
 namespace MagicPodsCore
-{
-    struct WatcherData {
-        std::string Tag{};
-    };
-    
+{    
     // Base class to process incoming data from headphones
     class AapWatcher
     {
@@ -19,7 +15,7 @@ namespace MagicPodsCore
     public:
         AapWatcher(std::string tag);
         // Subscribe each class to process incoming data from headphones
-        virtual void ProcessBytes(const std::vector<unsigned char> &bytes) = 0;
+        virtual void ProcessResponse(const std::vector<unsigned char> &data) = 0;
     };
 
 }

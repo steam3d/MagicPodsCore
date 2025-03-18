@@ -14,4 +14,18 @@ namespace MagicPodsCore
         Cached = 0x03,
     };
 
+    static std::string DeviceBatteryStatusToString(DeviceBatteryStatus value)
+    {
+        switch (value)
+        {
+        case DeviceBatteryStatus::NotAvailable:
+            return "NotAvailable";
+        case DeviceBatteryStatus::Disconnected:
+            return "Disconnected";
+        case DeviceBatteryStatus::Connected:
+            return "Connected";
+        case DeviceBatteryStatus::Cached:
+            return "Cached";
+        }
+    }
 }

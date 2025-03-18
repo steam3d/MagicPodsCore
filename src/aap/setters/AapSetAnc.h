@@ -34,6 +34,6 @@ namespace MagicPodsCore
     public:
         AapSetAnc(AapAncMode mode);
         std::vector<unsigned char> Request() const override;
-        static std::vector<AapAncMode> GetAncModes(unsigned short model);
+        static std::vector<AapAncMode> GetAncModesFor(unsigned short model);
     };
 }

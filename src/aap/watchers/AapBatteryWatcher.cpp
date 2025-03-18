@@ -32,19 +32,19 @@ namespace MagicPodsCore
     }
 
     // !MUST BE TESTED ON ALL AIRPOD MODES!
-    void AapBatteryWatcher::ProcessBytes(const std::vector<unsigned char> &bytes)
+    void AapBatteryWatcher::ProcessResponse(const std::vector<unsigned char> &data)
     {
         // min length of the battery packet
-        if (bytes.size() < 11)
+        if (data.size() < 11)
             return;
 
         // packet type must be battery
-        if (bytes[4] != static_cast<unsigned char>(AapCmd::Battery))
+        if (data[4] != static_cast<unsigned char>(AapCmd::Battery))
             return;
 
         LOG_DEBUG("%s", _tag.c_str());
 
-        int batteryCount = static_cast<int>(bytes[6]);
+        int batteryCount = static_cast<int>(data[6]);
 
         int startByte = 7;
 
@@ -53,16 +53,16 @@ namespace MagicPodsCore
 
         for (int i = 0; i < batteryCount; i++)
         {
-            if (!isValidAapBatteryType(bytes[startByte]))
+            if (!isValidAapBatteryType(data[startByte]))
                 continue;
 
-            AapBatteryType batteryType = static_cast<AapBatteryType>(bytes[startByte]);
-            unsigned char battery = bytes[startByte + 2];
+            AapBatteryType batteryType = static_cast<AapBatteryType>(data[startByte]);
+            unsigned char battery = data[startByte + 2];
 
-            if (!isValidAapChargingStatusType(bytes[startByte]))
+            if (!isValidAapChargingStatusType(data[startByte]))
                 continue;
 
-            AapChargingStatus charging = static_cast<AapChargingStatus>(bytes[startByte + 3]);
+            AapChargingStatus charging = static_cast<AapChargingStatus>(data[startByte + 3]);
             startByte += 5;
             
             ConvertBattery(batteryData, batteryType, charging, battery);

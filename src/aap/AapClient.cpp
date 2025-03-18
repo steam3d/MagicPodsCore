@@ -55,8 +55,8 @@ namespace MagicPodsCore {
                     LOG_DEBUG("o(%zu):%s", receivedBytesLength, StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str()); // deprecated bytesToHexString use StringUtils::BytesToHexString
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
                     
-                    BatteryWatcher->ProcessBytes(vectorBuffer);
-                    AncWatcher->ProcessBytes(vectorBuffer);
+                    BatteryWatcher->ProcessResponse(vectorBuffer);
+                    AncWatcher->ProcessResponse(vectorBuffer);
                 }
                 else if (receivedBytesLength < 0) {
                     break;

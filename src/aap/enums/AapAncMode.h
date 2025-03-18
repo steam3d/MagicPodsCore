@@ -11,4 +11,18 @@ namespace MagicPodsCore
         Adaptive = 0x04,
     };
 
+    static std::string AapAncModeToString(AapAncMode value)
+    {
+        switch (value)
+        {
+        case AapAncMode::Off:
+            return "Off";
+        case AapAncMode::Transparency:
+            return "Transparency";
+        case AapAncMode::Adaptive:
+            return "Adaptive";
+        case AapAncMode::Anc:
+            return "WindCancellation";
+        }
+    }
 }

@@ -78,7 +78,7 @@ namespace MagicPodsCore
 
         if (isUpdated)
         {
-            LOG_RELEASE("Battery updated");
+            LOG_RELEASE("Battery updated: %s", ToString(_batteryStatus));
             _batteryChanged.FireEvent(_batteryStatus);
         }
     }
@@ -114,5 +114,38 @@ namespace MagicPodsCore
             }
         }
         return bodyJson;
+    }
+
+    std::string ToString(std::vector<DeviceBatteryData> battery)
+    {
+        std::string batteryString;
+        for (const auto &batteryData : battery)
+        {
+            switch (batteryData.Type)
+            {
+            case DeviceBatteryType::Single:
+                batteryString += "single:";
+                break;
+
+            case DeviceBatteryType::Right:
+                batteryString += "right:";
+                break;
+
+            case DeviceBatteryType::Left:
+                batteryString += "left:";
+                break;
+
+            case DeviceBatteryType::Case:
+                batteryString += "case:";
+                break;
+            }
+
+            batteryString+=std::to_string(batteryData.Battery);
+            batteryString+="% ";
+            batteryString+= batteryData.IsCharging ? "charging " : "";
+            batteryString+= DeviceBatteryStatusToString(batteryData.Status);
+            batteryString+= " ";
+        }
+        return batteryString;
     }
 }

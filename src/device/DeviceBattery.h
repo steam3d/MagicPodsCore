@@ -32,6 +32,7 @@ namespace MagicPodsCore
         void UpdateBattery(const std::vector<DeviceBatteryData> &batteryArray);
         void ClearBattery();
         nlohmann::json CreateJsonBody();
+        static std::string ToString(std::vector<DeviceBatteryData> battery);
 
     private:
         bool UpdateKey(const DeviceBatteryData &battery);

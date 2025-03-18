@@ -51,7 +51,7 @@ namespace MagicPodsCore
 
     public:
         AapBatteryWatcher();
-        void ProcessBytes(const std::vector<unsigned char> &bytes) override;
+        void ProcessResponse(const std::vector<unsigned char> &data) override;
 
         Event<std::vector<DeviceBatteryData>> &GetEvent()
         {

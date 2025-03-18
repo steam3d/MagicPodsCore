@@ -24,4 +24,21 @@ namespace MagicPodsCore
                 return false;
         }
     }
+
+    static std::string DeviceAncModesToString(DeviceAncModes value)
+    {
+        switch (value)
+        {
+        case DeviceAncModes::Off:
+            return "Off";
+        case DeviceAncModes::Transparency:
+            return "Transparency";
+        case DeviceAncModes::Adaptive:
+            return "Adaptive";
+        case DeviceAncModes::WindCancellation:
+            return "WindCancellation";
+        case DeviceAncModes::NoiseCancellation:
+            return "NoiseCancellation";
+        }
+    }
 }
