@@ -42,18 +42,15 @@ namespace MagicPodsCore {
             while(_isStarted) {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(_socket, buffer, sizeof(buffer), 0);
-                if (receivedBytesLength >= 0) {
+                if (receivedBytesLength > 0) {
                     LOG_DEBUG("r:%s", StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
                     
                     _onReceivedDataEvent.FireEvent(vectorBuffer);
                 }
-                else if (receivedBytesLength < 0) {
+                else {
                     LOG_DEBUG("stop listening");
                     break;
-                }
-                else {
-                    LOG_DEBUG("then");
                 }
             }
 
@@ -61,7 +58,7 @@ namespace MagicPodsCore {
         });
         thread.detach();
 
-        // std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         // SendRequest(AapInit{});
         // std::this_thread::sleep_for(std::chrono::seconds(1));
         // SendRequest(AapEnableNotifications{NotificationsMode::Unknown1});
