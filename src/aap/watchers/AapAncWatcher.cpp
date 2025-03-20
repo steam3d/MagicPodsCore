@@ -20,12 +20,9 @@ namespace MagicPodsCore
         if (data[6] != static_cast<unsigned char>(AapCmdSettings::Anc))
             return;
 
-        LOG_DEBUG("%s", _tag.c_str());
-
         AapAncMode ancMode = static_cast<AapAncMode>(data[7]);
 
-        // REPLACE WITH ANC STORAGE LOGIC OR EVENT ONANCCHANGED?
-        LOG_DEBUG("%s", DummyConvertAncMode(ancMode).c_str());
+        LOG_DEBUG("%s, %s", _tag.c_str(), DummyConvertAncMode(ancMode).c_str());
         _event.FireEvent(ancMode);
     }
 

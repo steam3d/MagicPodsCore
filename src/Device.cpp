@@ -4,9 +4,10 @@ namespace MagicPodsCore {
     void Device::SubscribeCapabilitiesChanges()
     {
         for (auto& c: capabilities){
-            size_t id = c.GetChangedEvent().Subscribe([this](size_t id, const Capability &capability)
+            size_t id = c->GetChangedEvent().Subscribe([this](size_t id, const Capability &capability)
             {
                 _onCapabilityChangedEvent.FireEvent(capability);
+                LOG_DEBUG("Capability changed");
             });
             capabilityEventIds.push_back(id);
         }
@@ -19,7 +20,7 @@ namespace MagicPodsCore {
 
         for (int i=0; i<capabilities.size(); i++){
             auto& c = capabilities[i];
-            c.GetChangedEvent().Unsubscribe(capabilityEventIds[i]);
+            c->GetChangedEvent().Unsubscribe(capabilityEventIds[i]);
         }
         capabilityEventIds.clear();
     }
@@ -36,6 +37,7 @@ namespace MagicPodsCore {
 
         if (deviceInterface.contains("Connected")) {
             _connected = deviceInterface.at("Connected").get<bool>();
+            LOG_DEBUG("_connected: %s", _connected ? "true" : "false");
         }
 
         if (deviceInterface.contains("Modalias")) {
@@ -51,14 +53,24 @@ namespace MagicPodsCore {
         SubscribeCapabilitiesChanges();
 
         clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
-        { OnResponseDataReceived(data); }); //Possible error
+        { OnResponseDataReceived(data); });
 
+        LOG_DEBUG("_connected 0 %s", _connected ? "true" : "false");
+        if (_connected){
+            _client->Start();
+            LOG_RELEASE("_client started 0");
+        }
+        
+        // When the client above is connected, PropertiesChanged will fire twice.
+        // First connection false
+        // Second connections true
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
-            LOG_RELEASE("PropertiesChanged");
+            //LOG_RELEASE("PropertiesChanged");
             if (values.contains("Connected")) {
                 auto newConnectedValue = values["Connected"].get<bool>();
                 if (_connected != newConnectedValue) {
                     _connected = newConnectedValue;
+                    LOG_DEBUG("PropertiesChanged:Connected %s", _connected ? "true" : "false");
                     _onConnectedPropertyChangedEvent.FireEvent(_connected);
                 }
                 if (_connected){                    
@@ -74,12 +86,6 @@ namespace MagicPodsCore {
         });
 
         _deviceProxy->finishRegistration();
-        LOG_RELEASE("_client started %s", _connected ? "true" : "false");
-        LOG_DEBUG("_client started %s", _connected ? "true" : "false");
-        if (_connected){
-            _client->Start();
-            LOG_RELEASE("_client started 0");
-        }
     }
 
     Device::~Device()
@@ -115,7 +121,7 @@ namespace MagicPodsCore {
 
         for (auto& capability : capabilities)
         {
-            auto capabilityJson = capability.GetAsJson();
+            auto capabilityJson = capability->GetAsJson();
             if (!capabilityJson.empty())
             capabilitiesJson.update(capabilityJson);
         }

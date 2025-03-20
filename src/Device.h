@@ -25,7 +25,7 @@ namespace MagicPodsCore {
         Event<bool> _onConnectedPropertyChangedEvent{};
         Event<Capability> _onCapabilityChangedEvent{};
         size_t clientReceivedDataEventId;
-        virtual void OnResponseDataReceived(std::vector<unsigned char> data) = 0;
+        virtual void OnResponseDataReceived(const std::vector<unsigned char> &data) = 0;
         void SubscribeCapabilitiesChanges();
         void UnsubscribeCapabilitiesChanges();
 
@@ -33,7 +33,7 @@ namespace MagicPodsCore {
         mutable std::mutex _propertyMutex{};
         std::unique_ptr<Client> _client;
         std::string _address{};
-        std::vector<Capability> capabilities{};
+        std::vector<std::unique_ptr<Capability>> capabilities{};
         std::vector<size_t> capabilityEventIds{};
         void Init();
 

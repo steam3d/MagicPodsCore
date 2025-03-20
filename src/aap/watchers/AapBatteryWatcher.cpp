@@ -40,9 +40,7 @@ namespace MagicPodsCore
 
         // packet type must be battery
         if (data[4] != static_cast<unsigned char>(AapCmd::Battery))
-            return;
-
-        LOG_DEBUG("%s", _tag.c_str());
+            return;        
 
         int batteryCount = static_cast<int>(data[6]);
 
@@ -66,13 +64,13 @@ namespace MagicPodsCore
             startByte += 5;
             
             ConvertBattery(batteryData, batteryType, charging, battery);
-            readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + "";
+            readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + " ";
         }
 
         if (batteryData.size() > 0)
         {
+            LOG_DEBUG("%s: %s", _tag.c_str(), readableStr.c_str());
             _event.FireEvent(batteryData);
-            LOG_DEBUG("%s", readableStr.c_str());
         }
     }
 

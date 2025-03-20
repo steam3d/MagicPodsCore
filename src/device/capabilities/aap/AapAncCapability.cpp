@@ -37,7 +37,7 @@ namespace MagicPodsCore
             return DeviceAncModes::NoiseCancellation;
         case AapAncMode::Adaptive:
             return DeviceAncModes::Adaptive;
-        
+
         // It will never be called, but it is added to avoid a build warning.
         default:
             return DeviceAncModes::Off;
@@ -73,8 +73,7 @@ namespace MagicPodsCore
                     isAvailable = true;
 
                 option = AapAncModeToDeviceAncModes(mode);
-                _onChanged.FireEvent(*this);
-                LOG_DEBUG("AapAncCapability::GetEvent"); });
+                _onChanged.FireEvent(*this); });
     }
 
     AapAncCapability::~AapAncCapability()

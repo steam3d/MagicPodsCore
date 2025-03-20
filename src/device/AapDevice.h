@@ -14,7 +14,7 @@ namespace MagicPodsCore
     {
     private:
         Event<const std::vector<unsigned char>> _onResponseDataRecived{};
-        void OnResponseDataReceived(std::vector<unsigned char> data) override;
+        void OnResponseDataReceived(const std::vector<unsigned char> &data) override;
 
     public:
         explicit AapDevice(const sdbus::ObjectPath &objectPath,
