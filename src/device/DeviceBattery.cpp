@@ -39,7 +39,7 @@ namespace MagicPodsCore
             {
                 // Say UI that battery from cache now
                 it->Status = DeviceBatteryStatus::Cached;
-                LOG_RELEASE("Changed to cache");
+                LOG_RELEASE("%s changed to cache", DeviceBatteryTypeToString(it->Type).c_str());
                 return true;
             }
             else
@@ -72,9 +72,13 @@ namespace MagicPodsCore
     void DeviceBattery::UpdateBattery(const std::vector<DeviceBatteryData> &batteryArray)
     {
         bool isUpdated = false;
-        for (auto &battery : _batteryStatus)
+        for (auto &battery : batteryArray)
         {
-            isUpdated = UpdateKey(battery);
+            bool b = UpdateKey(battery);
+
+            // if any battery is updated we must fire event
+            if (b && !isUpdated)
+                isUpdated = true;
         }
 
         if (isUpdated)
