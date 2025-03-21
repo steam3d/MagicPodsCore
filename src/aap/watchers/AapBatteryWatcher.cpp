@@ -13,12 +13,16 @@ namespace MagicPodsCore
         {
         case AapBatteryType::Single:
             dtype = DeviceBatteryType::Single;
+            break;
         case AapBatteryType::Left:
             dtype = DeviceBatteryType::Left;
+            break;
         case AapBatteryType::Right:
             dtype = DeviceBatteryType::Right;
+            break;
         case AapBatteryType::Case:
             dtype = DeviceBatteryType::Case;
+            break;
         }
 
         DeviceBatteryData data(
@@ -55,9 +59,11 @@ namespace MagicPodsCore
                 continue;
 
             AapBatteryType batteryType = static_cast<AapBatteryType>(data[startByte]);
+            
+            //Fake AirPods send a value of 127 after the case is closed. Should we ignore values greater than 100?
             unsigned char battery = data[startByte + 2];
 
-            if (!isValidAapChargingStatusType(data[startByte]))
+            if (!isValidAapChargingStatusType(data[startByte + 3]))
                 continue;
 
             AapChargingStatus charging = static_cast<AapChargingStatus>(data[startByte + 3]);
