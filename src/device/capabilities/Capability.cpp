@@ -4,8 +4,6 @@ namespace MagicPodsCore
 {
     nlohmann::json Capability::CreateJsonBody()
     {
-        LOG_DEBUG("Capability CreateJsonBody");
-        //Build crash if use abstract method
         return nlohmann::json();
     }
 
@@ -22,9 +20,6 @@ namespace MagicPodsCore
 
         auto bodyJson = CreateJsonBody();
         bodyJson["IsReadOnly"] = isReadOnly;
-
-        //auto json = nlohmann::json::object();
-        //json[name] = bodyJson;
 
         return nlohmann::json{{name, bodyJson}};
     }

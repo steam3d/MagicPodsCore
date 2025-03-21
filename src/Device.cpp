@@ -60,7 +60,7 @@ namespace MagicPodsCore {
             _client->Start();
             LOG_RELEASE("_client started 0");
         }
-        
+
         // When the client above is connected, PropertiesChanged will fire twice.
         // First connection false
         // Second connections true
@@ -73,14 +73,13 @@ namespace MagicPodsCore {
                     LOG_DEBUG("PropertiesChanged:Connected %s", _connected ? "true" : "false");
                     _onConnectedPropertyChangedEvent.FireEvent(_connected);
                 }
-                if (_connected){                    
-                    _client->Start(); 
-                    LOG_RELEASE("_client started 1");                   
+                if (_connected){
+                    _client->Start();
+                    LOG_RELEASE("_client started 1");
                 }
                 else{
                     _client->Stop();
                     LOG_RELEASE("_client stopped 1");
-                    //throw std::runtime_error("TODO ADD RESETTING CAPABILITIES");                    
                 }
             }
         });
@@ -123,7 +122,7 @@ namespace MagicPodsCore {
         {
             auto capabilityJson = capability->GetAsJson();
             if (!capabilityJson.empty())
-            capabilitiesJson.update(capabilityJson);
+                capabilitiesJson.update(capabilityJson);
         }
 
         deviceJson["capabilities"] = capabilitiesJson;
