@@ -69,11 +69,19 @@ namespace MagicPodsCore
     AapAncCapability::AapAncCapability(AapDevice &device) : AapCapability("anc", false, device)
     {
         watcherAncChangedEventId = watcher.GetEvent().Subscribe([this](size_t id, AapAncMode mode){
-                if (!isAvailable)
+            DeviceAncModes newOption = AapAncModeToDeviceAncModes(mode);
+            if (!isAvailable){
+                    //When we get ANC mode for the first time, we must notify. But on the second and subsequent times, we should notify only if the option has changed.
                     isAvailable = true;
+                    option = newOption;
+                    _onChanged.FireEvent(*this);
+                }
+                else if (option != newOption){
+                    option = newOption;
+                    _onChanged.FireEvent(*this);
+                }
+        });
 
-                option = AapAncModeToDeviceAncModes(mode);
-                _onChanged.FireEvent(*this); });
     }
 
     AapAncCapability::~AapAncCapability()
