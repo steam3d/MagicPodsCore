@@ -15,6 +15,7 @@ namespace MagicPodsCore
         bool isAvailable = false;
         Event<Capability> _onChanged{};
         virtual nlohmann::json CreateJsonBody();
+        virtual void Reset();
 
     public:
         explicit Capability(const std::string &name, bool isReadOnly) : name(name), isReadOnly(isReadOnly) {}
@@ -22,8 +23,13 @@ namespace MagicPodsCore
         {
             return _onChanged;
         }
+
+        std::string& GetName(){
+            return name;
+        }
+
         nlohmann::json GetAsJson();
-        virtual void SetFromJson(nlohmann::json json);        
+        virtual void SetFromJson(nlohmann::json json);
         virtual ~Capability() = default;
     };
 }

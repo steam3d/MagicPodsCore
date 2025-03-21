@@ -16,7 +16,8 @@ namespace MagicPodsCore
 
     protected:
         nlohmann::json CreateJsonBody() override;
-        void OnReceivedData(const std::vector<unsigned char> &data);
+        void OnReceivedData(const std::vector<unsigned char> &data) override;
+        void Reset() override;
 
     public:
         explicit AapBatteryCapability(AapDevice &device);

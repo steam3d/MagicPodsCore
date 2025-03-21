@@ -11,11 +11,14 @@ namespace MagicPodsCore
     {
     private:
         size_t responseDataRecivedId;
+        size_t onConnectedPropertyChangedId;
 
-    protected:    
+    protected:
         AapDevice &device;
         virtual void OnReceivedData(const std::vector<unsigned char> &data) = 0;
         void SendData(const AapRequest &setter);
+        void Reset() override;
+
 
     public:
         explicit AapCapability(const std::string &name,

@@ -13,19 +13,26 @@ namespace MagicPodsCore
         watcher.ProcessResponse(data);
     }
 
+    void AapBatteryCapability::Reset()
+    {
+        battery.ClearBattery();
+        AapCapability::Reset();
+    }
+
     AapBatteryCapability::AapBatteryCapability(AapDevice &device) : AapCapability("battery", true, device),
                                                                     battery(true)
     {
-        batteryChangedEventId = battery.GetBatteryChangedEvent().Subscribe([this](size_t id, std::vector<DeviceBatteryData> b){
+        batteryChangedEventId = battery.GetBatteryChangedEvent().Subscribe([this](size_t id, const std::vector<DeviceBatteryData> &b){
             if (!isAvailable)
                 isAvailable = true;
 
             _onChanged.FireEvent(*this);
-            LOG_DEBUG("AapAncCapability::GetBatteryChangedEvent");
         });
 
-        watcherBatteryChangedEventId = watcher.GetEvent().Subscribe([this](size_t id, std::vector<DeviceBatteryData> b){
-            battery.UpdateBattery(b); });
+        watcherBatteryChangedEventId = watcher.GetEvent().Subscribe([this](size_t id, const std::vector<DeviceBatteryData> &b){
+            battery.UpdateBattery(b);
+
+        });
     }
 
     AapBatteryCapability::~AapBatteryCapability()
