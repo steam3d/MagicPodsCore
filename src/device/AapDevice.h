@@ -3,8 +3,8 @@
 #include "../Event.h"
 #include "../Device.h"
 #include "../aap/setters/AapRequest.h"
-class AapAncCapability;
-class AapBatteryCapability;
+//class AapAncCapability;
+//class AapBatteryCapability;
 
 
 namespace MagicPodsCore

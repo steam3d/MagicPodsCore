@@ -69,12 +69,20 @@ namespace MagicPodsCore
                                                                                                            watcher(GalaxyBudsAncWatcher(static_cast<GalaxyBudsModelIds>(device.GetProductId())))
     {
         watcherAncChangedEventId = watcher.GetAncChangedEvent().Subscribe([this](size_t id, GalaxyBudsAnc mode){
-                if (!isAvailable)
-                    isAvailable = true;
-
-                option = GalaxyBudsAncToDeviceAncModes(mode);
+            DeviceAncModes newOption = GalaxyBudsAncToDeviceAncModes(mode);
+            if (!isAvailable){
+                //When we get ANC mode for the first time, we must notify. But on the second and subsequent times, we should notify only if the option has changed.
+                isAvailable = true;
+                option = newOption;
+                LOG_DEBUG("GalaxyBudsAncCapability: %s", DeviceAncModesToString(option).c_str());
                 _onChanged.FireEvent(*this);
-                LOG_DEBUG("GalaxyBudsAncCapability::GetAncChangedEvent"); });
+            }
+            else if (option != newOption){
+                option = newOption;
+                LOG_DEBUG("GalaxyBudsAncCapability: %s", DeviceAncModesToString(option).c_str());
+                _onChanged.FireEvent(*this);
+            }    
+        });
     }
 
     GalaxyBudsAncCapability::~GalaxyBudsAncCapability(){

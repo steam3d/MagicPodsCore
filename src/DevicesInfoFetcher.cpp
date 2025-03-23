@@ -8,6 +8,7 @@
 #include <regex>
 #include <iostream>
 #include <algorithm>
+#include "device/GalaxyBudsDevice.h"
 
 namespace MagicPodsCore {
 
@@ -151,7 +152,21 @@ namespace MagicPodsCore {
             }
             return false;
         };
+            
+        const static auto checkHardcodedModalias = [](const std::string& modalias) -> bool {
+            
+            LOG_RELEASE("%s", modalias.c_str());
+            return modalias == "bluetooth:v0075pA013d0001";
+        };
     
+        if (deviceInterface.contains("Modalias") && checkHardcodedModalias(deviceInterface.at("Modalias").get<std::string>())){
+            auto newDevice = GalaxyBudsDevice::Create(objectPath, deviceInterface, 9);
+            newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
+                TrySelectNewActiveDevice();
+            });
+            return newDevice;
+        }
+
         if (deviceInterface.contains("Modalias") && checkModalias(deviceInterface.at("Modalias").get<std::string>())) {
             //auto newDevice = std::make_shared<Device>(objectPath, deviceInterface);
             //auto newDevice = std::make_shared<AapDevice>(objectPath, deviceInterface);

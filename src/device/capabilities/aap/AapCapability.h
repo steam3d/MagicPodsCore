@@ -3,7 +3,7 @@
 #include "../Capability.h"
 #include "../../../aap/setters/AapRequest.h"
 #include "../../AapDevice.h"
-class AapDevice;
+//class AapDevice;
 
 namespace MagicPodsCore
 {
