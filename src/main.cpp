@@ -199,10 +199,10 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
 void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
     auto onCapabilityChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, const Capability& newValues) {
         if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
-            LOG_RELEASE("OnBatteryChanged Broadcast was triggered");
+            LOG_RELEASE("onCapabilityChanged Broadcast was triggered");
             app.getLoop()->defer([&app, &devicesInfoFetcher](){
                 auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
-                app.publish("OnBatteryChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+                app.publish("onCapabilityChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
             });
         }
     };
@@ -325,6 +325,7 @@ int main(int argc, char** argv) {
             LOG_RELEASE("On open websocket connected");
             ws->subscribe("OnBatteryChanged");
             ws->subscribe("OnAncChanged");
+            ws->subscribe("onCapabilityChanged");
             ws->subscribe("OnConnectedChanged");
             ws->subscribe("OnActiveDeviceChanged");
             ws->subscribe("OnDefaultAdapterChangeEnabled");
