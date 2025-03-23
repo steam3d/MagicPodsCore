@@ -22,13 +22,24 @@ add_executable(MagicPodsCore
     src/aap/watchers/AapBatteryWatcher.cpp
     src/aap/watchers/AapWatcher.cpp
 
+    src/sgb/watchers/GalaxyBudsAncWatcher.cpp
+    src/sgb/watchers/GalaxyBudsBatteryWatcher.cpp
+    src/sgb/watchers/GalaxyBudsEarDetectionWatcher.cpp
+    src/sgb/Crc16.cpp
+    src/sgb/GalaxyBudsHelper.cpp
+    src/sgb/GalaxyBudsPacket.cpp
 
     src/device/capabilities/aap/AapCapability.cpp
     src/device/capabilities/aap/AapAncCapability.cpp
     src/device/capabilities/aap/AapBatteryCapability.cpp
+    
+    src/device/capabilities/sgb/GalaxyBudsCapability.cpp
+    src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
+    src/device/capabilities/sgb/GalaxyBudsBatteryCapability.cpp
 
     src/device/capabilities/Capability.cpp
     src/device/AapDevice.cpp
+    src/device/GalaxyBudsDevice.cpp
     src/device/DeviceBattery.cpp    
 
     src/DevicesInfoFetcher.cpp

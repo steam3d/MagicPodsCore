@@ -1,8 +1,13 @@
 #include "GalaxyBudsDevice.h"
 
+#include "../sgb/GalaxyBudsHelper.h"
+#include "../sgb/enums/GalaxyBudsModelIds.h"
+#include "capabilities/sgb/GalaxyBudsAncCapability.h"
+#include "capabilities/sgb/GalaxyBudsBatteryCapability.h"
+
 namespace MagicPodsCore
 {
-    void GalaxyBudsDevice::OnResponseDataReceived(std::vector<unsigned char> data)
+    void GalaxyBudsDevice::OnResponseDataReceived(const std::vector<unsigned char> &data)
     {
         std::optional<GalaxyBudsResponseData> optionalData = _packet.Extract(data);
         if (optionalData.has_value())
@@ -16,8 +21,8 @@ namespace MagicPodsCore
           _customProductId(model),
           _packet(static_cast<GalaxyBudsModelIds>(model))
     {
-        capabilities.push_back(GalaxyBudsBatteryCapability(*this));
-        capabilities.push_back(GalaxyBudsAncCapability(*this));
+        capabilities.push_back(std::make_unique<GalaxyBudsBatteryCapability>(*this));
+        capabilities.push_back(std::make_unique<GalaxyBudsAncCapability>(*this));
     }
 
     void GalaxyBudsDevice::SendData(const GalaxyBudsSetAnc &setter) // TODO MAKE COMMON CLASS FOR SETTERS

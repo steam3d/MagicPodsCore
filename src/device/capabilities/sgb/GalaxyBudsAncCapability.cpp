@@ -18,6 +18,10 @@ namespace MagicPodsCore
             return GalaxyBudsAnc::NoiseReduction;
         case DeviceAncModes::Adaptive:
             return GalaxyBudsAnc::Adaptive;
+
+        // It will never be called, but it is added to avoid a build warning.
+        default:
+            return GalaxyBudsAnc::Off;
         }
     }
     DeviceAncModes GalaxyBudsAncCapability::GalaxyBudsAncToDeviceAncModes(GalaxyBudsAnc mode)
@@ -32,6 +36,10 @@ namespace MagicPodsCore
             return DeviceAncModes::NoiseCancellation;
         case GalaxyBudsAnc::Adaptive:
             return DeviceAncModes::Adaptive;
+
+        // It will never be called, but it is added to avoid a build warning.
+        default:
+            return DeviceAncModes::Off;
         }
     }
 
@@ -83,7 +91,7 @@ namespace MagicPodsCore
             {
                 GalaxyBudsAnc nativeMode = DeviceAncModesToGalaxyBudsAnc(static_cast<DeviceAncModes>(value));
                 SendData(GalaxyBudsSetAnc(nativeMode));
-                LOG_DEBUG("GalaxyBudsAncCapability::SetFromJson set option to %d", GalaxyBudsAncToString(nativeMode));
+                LOG_DEBUG("GalaxyBudsAncCapability::SetFromJson set option to %s", GalaxyBudsAncToString(nativeMode).c_str());
             }
             else
             {

@@ -2,13 +2,9 @@
 
 #include "../Event.h"
 #include "../Device.h"
-#include "../sgb/GalaxyBudsHelper.h"
 #include "../sgb/setters/GalaxyBudsSetAnc.h"
-#include "../sgb/enums/GalaxyBudsModelIds.h"
 #include "../sgb/structs/GalaxyBudsResponseData.h"
 #include "../sgb/GalaxyBudsPacket.h"
-#include "capabilities/sgb/GalaxyBudsAncCapability.h"
-#include "capabilities/sgb/GalaxyBudsBatteryCapability.h"
 
 namespace MagicPodsCore
 {
@@ -18,7 +14,7 @@ namespace MagicPodsCore
         unsigned short _customProductId = 0;
         Event<GalaxyBudsResponseData> _onGalaxyBudsResponseDataRecived{};
         GalaxyBudsPacket _packet;
-        void OnResponseDataReceived(std::vector<unsigned char> data) override;
+        void OnResponseDataReceived(const std::vector<unsigned char> &data) override;
 
         explicit GalaxyBudsDevice(const sdbus::ObjectPath &objectPath,
                                   const std::map<std::string, sdbus::Variant> &deviceInterface,

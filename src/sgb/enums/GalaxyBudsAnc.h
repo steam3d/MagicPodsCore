@@ -34,6 +34,8 @@ namespace MagicPodsCore {
             return "Adaptive";
         case GalaxyBudsAnc::NoiseReduction:
             return "NoiseReduction";
+        default:
+            return "Unknown value";
         }
     }
 }
