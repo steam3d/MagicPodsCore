@@ -23,7 +23,7 @@ namespace MagicPodsCore
 
         return nlohmann::json{{name, bodyJson}};
     }
-    void Capability::SetFromJson(nlohmann::json json)
+    void Capability::SetFromJson(const nlohmann::json &json)
     {
     }
 }

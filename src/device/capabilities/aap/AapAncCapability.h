@@ -23,6 +23,6 @@ namespace MagicPodsCore
     public:
         explicit AapAncCapability(AapDevice &device);
         ~AapAncCapability() override;
-        void SetFromJson(nlohmann::json json) override;
+        void SetFromJson(const nlohmann::json &json) override;
     };
 }

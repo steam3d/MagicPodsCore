@@ -23,6 +23,6 @@ namespace MagicPodsCore
     public:
         explicit GalaxyBudsAncCapability(GalaxyBudsDevice &device);
         ~GalaxyBudsAncCapability() override;
-        void SetFromJson(nlohmann::json json) override;
+        void SetFromJson(const nlohmann::json &json) override;
     };
 }

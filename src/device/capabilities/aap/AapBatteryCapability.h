@@ -22,6 +22,6 @@ namespace MagicPodsCore
     public:
         explicit AapBatteryCapability(AapDevice &device);
         ~AapBatteryCapability() override;
-        void SetFromJson(nlohmann::json json) override {};
+        void SetFromJson(const nlohmann::json &json) override {};
     };
 }

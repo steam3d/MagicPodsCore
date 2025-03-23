@@ -86,6 +86,8 @@ namespace MagicPodsCore {
         void Disconnect(); // TODO: может полностью перейти на Async?
         void DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback);
 
+        void SetCapabilities(const nlohmann::json &json);
+
         nlohmann::json GetAsJson();
     };
 

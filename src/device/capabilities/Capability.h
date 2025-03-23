@@ -29,7 +29,7 @@ namespace MagicPodsCore
         }
 
         nlohmann::json GetAsJson();
-        virtual void SetFromJson(nlohmann::json json);
+        virtual void SetFromJson(const nlohmann::json &json);
         virtual ~Capability() = default;
     };
 }

@@ -89,12 +89,16 @@ namespace MagicPodsCore
         watcher.GetAncChangedEvent().Unsubscribe(watcherAncChangedEventId);
     }
 
-    void GalaxyBudsAncCapability::SetFromJson(nlohmann::json json)
-    {
-        // {"value":1}
-        if (json.contains("value") && json["value"].is_number_integer())
+    void GalaxyBudsAncCapability::SetFromJson(const nlohmann::json &json)
+    {                
+        if (!json.contains(name))
+            return;
+        
+        const auto& capability = json.at(name);
+
+        if (capability.contains("value") && capability["value"].is_number_integer())
         {
-            unsigned char value = static_cast<unsigned char>(json["value"].get<int>());
+            unsigned char value = static_cast<unsigned char>(capability["value"].get<int>());
             if (isValidDeviceAncModesType(value))
             {
                 GalaxyBudsAnc nativeMode = DeviceAncModesToGalaxyBudsAnc(static_cast<DeviceAncModes>(value));

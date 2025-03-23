@@ -107,6 +107,30 @@ namespace MagicPodsCore {
         }
     }
 
+    void DevicesInfoFetcher::SetCapabilities(const nlohmann::json &json)
+    {        
+        LOG_RELEASE("DevicesInfoFetcher::SetCapabilities");
+
+        if (!json.contains("arguments") || !json["arguments"].contains("address") || !json["arguments"].contains("capabilities"))
+        {
+            LOG_RELEASE("Error: missing required fields in SetCapabilities");
+            return;
+        }
+    
+        const auto& arguments = json.at("arguments");
+        const auto& deviceAddress = arguments.at("address").get_ref<const std::string&>();
+        const auto& capabilities = arguments.at("capabilities");
+    
+        for (const auto& [key, device] : _devicesMap)
+        {
+            if (device->GetAddress() == deviceAddress)
+            {
+                device->SetCapabilities(capabilities);
+                break;
+            }
+        }
+    }
+
     void DevicesInfoFetcher::SetAnc(const std::string& deviceAddress, DeviceAncModes mode) {
         //for (const auto& [key, value] : _devicesMap) {
         //    if (value->GetAddress() == deviceAddress) {

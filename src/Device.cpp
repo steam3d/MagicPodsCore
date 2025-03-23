@@ -109,6 +109,14 @@ namespace MagicPodsCore {
         _deviceProxy->callMethodAsync("Disconnect").withTimeout(std::chrono::seconds(10)).onInterface("org.bluez.Device1").uponReplyInvoke(callback);
     }
 
+    void Device::SetCapabilities(const nlohmann::json &json)
+    {
+        for (auto& capability : capabilities)
+        {
+            capability->SetFromJson(json);
+        }
+    }
+
     nlohmann::json Device::GetAsJson()
     {
         auto capabilitiesJson = nlohmann::json::object();

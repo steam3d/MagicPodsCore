@@ -51,6 +51,7 @@ namespace MagicPodsCore {
 
         void Connect(const std::string& deviceAddress);
         void Disconnect(const std::string& deviceAddress);
+        void SetCapabilities(const nlohmann::json& json);
         void SetAnc(const std::string& deviceAddress, DeviceAncModes mode);
 
         bool IsBluetoothAdapterPowered() const {

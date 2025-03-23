@@ -100,6 +100,13 @@ void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
         devicesInfoFetcher.SetAnc(deviceAddress, static_cast<DeviceAncModes>(value));
 }
 
+
+void HandleSetCapabilitiesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    LOG_RELEASE("HandleSetAncRequest");
+    devicesInfoFetcher.SetCapabilities(json);
+}
+
+
 void HandleGetDefaultBluetoothAdapterRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     LOG_RELEASE("HandleGetDefaultBluetoothAdapterRequest");
     
@@ -169,6 +176,8 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
                 HandleDisconnectDeviceRequest(ws, json, opCode, app, devicesInfoFetcher);
             else if (methodName == "SetAnc")
                 HandleSetAncRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "SetCapabilities")
+                HandleSetCapabilitiesRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "GetDefaultBluetoothAdapter")
                 HandleGetDefaultBluetoothAdapterRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "EnableDefaultBluetoothAdapter")

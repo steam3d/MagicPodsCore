@@ -89,12 +89,16 @@ namespace MagicPodsCore
         watcher.GetEvent().Unsubscribe(watcherAncChangedEventId);
     }
 
-    void AapAncCapability::SetFromJson(nlohmann::json json)
+    void AapAncCapability::SetFromJson(const nlohmann::json &json)
     {
-        // {"value":1}
-        if (json.contains("value") && json["value"].is_number_integer())
+        if (!json.contains(name))
+            return;
+
+        const auto& capability = json.at(name);
+
+        if (capability.contains("value") && capability["value"].is_number_integer())
         {
-            unsigned char value = static_cast<unsigned char>(json["value"].get<int>());
+            unsigned char value = static_cast<unsigned char>(capability["value"].get<int>());
             if (isValidDeviceAncModesType(value))
             {
                 AapAncMode nativeMode = DeviceAncModesToAapAncMode(static_cast<DeviceAncModes>(value));
