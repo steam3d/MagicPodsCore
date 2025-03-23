@@ -246,7 +246,32 @@ Request
 }
 ```
 
-Responce
+Response
 
 > Get decky Info
+
+### Set capabilities
+
+If a capability is not read-only, you can change it or change multiple capabilities at once.
+
+{
+  "method": "SetCapabilities",
+  "arguments": {
+    "address": "string",
+    "capabilities": {
+      "capabilityname1": {
+        "value": "int"
+      },
+      "capabilityname2": {
+        "value": "int"
+      }
+    }
+  }
+}
+
+Response
+
+if capability supports notification you will GetInfo
+
+
 
