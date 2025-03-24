@@ -15,6 +15,7 @@ add_executable(MagicPodsCore
 
     src/client/Client.cpp
 
+    src/sdk/aap/AapHelper.cpp
     src/sdk/aap/setters/AapEnableNotifications.cpp
     src/sdk/aap/setters/AapInit.cpp
     src/sdk/aap/setters/AapInitExt.cpp

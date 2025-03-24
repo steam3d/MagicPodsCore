@@ -17,11 +17,9 @@ nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto rootObject = nlohmann::json::object();
     auto jsonArray = nlohmann::json::array();
     for (const auto& device : devicesInfoFetcher.GetDevices()) {
-        auto jsonObject = nlohmann::json::object();
-        jsonObject["name"] = device->GetName();
-        jsonObject["address"] = device->GetAddress();
-        jsonObject["connected"] = device->GetConnected();
-        jsonArray.push_back(jsonObject);
+        auto deviceJson = device->GetAsJson();        
+        deviceJson.erase("capabilities"); // we do not need capabilities in GetDevices
+        jsonArray.push_back(deviceJson);
     }
     rootObject["headphones"] = jsonArray;
 
@@ -31,7 +29,7 @@ nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
 nlohmann::json MakeGetDeckyInfoResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto activeDevice = devicesInfoFetcher.GetActiveDevice();
     if (activeDevice)
-        return nlohmann::json{{"info", activeDevice->GetAsJson()}};        
+        return nlohmann::json{{"info", activeDevice->GetAsJson()}};
 
     return {};
 }
@@ -91,17 +89,6 @@ void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::Op
     });
 }
 
-void HandleSetAncRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleSetAncRequest");
-
-    auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
-    auto value = json.at("arguments").at("value").template get<int>();
-
-    if (value == 1 || value == 2 || value == 3) // TODO: исправить костыль
-        devicesInfoFetcher.SetAnc(deviceAddress, static_cast<DeviceAncModes>(value));
-}
-
-
 void HandleSetCapabilitiesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     LOG_RELEASE("HandleSetAncRequest");
     devicesInfoFetcher.SetCapabilities(json);
@@ -110,7 +97,7 @@ void HandleSetCapabilitiesRequest(auto *ws, const nlohmann::json& json, uWS::OpC
 
 void HandleGetDefaultBluetoothAdapterRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     LOG_RELEASE("HandleGetDefaultBluetoothAdapterRequest");
-    
+
     auto response = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
@@ -175,8 +162,6 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
                 HandleConnectDeviceRequest(ws, json, opCode, app, devicesInfoFetcher);
             else if (methodName == "DisconnectDevice")
                 HandleDisconnectDeviceRequest(ws, json, opCode, app, devicesInfoFetcher);
-            else if (methodName == "SetAnc")
-                HandleSetAncRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "SetCapabilities")
                 HandleSetCapabilitiesRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "GetDefaultBluetoothAdapter")
@@ -207,15 +192,7 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
             });
         }
     };
-    //auto onAncChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, DeviceAncMode newValue) {
-    //    if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
-    //        LOG_RELEASE("OnAncChanged Broadcast was triggered");
-    //        app.getLoop()->defer([&app, &devicesInfoFetcher](){
-    //            auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
-    //            app.publish("OnAncChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
-    //        });
-    //    }
-    //};
+
     auto onConnectedChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, bool newValue) {
         LOG_RELEASE("OnConnectedChanged Broadcast was triggered");
         app.getLoop()->defer([&app, &devicesInfoFetcher]() {
@@ -242,22 +219,15 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
         device->GetCapabilityChangedEvent().Subscribe([onCapabilityChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto& newValues) {
             onCapabilityChangedListener(weakDevice.lock(), newValues);
         });
-        //device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
-        //    onAncChangedListener(weakDevice.lock(), newValue);
-        //});
         device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
             onConnectedChangedListener(weakDevice.lock(), newValue);
         });
-    }
-    //devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onCapabilityChangedListener, onAncChangedListener, onConnectedChangedListener](size_t listenerId, auto newDevices) {
+    }    
     devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onCapabilityChangedListener, onConnectedChangedListener](size_t listenerId, auto newDevices) {
         for (auto& device : newDevices) {
             device->GetCapabilityChangedEvent().Subscribe([onCapabilityChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto& newValues) {
                 onCapabilityChangedListener(weakDevice.lock(), newValues);
             });
-            //device->GetAnc().GetAncChangedEvent().Subscribe([onAncChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
-            //    onAncChangedListener(weakDevice.lock(), newValue);
-            //});
             device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
                 onConnectedChangedListener(weakDevice.lock(), newValue);
             });
@@ -327,8 +297,6 @@ int main(int argc, char** argv) {
         .open = [](auto* ws) {
             /* Open event here, you may access ws->getUserData() which points to a PerSocketData struct */
             LOG_RELEASE("On open websocket connected");
-            ws->subscribe("OnBatteryChanged");
-            ws->subscribe("OnAncChanged");
             ws->subscribe("onCapabilityChanged");
             ws->subscribe("OnConnectedChanged");
             ws->subscribe("OnActiveDeviceChanged");
@@ -338,7 +306,7 @@ int main(int argc, char** argv) {
             HandleRequest(ws, message, opCode, app, devicesInfoFetcher);
 
             /* This is the opposite of what you probably want; compress if message is LARGER than 16 kb
-             * the reason we do the opposite here; compress if SMALLER than 16 kb is to allow for 
+             * the reason we do the opposite here; compress if SMALLER than 16 kb is to allow for
              * benchmarking of large message sending without compression */
             LOG_RELEASE("Received: %s", std::string{message}.c_str());
         },

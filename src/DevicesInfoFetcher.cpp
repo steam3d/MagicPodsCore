@@ -9,6 +9,7 @@
 #include <iostream>
 #include <algorithm>
 #include "device/GalaxyBudsDevice.h"
+#include "device/AapDevice.h"
 
 namespace MagicPodsCore {
 
@@ -129,15 +130,6 @@ namespace MagicPodsCore {
                 break;
             }
         }
-    }
-
-    void DevicesInfoFetcher::SetAnc(const std::string& deviceAddress, DeviceAncModes mode) {
-        //for (const auto& [key, value] : _devicesMap) {
-        //    if (value->GetAddress() == deviceAddress) {
-        //        value->SetAnc(mode);
-        //        break;
-        //    }
-        //}
     }
 
     void DevicesInfoFetcher::EnableBluetoothAdapter() {
