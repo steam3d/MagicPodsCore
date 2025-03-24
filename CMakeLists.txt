@@ -12,22 +12,22 @@ add_executable(MagicPodsCore
     src/main.cpp
     src/client/Client.cpp
 
-    src/aap/setters/AapEnableNotifications.cpp
-    src/aap/setters/AapInit.cpp
-    src/aap/setters/AapInitExt.cpp
-    src/aap/setters/AapRequest.cpp
-    src/aap/setters/AapSetAnc.cpp
+    src/sdk/aap/setters/AapEnableNotifications.cpp
+    src/sdk/aap/setters/AapInit.cpp
+    src/sdk/aap/setters/AapInitExt.cpp
+    src/sdk/aap/setters/AapRequest.cpp
+    src/sdk/aap/setters/AapSetAnc.cpp
 
-    src/aap/watchers/AapAncWatcher.cpp
-    src/aap/watchers/AapBatteryWatcher.cpp
-    src/aap/watchers/AapWatcher.cpp
+    src/sdk/aap/watchers/AapAncWatcher.cpp
+    src/sdk/aap/watchers/AapBatteryWatcher.cpp
+    src/sdk/aap/watchers/AapWatcher.cpp
 
-    src/sgb/watchers/GalaxyBudsAncWatcher.cpp
-    src/sgb/watchers/GalaxyBudsBatteryWatcher.cpp
-    src/sgb/watchers/GalaxyBudsEarDetectionWatcher.cpp
-    src/sgb/Crc16.cpp
-    src/sgb/GalaxyBudsHelper.cpp
-    src/sgb/GalaxyBudsPacket.cpp
+    src/sdk/sgb/watchers/GalaxyBudsAncWatcher.cpp
+    src/sdk/sgb/watchers/GalaxyBudsBatteryWatcher.cpp
+    src/sdk/sgb/watchers/GalaxyBudsEarDetectionWatcher.cpp
+    src/sdk/sgb/Crc16.cpp
+    src/sdk/sgb/GalaxyBudsHelper.cpp
+    src/sdk/sgb/GalaxyBudsPacket.cpp
 
     src/device/capabilities/aap/AapCapability.cpp
     src/device/capabilities/aap/AapAncCapability.cpp
@@ -46,5 +46,9 @@ add_executable(MagicPodsCore
     src/Device.cpp
 )
 add_subdirectory(dependencies)
-target_include_directories(MagicPodsCore PRIVATE src dependencies/json ${PROJECT_BINARY_DIR}/src)
+target_include_directories(MagicPodsCore PRIVATE
+    src    
+    dependencies/json
+    ${PROJECT_BINARY_DIR}/src
+)
 target_link_libraries(MagicPodsCore PRIVATE sdbus-c++ uWebSockets bluetooth)

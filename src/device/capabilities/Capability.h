@@ -2,8 +2,7 @@
 
 #include <string>
 #include <json.hpp>
-#include "../../Event.h"
-#include "../../Logger.h"
+#include "Event.h"
 
 namespace MagicPodsCore
 {

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../Event.h"
-#include "../Logger.h"
-#include "enums/DeviceBatteryStatus.h"
-#include "structs/DeviceBatteryData.h"
+#include "Event.h"
+#include "Logger.h"
+#include "device/structs/DeviceBatteryData.h"
 #include <json.hpp>
 
 namespace MagicPodsCore

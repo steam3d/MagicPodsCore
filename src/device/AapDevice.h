@@ -2,7 +2,7 @@
 
 #include "../Event.h"
 #include "../Device.h"
-#include "../aap/setters/AapRequest.h"
+#include "sdk/aap/setters/AapRequest.h"
 //class AapAncCapability;
 //class AapBatteryCapability;
 

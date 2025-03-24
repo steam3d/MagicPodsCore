@@ -1,7 +1,7 @@
 #include "DevicesInfoFetcher.h"
 
 #include "BtVendorIds.h"
-#include "aap/enums/AapModelIds.h"
+#include "sdk/aap/enums/AapModelIds.h"
 #include "StringUtils.h"
 #include "Logger.h"
 

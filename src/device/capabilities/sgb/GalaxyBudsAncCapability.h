@@ -1,8 +1,8 @@
 #pragma once
 #include "GalaxyBudsCapability.h"
-#include "../../../sgb/watchers/GalaxyBudsAncWatcher.h"
-#include "../../../sgb/setters/GalaxyBudsSetAnc.h"
-#include "../../../sgb/GalaxyBudsPacket.h"
+#include "sdk/sgb/watchers/GalaxyBudsAncWatcher.h"
+#include "sdk/sgb/setters/GalaxyBudsSetAnc.h"
+#include "sdk/sgb/GalaxyBudsPacket.h"
 #include "../../enums/DeviceAncModes.h"
 
 namespace MagicPodsCore

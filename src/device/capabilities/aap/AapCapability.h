@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Capability.h"
-#include "../../../aap/setters/AapRequest.h"
+#include "sdk/aap/setters/AapRequest.h"
 #include "../../AapDevice.h"
 //class AapDevice;
 

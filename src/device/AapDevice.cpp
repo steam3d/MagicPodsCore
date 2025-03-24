@@ -1,8 +1,8 @@
 #include "AapDevice.h"
 #include "capabilities/aap/AapAncCapability.h"
 #include "capabilities/aap/AapBatteryCapability.h"
-#include "../aap/setters/AapInit.h"
-#include "../aap/setters/AapEnableNotifications.h"
+#include "sdk/aap/setters/AapInit.h"
+#include "sdk/aap/setters/AapEnableNotifications.h"
 
 namespace MagicPodsCore
 {

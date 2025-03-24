@@ -1,6 +1,6 @@
 #pragma once
 #include "GalaxyBudsCapability.h"
-#include "../../../sgb/watchers/GalaxyBudsBatteryWatcher.h"
+#include "sdk/sgb/watchers/GalaxyBudsBatteryWatcher.h"
 #include "../../DeviceBattery.h"
 
 namespace MagicPodsCore

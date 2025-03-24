@@ -1,7 +1,7 @@
 #include "GalaxyBudsDevice.h"
 
-#include "../sgb/GalaxyBudsHelper.h"
-#include "../sgb/enums/GalaxyBudsModelIds.h"
+#include "sdk/sgb/GalaxyBudsHelper.h"
+#include "sdk/sgb/enums/GalaxyBudsModelIds.h"
 #include "capabilities/sgb/GalaxyBudsAncCapability.h"
 #include "capabilities/sgb/GalaxyBudsBatteryCapability.h"
 

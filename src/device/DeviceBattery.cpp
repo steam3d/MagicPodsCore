@@ -1,5 +1,6 @@
 #include "DeviceBattery.h"
-#include "enums/DeviceBatteryType.h"
+#include "device/enums/DeviceBatteryType.h"
+#include "device/enums/DeviceBatteryStatus.h"
 
 namespace MagicPodsCore
 {

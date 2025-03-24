@@ -1,8 +1,8 @@
 #pragma once
 #include "AapCapability.h"
-#include "../../../aap/watchers/AapAncWatcher.h"
-#include "../../../aap/setters/AapSetAnc.h"
-#include "../../../aap/enums/AapAncMode.h"
+#include "sdk/aap/watchers/AapAncWatcher.h"
+#include "sdk/aap/setters/AapSetAnc.h"
+#include "sdk/aap/enums/AapAncMode.h"
 #include "../../enums/DeviceAncModes.h"
 
 namespace MagicPodsCore

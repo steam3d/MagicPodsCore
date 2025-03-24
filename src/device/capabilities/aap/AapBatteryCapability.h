@@ -1,6 +1,6 @@
 #pragma once
 #include "AapCapability.h"
-#include "../../../aap/watchers/AapBatteryWatcher.h"
+#include "sdk/aap/watchers/AapBatteryWatcher.h"
 #include "../../DeviceBattery.h"
 
 namespace MagicPodsCore

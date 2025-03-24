@@ -1,4 +1,5 @@
 #include "Capability.h"
+#include "Logger.h"
 
 namespace MagicPodsCore
 {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../Event.h"
-#include "../Device.h"
-#include "../sgb/setters/GalaxyBudsSetAnc.h"
-#include "../sgb/structs/GalaxyBudsResponseData.h"
-#include "../sgb/GalaxyBudsPacket.h"
+#include "Event.h"
+#include "Device.h"
+#include "sdk/sgb/setters/GalaxyBudsSetAnc.h"
+#include "sdk/sgb/structs/GalaxyBudsResponseData.h"
+#include "sdk/sgb/GalaxyBudsPacket.h"
 
 namespace MagicPodsCore
 {
