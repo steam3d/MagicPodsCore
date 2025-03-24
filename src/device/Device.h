@@ -19,8 +19,6 @@ namespace MagicPodsCore {
 
         std::string _name{};
         bool _connected{};
-        unsigned short _vendorId = 0;
-        unsigned short _productId = 0; //model
         std::string _modaliasString{};
         Event<bool> _onConnectedPropertyChangedEvent{};
         Event<Capability> _onCapabilityChangedEvent{};
@@ -28,8 +26,10 @@ namespace MagicPodsCore {
         virtual void OnResponseDataReceived(const std::vector<unsigned char> &data) = 0;
         void SubscribeCapabilitiesChanges();
         void UnsubscribeCapabilitiesChanges();
-
+        
     protected:
+        unsigned short _vendorId = 0;
+        unsigned short _productId = 0; //model
         mutable std::mutex _propertyMutex{};
         std::unique_ptr<Client> _client;
         std::string _address{};
