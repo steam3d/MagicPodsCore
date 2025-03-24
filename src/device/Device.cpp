@@ -1,4 +1,5 @@
 #include "Device.h"
+#include "DevicesInfoFetcher.h"
 
 namespace MagicPodsCore {
     void Device::SubscribeCapabilitiesChanges()
@@ -41,10 +42,10 @@ namespace MagicPodsCore {
         }
 
         if (deviceInterface.contains("Modalias")) {
-            _modaliasString = deviceInterface.at("Modalias").get<std::string>();
+            auto vp = DevicesInfoFetcher::ParseVidPid(deviceInterface.at("Modalias").get<std::string>());
+            _vendorId = vp[0];
+            _productId = vp[1];
         }
-
-        //TODO parse modalias as Product and Vendor
     }
 
     void Device::Init()

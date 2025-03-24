@@ -13,6 +13,8 @@
 #include "device/Device.h"
 #include "Event.h"
 
+#include <array>
+
 namespace MagicPodsCore {
 
     class DeviceComparator {
@@ -49,7 +51,7 @@ namespace MagicPodsCore {
 
         void Connect(const std::string& deviceAddress);
         void Disconnect(const std::string& deviceAddress);
-        void SetCapabilities(const nlohmann::json& json);        
+        void SetCapabilities(const nlohmann::json& json);
 
         bool IsBluetoothAdapterPowered() const {
             return _isBluetoothAdapterPowered;
@@ -80,9 +82,11 @@ namespace MagicPodsCore {
 
         void ClearAndFillDevicesMap();
         void TrySelectNewActiveDevice();
-        
+
         void OnDevicesAdd(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices);
         void OnDevicesRemove(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices);
-    };
 
+        public:
+            static std::array<unsigned short, 2>ParseVidPid(const std::string& modalias);
+    };
 }

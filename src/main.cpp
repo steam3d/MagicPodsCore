@@ -17,7 +17,7 @@ nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto rootObject = nlohmann::json::object();
     auto jsonArray = nlohmann::json::array();
     for (const auto& device : devicesInfoFetcher.GetDevices()) {
-        auto deviceJson = device->GetAsJson();        
+        auto deviceJson = device->GetAsJson();
         deviceJson.erase("capabilities"); // we do not need capabilities in GetDevices
         jsonArray.push_back(deviceJson);
     }
@@ -222,7 +222,7 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
         device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
             onConnectedChangedListener(weakDevice.lock(), newValue);
         });
-    }    
+    }
     devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onCapabilityChangedListener, onConnectedChangedListener](size_t listenerId, auto newDevices) {
         for (auto& device : newDevices) {
             device->GetCapabilityChangedEvent().Subscribe([onCapabilityChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto& newValues) {
