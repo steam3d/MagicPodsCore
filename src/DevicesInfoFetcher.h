@@ -10,7 +10,7 @@
 #include <sdbus-c++/sdbus-c++.h>
 #include <json.hpp>
 
-#include "Device.h"
+#include "device/Device.h"
 #include "Event.h"
 #include "device/enums/DeviceAncModes.h"
 #include "device/AapDevice.h"

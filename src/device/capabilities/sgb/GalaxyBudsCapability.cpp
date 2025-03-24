@@ -1,4 +1,5 @@
 #include "GalaxyBudsCapability.h"
+#include "sdk/sgb/enums/GalaxyBudsModelIds.h"
 
 namespace MagicPodsCore
 {

@@ -41,9 +41,9 @@ add_executable(MagicPodsCore
     src/device/AapDevice.cpp
     src/device/GalaxyBudsDevice.cpp
     src/device/DeviceBattery.cpp    
+    src/device/Device.cpp
 
     src/DevicesInfoFetcher.cpp
-    src/Device.cpp
 )
 add_subdirectory(dependencies)
 target_include_directories(MagicPodsCore PRIVATE

@@ -1,10 +1,9 @@
 #pragma once
 
-#include "../Capability.h"
-#include "sdk/sgb/enums/GalaxyBudsModelIds.h"
+#include "device/capabilities/Capability.h"
+#include "device/GalaxyBudsDevice.h"
 #include "sdk/sgb/structs/GalaxyBudsResponseData.h"
 #include "sdk/sgb/setters/GalaxyBudsSetAnc.h"
-#include "../../GalaxyBudsDevice.h"
 
 namespace MagicPodsCore
 {

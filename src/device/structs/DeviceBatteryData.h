@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../enums/DeviceBatteryType.h"
-#include "../enums/DeviceBatteryStatus.h"
+#include "device/enums/DeviceBatteryType.h"
+#include "device/enums/DeviceBatteryStatus.h"
 #include <algorithm>
 
 namespace MagicPodsCore

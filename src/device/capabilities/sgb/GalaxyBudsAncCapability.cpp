@@ -1,4 +1,6 @@
 #include "GalaxyBudsAncCapability.h"
+#include "sdk/sgb/setters/GalaxyBudsSetAnc.h"
+#include "sdk/sgb/GalaxyBudsPacket.h"
 
 namespace MagicPodsCore
 {
