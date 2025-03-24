@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../AppleProductIds.h"
-#include "../BtVendorIds.h"
-
 namespace MagicPodsCore
 {
     class AapHelper

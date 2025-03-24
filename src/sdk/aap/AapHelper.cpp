@@ -1,4 +1,6 @@
 #include "AapHelper.h"
+#include "sdk/aap/enums/AapModelIds.h"
+#include "BtVendorIds.h"
 
 namespace MagicPodsCore
 {
@@ -6,7 +8,7 @@ namespace MagicPodsCore
     {
         if (vendorId == static_cast<unsigned short>(BtVendorIds::Apple))
         {
-            for (auto &appleProductId : AllAppleProductIds)
+            for (auto &appleProductId : AllAapModelsIds)
             {
                 if (productId == static_cast<unsigned short>(appleProductId))
                     return true;
