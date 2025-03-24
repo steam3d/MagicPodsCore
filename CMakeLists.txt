@@ -10,6 +10,9 @@ configure_file(config/Config.h.in src/Config.h)
 
 add_executable(MagicPodsCore 
     src/main.cpp
+
+    src/tests/TestsSgb.cpp
+
     src/client/Client.cpp
 
     src/sdk/aap/setters/AapEnableNotifications.cpp

@@ -5,6 +5,7 @@
 #include "DevicesInfoFetcher.h"
 #include "device/DeviceBattery.h"
 #include "device/enums/DeviceAncModes.h"
+#include "tests/TestsSgb.h"
 #include "Logger.h"
 #include "Config.h"
 
@@ -288,6 +289,9 @@ bool TryToParseArguments(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
+    #ifdef DEBUG
+    TestsSgb sgb;
+    #endif
     // fix stdout buffering issue, when python does not receive output
     setvbuf(stdout, NULL, _IONBF, 0);
 

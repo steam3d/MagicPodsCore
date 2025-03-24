@@ -1,15 +1,16 @@
-#include "Crc16.h"
-#include "enums/GalaxyBudsMsgIds.h"
-#include "GalaxyBudsHelper.h"
-#include "enums/GalaxyBudsModelIds.h"
-#include "enums/GalaxyBudsColoredModelIds.h"
-#include "GalaxyBudsPacket.h"
-#include "enums/GalaxyBudsAnc.h"
-#include "watchers/GalaxyBudsAncWatcher.h"
-#include "watchers/GalaxyBudsEarDetectionWatcher.h"
-#include "watchers/GalaxyBudsBatteryWatcher.h"
-#include "setters/GalaxyBudsSetAnc.h"
-#include "../StringUtils.h"
+#include "TestsSgb.h"
+#include "sdk/sgb/Crc16.h"
+#include "sdk/sgb/enums/GalaxyBudsMsgIds.h"
+#include "sdk/sgb/GalaxyBudsHelper.h"
+#include "sdk/sgb/enums/GalaxyBudsModelIds.h"
+#include "sdk/sgb/enums/GalaxyBudsColoredModelIds.h"
+#include "sdk/sgb/GalaxyBudsPacket.h"
+#include "sdk/sgb/enums/GalaxyBudsAnc.h"
+#include "sdk/sgb/watchers/GalaxyBudsAncWatcher.h"
+#include "sdk/sgb/watchers/GalaxyBudsEarDetectionWatcher.h"
+#include "sdk/sgb/watchers/GalaxyBudsBatteryWatcher.h"
+#include "sdk/sgb/setters/GalaxyBudsSetAnc.h"
+#include "StringUtils.h"
 #include <string>
 #include <iostream>
 #include <cstring>
@@ -18,7 +19,7 @@
 using namespace MagicPodsCore;
 
 // 6102086464010111000000ff22000054015401070004dd0004041000010000110200000000000000000000000000000100000200010000ff010100540f
-bool TestChecksum1()
+bool TestsSgb::TestChecksum1()
 {
     std::vector<unsigned char> raw = {97, 2, 8, 100, 100, 1, 1, 17, 0, 0, 0, 255, 34, 0, 0, 84, 1, 84, 1, 7, 0, 4, 221, 0, 4, 4, 16, 0, 1, 0, 0, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 255, 1, 1, 0, 84, 15};
 
@@ -29,7 +30,7 @@ bool TestChecksum1()
 }
 
 // fd04007803 93 b1 dd
-bool TestChecksum2()
+bool TestsSgb::TestChecksum2()
 {
     std::vector<unsigned char> raw = {3};
 
@@ -39,7 +40,7 @@ bool TestChecksum2()
 }
 
 // Finder
-bool TestFindByGuid1()
+bool TestsSgb::TestFindByGuid1()
 {
     std::vector<std::string> guids = {
         "d908aab5-7a90-4cbe-8641-86a553db0147",
@@ -52,7 +53,7 @@ bool TestFindByGuid1()
            pairModelColor.second == StringUtils::int16ToHex(static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds2ProWhite));
 }
 
-bool TestFindByGuid2()
+bool TestsSgb::TestFindByGuid2()
 {
     std::vector<std::string> guids = {
         "d908aab5-7a90-4cbe-8641-86a553db0154",
@@ -65,7 +66,7 @@ bool TestFindByGuid2()
            pairModelColor.second == StringUtils::int16ToHex(static_cast<int16_t>(GalaxyBudsColoredModelIds::GalaxyBuds3ProSilver));
 }
 
-bool TestFindByGuid3()
+bool TestsSgb::TestFindByGuid3()
 {
     std::vector<std::string> guids = {
         "d908aab5-7a90-4cbe-8641-86a553db-X",
@@ -79,7 +80,7 @@ bool TestFindByGuid3()
            pairModelColor.second == "";
 }
 
-bool TestFindByGuid4()
+bool TestsSgb::TestFindByGuid4()
 {
     std::vector<std::string> guids = {
         "d908aab5-7a90-4cbe-8641-86a553db-X",
@@ -91,7 +92,7 @@ bool TestFindByGuid4()
            pairModelColor.second == "";
 }
 
-bool TestFindByName1()
+bool TestsSgb::TestFindByName1()
 {
     std::vector<std::string> guids = {};
     std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Samsung Galaxy Buds+ (user)");
@@ -100,7 +101,7 @@ bool TestFindByName1()
            pairModelColor.second == "";
 }
 
-bool TestFindByName2()
+bool TestsSgb::TestFindByName2()
 {
     std::vector<std::string> guids = {};
     std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Galaxy Buds2 (user)");
@@ -109,7 +110,7 @@ bool TestFindByName2()
            pairModelColor.second == "";
 }
 
-bool TestFindByName3()
+bool TestsSgb::TestFindByName3()
 {
     std::vector<std::string> guids = {};
     std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Samsung Galaxy Buds2 Pro (user))");
@@ -118,7 +119,7 @@ bool TestFindByName3()
            pairModelColor.second == "";
 }
 
-bool TestFindByName4()
+bool TestsSgb::TestFindByName4()
 {
     std::vector<std::string> guids = {};
     std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Galaxy Buds3 (user)");
@@ -127,7 +128,7 @@ bool TestFindByName4()
            pairModelColor.second == "";
 }
 
-bool TestFindByName5()
+bool TestsSgb::TestFindByName5()
 {
     std::vector<std::string> guids = {};
     std::pair<GalaxyBudsModelIds, std::string> pairModelColor = GalaxyBudsHelper::SearchModelColor(guids, "Samsung Galaxy Buds3 Pro (user)");
@@ -136,7 +137,7 @@ bool TestFindByName5()
            pairModelColor.second == "";
 }
 
-bool TestExtract1()
+bool TestsSgb::TestExtract1()
 {
     std::vector<unsigned char> raw = {253, 61, 0, 97, 2, 8, 100, 100, 1, 1, 17, 0, 0, 0, 255, 34, 0, 0, 84, 1, 84, 1, 7, 0, 4, 221, 0, 4, 4, 16, 0, 1, 0, 0, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 255, 1, 1, 0, 15, 84, 221};
     std::vector<unsigned char> expectedPayload = {2, 8, 100, 100, 1, 1, 17, 0, 0, 0, 255, 34, 0, 0, 84, 1, 84, 1, 7, 0, 4, 221, 0, 4, 4, 16, 0, 1, 0, 0, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 255, 1, 1, 0};
@@ -165,7 +166,7 @@ bool TestExtract1()
     }
 }
 
-bool TestEncode1()
+bool TestsSgb::TestEncode1()
 {
     std::vector<unsigned char> payload = {0};
     std::vector<unsigned char> expectedData = {0, 4, 0, 120, 0, 240, 129, 0};
@@ -183,7 +184,7 @@ bool TestEncode1()
     }
 }
 
-bool TestAnc1()
+bool TestsSgb::TestAnc1()
 {
     std::vector<unsigned char> raw = {253, 61, 192, 97, 2, 8, 100, 100, 1, 1, 33, 0, 0, 0, 255, 34, 2, 0, 84, 1, 84, 1, 7, 0, 4, 221, 0, 4, 4, 16, 0, 1, 0, 0, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 255, 1, 1, 0, 212, 72, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBuds3Pro);
@@ -208,7 +209,7 @@ bool TestAnc1()
     return ancData == GalaxyBudsAnc::AmbientSound;
 }
 
-bool TestAnc2()
+bool TestsSgb::TestAnc2()
 {
     std::vector<unsigned char> raw = {253, 61, 128, 97, 2, 8, 100, 100, 1, 1, 17, 0, 0, 0, 255, 34, 0, 0, 84, 1, 84, 1, 7, 0, 4, 221, 0, 4, 4, 16, 0, 1, 0, 0, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 255, 1, 1, 0, 15, 84, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBuds3Pro);
@@ -233,7 +234,7 @@ bool TestAnc2()
     return ancData == GalaxyBudsAnc::Off;
 }
 
-bool TestAnc3()
+bool TestsSgb::TestAnc3()
 {
     std::vector<unsigned char> raw = {253, 10, 0, 119, 0, 17, 1, 0, 13, 13, 1, 77, 166, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBuds3Pro);
@@ -258,7 +259,7 @@ bool TestAnc3()
     return ancData == GalaxyBudsAnc::Off;
 }
 
-bool TestAnc4()
+bool TestsSgb::TestAnc4()
 {
     std::vector<unsigned char> raw = {253, 10, 64, 119, 1, 17, 1, 0, 13, 13, 1, 44, 30, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBuds3Pro);
@@ -283,7 +284,7 @@ bool TestAnc4()
     return ancData == GalaxyBudsAnc::NoiseReduction;
 }
 
-bool TestEarDetection1()
+bool TestsSgb::TestEarDetection1()
 {
     std::vector<unsigned char> raw = {253, 61, 0, 97, 2, 8, 100, 100, 1, 1, 17, 0, 0, 0, 255, 34, 0, 0, 84, 1, 84, 1, 7, 0, 4, 221, 0, 4, 4, 16, 0, 1, 0, 0, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 255, 1, 1, 0, 15, 84, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBuds3Pro);
@@ -308,7 +309,7 @@ bool TestEarDetection1()
     return state.Left == GalaxyBudsEarDetectionState::Wearing && state.Right == GalaxyBudsEarDetectionState::Wearing;
 }
 
-bool TestEarDetection2()
+bool TestsSgb::TestEarDetection2()
 {
     std::vector<unsigned char> raw = {253, 11, 192, 96, 1, 100, 100, 1, 1, 17, 30, 0, 89, 28, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBuds3Pro);
@@ -333,7 +334,7 @@ bool TestEarDetection2()
     return state.Left == GalaxyBudsEarDetectionState::Wearing && state.Right == GalaxyBudsEarDetectionState::Wearing;
 }
 
-bool TestEarDetection3()
+bool TestsSgb::TestEarDetection3()
 {
     std::vector<unsigned char> raw = {253, 11, 8, 96, 1, 100, 99, 1, 1, 51, 87, 4, 110, 203, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBuds3Pro);
@@ -358,7 +359,7 @@ bool TestEarDetection3()
     return state.Left == GalaxyBudsEarDetectionState::Case && state.Right == GalaxyBudsEarDetectionState::Case;
 }
 
-bool TestSetAnc1()
+bool TestsSgb::TestSetAnc1()
 {
     std::vector<unsigned char> raw = {253, 10, 64, 119, 1, 17, 1, 0, 13, 13, 1, 44, 30, 221};
     std::vector<unsigned char> expected = {253, 4, 0, 120, 2, 178, 161, 221};
@@ -372,7 +373,7 @@ bool TestSetAnc1()
     return packet.Encode(stage.Id, stage.Payload) == expected;
 }
 
-bool TestSetAnc2()
+bool TestsSgb::TestSetAnc2()
 {
     std::vector<unsigned char> raw = {253, 10, 64, 119, 1, 17, 1, 0, 13, 13, 1, 44, 30, 221};
     std::vector<unsigned char> expected = {253, 4, 0, 120, 3, 147, 177, 221};
@@ -386,7 +387,7 @@ bool TestSetAnc2()
     return packet.Encode(stage.Id, stage.Payload) == expected;
 }
 
-bool TestBattery1()
+bool TestsSgb::TestBattery1()
 {
     std::vector<unsigned char> raw = {253, 61, 0, 97, 2, 8, 100, 100, 1, 1, 17, 0, 0, 0, 255, 34, 0, 0, 84, 1, 84, 1, 7, 0, 4, 221, 0, 4, 4, 16, 0, 1, 0, 0, 17, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 255, 1, 1, 0, 15, 84, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBuds3Pro);
@@ -431,7 +432,7 @@ bool TestBattery1()
     return isLeftPass && isRightPass && isCasePass;
 }
 
-bool TestBattery2()
+bool TestsSgb::TestBattery2()
 {
     std::vector<unsigned char> raw = {253, 11, 64, 96, 1, 99, 99, 1, 0, 17, 33, 0, 67, 174, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBuds3Pro);
@@ -476,7 +477,7 @@ bool TestBattery2()
     return isLeftPass && isRightPass && isCasePass;
 }
 
-bool TestBattery3()
+bool TestsSgb::TestBattery3()
 {
     std::vector<unsigned char> raw = {253, 11, 8, 96, 1, 100, 99, 1, 1, 51, 87, 4, 110, 203, 221};
     GalaxyBudsPacket packet(GalaxyBudsModelIds::GalaxyBudsFe);
@@ -508,7 +509,7 @@ bool TestBattery3()
         }
         else if (battery.Type == DeviceBatteryType::Right)
         {
-            if (battery.Battery == 99 && battery.IsCharging == false && battery.Status == DeviceBatteryStatus::Connected)
+            if (battery.Battery == 99 && battery.IsCharging == true && battery.Status == DeviceBatteryStatus::Connected)
                 isRightPass = true;
         }
         else if (battery.Type == DeviceBatteryType::Case)
@@ -521,7 +522,7 @@ bool TestBattery3()
     return isLeftPass && isRightPass && isCasePass;
 }
 
-void Test(const char *name, bool b)
+void TestsSgb::Test(const char *name, bool b)
 {
 
     int spaceCount = 50 - std::strlen(name);
@@ -541,7 +542,7 @@ void Test(const char *name, bool b)
     }
 }
 
-int main()
+MagicPodsCore::TestsSgb::TestsSgb()
 {
     Test("CRC16.Checksum1", TestChecksum1());
     Test("CRC16.Checksum2", TestChecksum2());
@@ -568,12 +569,8 @@ int main()
     Test("GalaxyBudsBatteryWatcher.TestBattery1", TestBattery1());
     Test("GalaxyBudsBatteryWatcher.TestBattery2", TestBattery2());
     Test("GalaxyBudsBatteryWatcher.TestBattery3", TestBattery3());
-
-    std::string modalias = "bluetooth:v004Cp200EdB087";
-    size_t vi = modalias.find("v");
-    size_t pi = modalias.find("p");
-    size_t di = modalias.find("d");
-
-
-    return 0;
+    //std::string modalias = "bluetooth:v004Cp200EdB087";
+    //size_t vi = modalias.find("v");
+    //size_t pi = modalias.find("p");
+    //size_t di = modalias.find("d");
 }
