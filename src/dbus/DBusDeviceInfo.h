@@ -22,7 +22,7 @@ namespace MagicPodsCore {
         ObservableVariable<bool> _connectionStatus{false};
 
     public:
-        explicit DBusDeviceInfo(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& interface);
+        explicit DBusDeviceInfo(const sdbus::ObjectPath& objectPath, const std::map<std::string, std::map<std::string, sdbus::Variant>>& interfaces);
 
         DBusDeviceInfo(const DBusDeviceInfo& info) = delete;
         DBusDeviceInfo(DBusDeviceInfo&& info) noexcept = delete;

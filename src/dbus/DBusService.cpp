@@ -44,9 +44,7 @@ namespace MagicPodsCore {
         
         if (std::regex_match(objectPath, match, DEVICE_INSTANCE_RE)) {
             if (interfaces.contains("org.bluez.Device1")) {
-                auto deviceInterface = interfaces.at("org.bluez.Device1");
-
-                auto deviceInfo = std::make_shared<DBusDeviceInfo>(objectPath, deviceInterface);
+                auto deviceInfo = std::make_shared<DBusDeviceInfo>(objectPath, interfaces);
                     
                 if (_cache.contains(objectPath)) {
                     _cache.erase(objectPath);
@@ -71,5 +69,5 @@ namespace MagicPodsCore {
         }
         return false;
     }
-    
+
 }
