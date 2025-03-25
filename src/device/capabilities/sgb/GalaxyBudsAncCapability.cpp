@@ -57,8 +57,8 @@ namespace MagicPodsCore
         }
 
         auto bodyJson = nlohmann::json::object();
-        bodyJson["Value"] = option;
-        bodyJson["Options"] = optionsFlag;
+        bodyJson["selected"] = option;
+        bodyJson["options"] = optionsFlag;
         return bodyJson;
     }
 
@@ -98,18 +98,18 @@ namespace MagicPodsCore
         
         const auto& capability = json.at(name);
 
-        if (capability.contains("value") && capability["value"].is_number_integer())
+        if (capability.contains("selected") && capability["selected"].is_number_integer())
         {
-            unsigned char value = static_cast<unsigned char>(capability["value"].get<int>());
-            if (isValidDeviceAncModesType(value))
+            unsigned char selected = static_cast<unsigned char>(capability["selected"].get<int>());
+            if (isValidDeviceAncModesType(selected))
             {
-                GalaxyBudsAnc nativeMode = DeviceAncModesToGalaxyBudsAnc(static_cast<DeviceAncModes>(value));
+                GalaxyBudsAnc nativeMode = DeviceAncModesToGalaxyBudsAnc(static_cast<DeviceAncModes>(selected));
                 SendData(GalaxyBudsSetAnc(nativeMode));
                 LOG_DEBUG("GalaxyBudsAncCapability::SetFromJson set option to %s", GalaxyBudsAncToString(nativeMode).c_str());
             }
             else
             {
-                LOG_RELEASE("Error: GalaxyBudsAncCapability::SetFromJson got unexpected option: %d", value);
+                LOG_RELEASE("Error: GalaxyBudsAncCapability::SetFromJson got unexpected option: %d", selected);
             }
         }
         else

@@ -71,47 +71,13 @@ namespace MagicPodsCore
             startByte += 5;
             
             ConvertBattery(batteryData, batteryType, charging, battery);
-            readableStr += DummyConvertBatteryType(batteryType) + " " + std::to_string(battery) + " " + DummyConvertChargingStatus(charging) + " ";
+            readableStr += AapBatteryTypeToString(batteryType) + " " + std::to_string(battery) + " " + AapChargingStatusToString(charging) + " ";
         }
 
         if (batteryData.size() > 0)
         {
             LOG_DEBUG("%s: %s", _tag.c_str(), readableStr.c_str());
             _event.FireEvent(batteryData);
-        }
-    }
-
-    std::string AapBatteryWatcher::DummyConvertChargingStatus(AapChargingStatus status)
-    {
-        switch (status)
-        {
-        case AapChargingStatus::Undefined:
-            return "Undefined";
-        case AapChargingStatus::Charging:
-            return "Charging";
-        case AapChargingStatus::NotCharging:
-            return "NotCharging";
-        case AapChargingStatus::Disconnected:
-            return "Disconnected";
-        default:
-            return "Unknown";
-        }
-    }
-
-    std::string AapBatteryWatcher::DummyConvertBatteryType(AapBatteryType status)
-    {
-        switch (status)
-        {
-        case AapBatteryType::Single:
-            return "Single";
-        case AapBatteryType::Left:
-            return "Left  ";
-        case AapBatteryType::Right:
-            return "Right ";
-        case AapBatteryType::Case:
-            return "Case  ";
-        default:
-            return "Unknown";
         }
     }
 

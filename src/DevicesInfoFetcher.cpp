@@ -2,6 +2,7 @@
 
 #include "BtVendorIds.h"
 #include "sdk/aap/enums/AapModelIds.h"
+#include "sdk/aap/AapHelper.h"
 #include "StringUtils.h"
 #include "Logger.h"
 
@@ -9,6 +10,9 @@
 #include <iostream>
 #include <algorithm>
 #include "device/GalaxyBudsDevice.h"
+#include "device/AapDevice.h"
+#include <regex>
+
 
 namespace MagicPodsCore {
 
@@ -25,7 +29,7 @@ namespace MagicPodsCore {
             if (std::regex_match(objectPath, match, DEVICE_INSTANCE_RE)) {
                 if (interfaces.contains("org.bluez.Device1")) {
                     auto deviceInterface = interfaces.at("org.bluez.Device1");
-                    
+
                     if (!_devicesMap.contains(objectPath)) {
                         if (auto device = TryCreateDevice(objectPath, deviceInterface)) {
                             _devicesMap.emplace(objectPath, device);
@@ -108,7 +112,7 @@ namespace MagicPodsCore {
     }
 
     void DevicesInfoFetcher::SetCapabilities(const nlohmann::json &json)
-    {        
+    {
         LOG_RELEASE("DevicesInfoFetcher::SetCapabilities");
 
         if (!json.contains("arguments") || !json["arguments"].contains("address") || !json["arguments"].contains("capabilities"))
@@ -116,11 +120,11 @@ namespace MagicPodsCore {
             LOG_RELEASE("Error: missing required fields in SetCapabilities");
             return;
         }
-    
+
         const auto& arguments = json.at("arguments");
         const auto& deviceAddress = arguments.at("address").get_ref<const std::string&>();
         const auto& capabilities = arguments.at("capabilities");
-    
+
         for (const auto& [key, device] : _devicesMap)
         {
             if (device->GetAddress() == deviceAddress)
@@ -129,15 +133,6 @@ namespace MagicPodsCore {
                 break;
             }
         }
-    }
-
-    void DevicesInfoFetcher::SetAnc(const std::string& deviceAddress, DeviceAncModes mode) {
-        //for (const auto& [key, value] : _devicesMap) {
-        //    if (value->GetAddress() == deviceAddress) {
-        //        value->SetAnc(mode);
-        //        break;
-        //    }
-        //}
     }
 
     void DevicesInfoFetcher::EnableBluetoothAdapter() {
@@ -162,39 +157,30 @@ namespace MagicPodsCore {
         _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke(callback);
     }
 
-    std::shared_ptr<Device> DevicesInfoFetcher::TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) {        
-        const static auto checkModalias = [](const std::string& modalias) -> bool {
-            for (auto& appleProductId : AllAapModelsIds) {
-                std::string upperCaseActualModalias = modalias;
-                std::transform(upperCaseActualModalias.begin(), upperCaseActualModalias.end(), upperCaseActualModalias.begin(), [](unsigned char c){ return std::toupper(c); });
-                std::string upperCaseTargetModalias = StringUtils::Format("v%04Xp%04X", static_cast<unsigned short>(BtVendorIds::Apple), static_cast<unsigned short>(appleProductId));
-                std::transform(upperCaseTargetModalias.begin(), upperCaseTargetModalias.end(), upperCaseTargetModalias.begin(), [](unsigned char c){ return std::toupper(c); });                
-
-
-                if (upperCaseActualModalias.contains(upperCaseTargetModalias))
-                    return true;
-            }
-            return false;
-        };
-            
+    std::shared_ptr<Device> DevicesInfoFetcher::TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface) {
+        unsigned short pid = 0;
+        unsigned short vid = 0;
+        if (deviceInterface.contains("Modalias")){
+            auto vp = DevicesInfoFetcher::ParseVidPid(deviceInterface.at("Modalias").get<std::string>());
+            pid = vp[0];
+            vid = vp[1];
+        }
+        // HARDCODED TEST
         const static auto checkHardcodedModalias = [](const std::string& modalias) -> bool {
-            
+
             LOG_RELEASE("%s", modalias.c_str());
             return modalias == "bluetooth:v0075pA013d0001";
         };
-    
-        if (deviceInterface.contains("Modalias") && checkHardcodedModalias(deviceInterface.at("Modalias").get<std::string>())){
-            auto newDevice = GalaxyBudsDevice::Create(objectPath, deviceInterface, 9);
+        // HARDCODED TEST
+
+        if (AapHelper::IsAapDevice(pid, vid)){
+            auto newDevice = AapDevice::Create(objectPath, deviceInterface);
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
             return newDevice;
-        }
-
-        if (deviceInterface.contains("Modalias") && checkModalias(deviceInterface.at("Modalias").get<std::string>())) {
-            //auto newDevice = std::make_shared<Device>(objectPath, deviceInterface);
-            //auto newDevice = std::make_shared<AapDevice>(objectPath, deviceInterface);
-            auto newDevice = AapDevice::Create(objectPath, deviceInterface);
+        } else if (deviceInterface.contains("Modalias") && checkHardcodedModalias(deviceInterface.at("Modalias").get<std::string>())){
+            auto newDevice = GalaxyBudsDevice::Create(objectPath, deviceInterface, 9);
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
@@ -212,7 +198,7 @@ namespace MagicPodsCore {
         for (const auto& [objectPath, interfaces] : managedObjects) {
             const std::regex DEVICE_INSTANCE_RE{"^/org/bluez/hci[0-9]/dev(_[0-9A-F]{2}){6}$"};
             std::smatch match;
-            
+
             if (std::regex_match(objectPath, match, DEVICE_INSTANCE_RE)) {
                 if (interfaces.contains("org.bluez.Device1")) {
                     auto deviceInterface = interfaces.at("org.bluez.Device1");
@@ -260,4 +246,21 @@ namespace MagicPodsCore {
         _onDevicesRemoveEvent.FireEvent(devices);
     }
 
+    std::array<unsigned short, 2> DevicesInfoFetcher::ParseVidPid(const std::string &modalias)
+    {
+        std::smatch match;
+        std::regex pattern("v([0-9A-Fa-f]{4})p([0-9A-Fa-f]{4})");
+
+        unsigned short vid = 0;
+        unsigned short pid = 0;
+
+        if (std::regex_search(modalias, match, pattern)) {
+            try {
+                vid = static_cast<unsigned short>(std::stoul(match[1], nullptr, 16));
+                pid = static_cast<unsigned short>(std::stoul(match[2], nullptr, 16));
+            } catch (...) {}
+        }
+
+        return {vid, pid};
+    }
 }

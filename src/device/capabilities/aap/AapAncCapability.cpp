@@ -57,8 +57,8 @@ namespace MagicPodsCore
         }
 
         auto bodyJson = nlohmann::json::object();
-        bodyJson["Value"] = option;
-        bodyJson["Options"] = optionsFlag;
+        bodyJson["selected"] = option;
+        bodyJson["options"] = optionsFlag;
         return bodyJson;
     }
 
@@ -97,18 +97,18 @@ namespace MagicPodsCore
 
         const auto& capability = json.at(name);
 
-        if (capability.contains("value") && capability["value"].is_number_integer())
+        if (capability.contains("selected") && capability["selected"].is_number_integer())
         {
-            unsigned char value = static_cast<unsigned char>(capability["value"].get<int>());
-            if (isValidDeviceAncModesType(value))
+            unsigned char selected = static_cast<unsigned char>(capability["selected"].get<int>());
+            if (isValidDeviceAncModesType(selected))
             {
-                AapAncMode nativeMode = DeviceAncModesToAapAncMode(static_cast<DeviceAncModes>(value));
+                AapAncMode nativeMode = DeviceAncModesToAapAncMode(static_cast<DeviceAncModes>(selected));
                 SendData(AapSetAnc(nativeMode));
                 LOG_DEBUG("AapAncCapability::SetFromJson set option to %s", AapAncModeToString(nativeMode).c_str());
             }
             else
             {
-                LOG_RELEASE("Error: AapAncCapability::SetFromJson got unexpected option: %d", value);
+                LOG_RELEASE("Error: AapAncCapability::SetFromJson got unexpected option: %d", selected);
             }
         }
         else

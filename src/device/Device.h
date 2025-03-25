@@ -18,8 +18,7 @@ namespace MagicPodsCore {
         std::unique_ptr<sdbus::IProxy> _deviceProxy{};
 
         std::string _name{};
-        bool _connected{};
-        std::string _modaliasString{};
+        bool _connected{};    
         Event<bool> _onConnectedPropertyChangedEvent{};
         Event<Capability> _onCapabilityChangedEvent{};
         size_t clientReceivedDataEventId;
@@ -55,11 +54,6 @@ namespace MagicPodsCore {
         bool GetConnected() const {
             std::lock_guard lock{_propertyMutex};
             return _connected;
-        }
-
-        std::string GetModaliasString() const {
-            std::lock_guard lock{_propertyMutex};
-            return _modaliasString;
         }
 
         virtual unsigned short GetVendorId() const {

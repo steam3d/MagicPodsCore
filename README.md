@@ -12,7 +12,7 @@ Request
 }
 ```
 
-Responce
+Response
 
 ```
 {
@@ -45,11 +45,11 @@ Request
 {
     "method":"ConnectDevice",
     "arguments": {
-        "address": "FC:1D:43:DE:80:49"
+        "address": "string"
     }
 }
 ```
-Responce
+Response
 
 > Get Devices
 
@@ -61,7 +61,7 @@ Request
 {
     "method":"DisconnectDevice",
     "arguments": {
-        "address": "FC:1D:43:DE:80:49"
+        "address": "string"
     }
 }
 ```
@@ -126,37 +126,41 @@ Resonance
 
 > Get default Bluetooth adapter
 
-### Get decky Info
+### GetActiveDeviceInfo
 
-Request
+Request:
 
 ```
 {
-    "method":"GetDeckyInfo"
+    "method":"GetActiveDeviceInfo"
 }
 ```
 
-Response
+Response:
 
 ```
 {
   "info":{
-    "name": "AirPods (steam3d)",
-    "address": "12:45:ds:23:fd:12",
-    "connected": true,
-    "battery": {
-      "s": "int",
-      "sc": "bool",
-      "l": "int",
-      "lc": "bool",
-      "r": "int",
-      "rc": "bool",
-      "c": "int",
-      "cc": "bool"      
-    },
+    "name": "string",
+    "address": "string",
+    "connected": "bool",
     "capabilities": {
-      "anc"?: "int"      
-    } 
+      "battery"?: {
+        "s": "int",
+        "sc": "bool",
+        "l": "int",
+        "lc": "bool",
+        "r": "int",
+        "rc": "bool",
+        "c": "int",
+        "cc": "bool"
+      },
+      "anc"?: {
+        "options": "int",
+        "selected": "int",
+        "readonly": "bool"
+      }
+    }
   }
 }
 ```
@@ -180,7 +184,7 @@ Empty if headphones do not have capabilities:
 
 ### Get all
 
-Collects requests `GetDevices` `GetDefaultBluetoothAdapter` `GetDeckyInfo` together
+Collects requests `GetDevices` `GetDefaultBluetoothAdapter` `GetActiveDevice` together
 
 Request
 
@@ -189,7 +193,6 @@ Request
     "method":"GetAll"
 }
 ```
-
 
 Response
 
@@ -205,73 +208,61 @@ Response
     "address": "string",
     "connected":"bool"
   }],
-  
+
   "defaultbluetooth": {
     "enabled":"bool"
  },
-  
+
   "info":{
-    "name": "AirPods (steam3d)",
-    "address": "12:45:ds:23:fd:12",
-    "connected": true,
-    "battery": {
-      "s": "int",
-      "sc": "bool",
-      "l": "int",
-      "lc": "bool",
-      "r": "int",
-      "rc": "bool",
-      "c": "int",
-      "cc": "bool"      
-    },
+    "name": "string",
+    "address": "string",
+    "connected": "bool",
     "capabilities": {
-      "anc?": "int"      
-    } 
+      "battery"?: {
+        "s": "int",
+        "sc": "bool",
+        "l": "int",
+        "lc": "bool",
+        "r": "int",
+        "rc": "bool",
+        "c": "int",
+        "cc": "bool"
+      },
+      "anc"?: {
+        "options": "int",
+        "selected": "int",
+        "readonly": "bool"
+      }
+    }
   }
 }
 ```
-
-
-### Set anc (for apple device only)
-
-Request
-
-```
-{
-    "method":"SetAnc",
-    "arguments": {
-        "address": "string",
-        "value": "int",
-    }
-}
-```
-
-Response
-
-> Get decky Info
 
 ### Set capabilities
 
 If a capability is not read-only, you can change it or change multiple capabilities at once.
 
+```
 {
   "method": "SetCapabilities",
   "arguments": {
     "address": "string",
     "capabilities": {
       "capabilityname1": {
-        "value": "int"
+        "selected": "int"
       },
       "capabilityname2": {
-        "value": "int"
+        "selected": "int"
       }
     }
   }
 }
+```
 
 Response
 
 if capability supports notification you will GetInfo
 
+Response
 
-
+> Get decky Info

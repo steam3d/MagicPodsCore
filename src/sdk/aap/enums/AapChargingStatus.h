@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace MagicPodsCore
 {
     enum class AapChargingStatus : unsigned char
@@ -23,4 +25,20 @@ namespace MagicPodsCore
         }
     }
 
+    static std::string AapChargingStatusToString(AapChargingStatus status)
+    {
+        switch (status)
+        {
+        case AapChargingStatus::Undefined:
+            return "Undefined";
+        case AapChargingStatus::Charging:
+            return "Charging";
+        case AapChargingStatus::NotCharging:
+            return "NotCharging";
+        case AapChargingStatus::Disconnected:
+            return "Disconnected";
+        default:
+            return "Unknown";
+        }
+    }
 }

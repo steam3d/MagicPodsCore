@@ -82,7 +82,7 @@ namespace MagicPodsCore
         }
     }
 
-    GalaxyBudsModelIds GalaxyBudsHelper::GetModelFromName(std::string name)
+    GalaxyBudsModelIds GalaxyBudsHelper::GetModelFromName(const std::string &name)
     {
         if (name.empty())
             return GalaxyBudsModelIds::Unknown;
@@ -156,7 +156,7 @@ namespace MagicPodsCore
         }
     }
 
-    std::pair<GalaxyBudsModelIds, std::string> GalaxyBudsHelper::SearchModelColor(const std::vector<std::string> &guids, std::string name)
+    std::pair<GalaxyBudsModelIds, std::string> GalaxyBudsHelper::SearchModelColor(const std::vector<std::string> &guids, const std::string &name)
     {
         std::vector<std::string> _guids;
         _guids.reserve(guids.size());

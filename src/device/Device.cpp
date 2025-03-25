@@ -1,4 +1,5 @@
 #include "Device.h"
+#include "DevicesInfoFetcher.h"
 
 namespace MagicPodsCore {
     void Device::SubscribeCapabilitiesChanges()
@@ -6,8 +7,8 @@ namespace MagicPodsCore {
         for (auto& c: capabilities){
             size_t id = c->GetChangedEvent().Subscribe([this](size_t id, const Capability &capability)
             {
-                _onCapabilityChangedEvent.FireEvent(capability);
-                LOG_DEBUG("Capability changed");
+                _onCapabilityChangedEvent.FireEvent(capability);                
+                LOG_DEBUG("Capability: %s changed", capability.GetName().c_str());
             });
             capabilityEventIds.push_back(id);
         }
@@ -41,10 +42,10 @@ namespace MagicPodsCore {
         }
 
         if (deviceInterface.contains("Modalias")) {
-            _modaliasString = deviceInterface.at("Modalias").get<std::string>();
+            auto vp = DevicesInfoFetcher::ParseVidPid(deviceInterface.at("Modalias").get<std::string>());
+            _vendorId = vp[0];
+            _productId = vp[1];
         }
-
-        //TODO parse modalias as Product and Vendor
     }
 
     void Device::Init()

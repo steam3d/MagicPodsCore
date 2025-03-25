@@ -56,10 +56,6 @@ namespace MagicPodsCore
         {
             return _event;
         }
-
-    private:
-        std::string DummyConvertChargingStatus(AapChargingStatus status);
-        std::string DummyConvertBatteryType(AapBatteryType status);
     };
 
 }

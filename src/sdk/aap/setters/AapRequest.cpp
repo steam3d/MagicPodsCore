@@ -1,18 +1,15 @@
 #include "AapRequest.h"
+#include "StringUtils.h"
 
 namespace MagicPodsCore
 {
-    AapRequest::AapRequest(std::string tag) : _tag{tag}
+    AapRequest::AapRequest(std::string tag) : _tag{std::move(tag)}
     {
     }
 
     void AapRequest::PrintAsHex()
     {
-        LOG_DEBUG("%s ", _tag.c_str());
         std::vector<unsigned char> bytes = Request();
-        for (int i = 0; i < bytes.size(); i++)
-            LOG_DEBUG("%02x", bytes[i]);
-        LOG_DEBUG("");
-        LOG_DEBUG("");
+        LOG_DEBUG("%s: %s", _tag.c_str(), StringUtils::BytesToHexString(bytes).c_str());
     }
 }
