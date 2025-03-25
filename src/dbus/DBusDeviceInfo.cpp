@@ -33,4 +33,20 @@ namespace MagicPodsCore {
         });
         _deviceProxy->finishRegistration();
     }
+
+    void DBusDeviceInfo::Connect() {
+        _deviceProxy->callMethod("Connect").onInterface("org.bluez.Device1").dontExpectReply();
+    }
+
+    void DBusDeviceInfo::ConnectAsync(std::function<void(const sdbus::Error*)>&& callback) {
+        _deviceProxy->callMethodAsync("Connect").withTimeout(std::chrono::seconds(10)).onInterface("org.bluez.Device1").uponReplyInvoke(callback);
+    }
+
+    void DBusDeviceInfo::Disconnect() {
+        _deviceProxy->callMethod("Disconnect").onInterface("org.bluez.Device1").dontExpectReply();
+    }
+
+    void DBusDeviceInfo::DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback) {
+        _deviceProxy->callMethodAsync("Disconnect").withTimeout(std::chrono::seconds(10)).onInterface("org.bluez.Device1").uponReplyInvoke(callback);
+    }
 }

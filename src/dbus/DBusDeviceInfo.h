@@ -52,6 +52,11 @@ namespace MagicPodsCore {
         ObservableVariable<bool>& GetConnectionStatus() {
             return _connectionStatus;
         }
+
+        void Connect();
+        void ConnectAsync(std::function<void(const sdbus::Error*)>&& callback);
+        void Disconnect();
+        void DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback);
     };
 
 }
