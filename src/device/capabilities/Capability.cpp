@@ -20,7 +20,7 @@ namespace MagicPodsCore
             return {};
 
         auto bodyJson = CreateJsonBody();
-        bodyJson["IsReadOnly"] = isReadOnly;
+        bodyJson["readonly"] = isReadOnly;
 
         return nlohmann::json{{name, bodyJson}};
     }

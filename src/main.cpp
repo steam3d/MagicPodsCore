@@ -26,7 +26,7 @@ nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     return rootObject;
 }
 
-nlohmann::json MakeGetDeckyInfoResponse(DevicesInfoFetcher& devicesInfoFetcher) {
+nlohmann::json MakeGetActiveDeviceInfoResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto activeDevice = devicesInfoFetcher.GetActiveDevice();
     if (activeDevice)
         return nlohmann::json{{"info", activeDevice->GetAsJson()}};
@@ -124,10 +124,10 @@ void HandleDisableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, 
     });
 }
 
-void HandleGetDeckyInfoRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleGetDeckyInfoRequest");
+void HandleGetActiveDeviceInfoRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
+    LOG_RELEASE("HandleGetActiveDeviceInfoRequest");
 
-    auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
+    auto response = MakeGetActiveDeviceInfoResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
@@ -137,7 +137,7 @@ void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
     auto rootObject = nlohmann::json::object();
     auto getDevicesResponseJson = MakeGetDeviceResponse(devicesInfoFetcher);
     auto getDefaultBluetoothAdapterJson = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher);
-    auto getDeckyInfoResponseJson = MakeGetDeckyInfoResponse(devicesInfoFetcher);
+    auto getDeckyInfoResponseJson = MakeGetActiveDeviceInfoResponse(devicesInfoFetcher);
     rootObject["headphones"] = getDevicesResponseJson["headphones"];
     rootObject["defaultbluetooth"] = getDefaultBluetoothAdapterJson["defaultbluetooth"];
     rootObject["info"] = getDeckyInfoResponseJson["info"];
@@ -170,8 +170,8 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
                 HandleEnableDefaultBluetoothAdapter(ws, json, opCode, app, devicesInfoFetcher);
             else if (methodName == "DisableDefaultBluetoothAdapter")
                 HandleDisableDefaultBluetoothAdapter(ws, json, opCode, app, devicesInfoFetcher);
-            else if (methodName == "GetDeckyInfo")
-                HandleGetDeckyInfoRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "GetActiveDeviceInfo")
+                HandleGetActiveDeviceInfoRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "GetAll")
                 HandleGetAllRequest(ws, json, opCode, devicesInfoFetcher);
             else
@@ -187,7 +187,7 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
         if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
             LOG_RELEASE("onCapabilityChanged Broadcast was triggered");
             app.getLoop()->defer([&app, &devicesInfoFetcher](){
-                auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
+                auto response = MakeGetActiveDeviceInfoResponse(devicesInfoFetcher).dump();
                 app.publish("onCapabilityChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
             });
         }
@@ -203,7 +203,7 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
     auto onActiveDeviceChanged = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device) {
         LOG_RELEASE("OnActiveDeviceChanged Broadcast was triggered");
         app.getLoop()->defer([&app, &devicesInfoFetcher]() {
-            auto response = MakeGetDeckyInfoResponse(devicesInfoFetcher).dump();
+            auto response = MakeGetActiveDeviceInfoResponse(devicesInfoFetcher).dump();
             app.publish("OnActiveDeviceChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
         });
     };
