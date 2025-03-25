@@ -5,6 +5,7 @@ int main() {
     using namespace MagicPodsCore;
     DBusService service{};
     auto devices = service.GetBtDevices();
+    auto devices2 = service.GetBtDevices();
 
     std::this_thread::sleep_for(1000000s);
 

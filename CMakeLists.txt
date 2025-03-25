@@ -46,6 +46,9 @@ add_executable(MagicPodsCore
     src/device/DeviceBattery.cpp    
     src/device/Device.cpp
 
+    src/dbus/DBusDeviceInfo.cpp
+    src/dbus/DBusService.cpp
+
     src/DevicesInfoFetcher.cpp
 )
 add_subdirectory(dependencies)

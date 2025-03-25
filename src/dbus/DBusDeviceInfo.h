@@ -1,4 +1,7 @@
-#include "Event.h"
+#pragma once
+
+#include "./dbus/DBusDeviceModalias.h"
+#include "ObservableVariable.h"
 
 #include <string>
 #include <optional>
@@ -7,49 +10,19 @@
 
 namespace MagicPodsCore {
 
-    struct DBusDeviceModalias {
+    class DBusDeviceInfo {
     private:
-        std::optional<unsigned short> _productId{};
-        std::optional<unsigned short> _vendorId{};
+        std::unique_ptr<sdbus::IProxy> _deviceProxy{};
 
-    public:
-        explicit DBusDeviceModalias() {}
-
-        explicit DBusDeviceModalias(std::optional<unsigned short> productId, std::optional<unsigned short> vendorId) 
-            : _productId{productId}, _vendorId{vendorId} {}
-
-        const std::optional<unsigned short>& GetProductId() const {
-            return _productId;
-        }
-
-        const std::optional<unsigned short>& GetVectorId() const {
-            return _vendorId;
-        }
-    };
-
-    struct DBusDeviceInfo {
-    private:
         std::string _address{};
         DBusDeviceModalias _modalias{};
         std::vector<std::string> _uuids{};
         std::optional<unsigned int> _clazz{};
         std::string _name{};
-        bool _connectionStatus{};
+        ObservableVariable<bool> _connectionStatus{false};
 
     public:
-        explicit DBusDeviceInfo(const std::map<std::string, sdbus::Variant>& interface) 
-        {
-            _address = interface.at("Address").get<std::string>(),
-            _modalias = interface.contains("Modalias") // TODO: modalias
-                        ? DBusDeviceModalias{0, 0}
-                        : DBusDeviceModalias{std::nullopt, std::nullopt};
-            _uuids = std::vector<std::string>{};
-            _clazz = interface.contains("Class") 
-                        ? std::optional<unsigned int>{ interface.at("Class").get<unsigned int>() } 
-                        : std::nullopt;
-            _name = interface.at("Name").get<std::string>();
-            _connectionStatus = interface.at("Connected").get<bool>();
-        }
+        explicit DBusDeviceInfo(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& interface);
 
         DBusDeviceInfo(const DBusDeviceInfo& info) = delete;
         DBusDeviceInfo(DBusDeviceInfo&& info) noexcept = delete;
@@ -76,7 +49,7 @@ namespace MagicPodsCore {
             return _name;
         }
 
-        bool GetConnectionStatus() const {
+        ObservableVariable<bool>& GetConnectionStatus() {
             return _connectionStatus;
         }
     };
