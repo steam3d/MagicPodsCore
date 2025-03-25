@@ -1,8 +1,8 @@
 #pragma once
 
-#include "./dbus/DBusDeviceModalias.h"
 #include "ObservableVariable.h"
 
+#include <regex>
 #include <string>
 #include <optional>
 #include <vector>
@@ -15,7 +15,8 @@ namespace MagicPodsCore {
         std::unique_ptr<sdbus::IProxy> _deviceProxy{};
 
         std::string _address{};
-        DBusDeviceModalias _modalias{};
+        unsigned short _productId{};
+        unsigned short _vendorId{};
         std::vector<std::string> _uuids{};
         std::optional<unsigned int> _clazz{};
         std::string _name{};
@@ -33,8 +34,12 @@ namespace MagicPodsCore {
             return _address;
         }
 
-        const DBusDeviceModalias& GetModalias() const {
-            return _modalias;
+        unsigned short GetProductId() const {
+            return _productId;
+        }
+
+        unsigned short GetVendorId() const {
+            return _vendorId;
         }
 
         const std::vector<std::string> GetUuids() const {
@@ -57,6 +62,9 @@ namespace MagicPodsCore {
         void ConnectAsync(std::function<void(const sdbus::Error*)>&& callback);
         void Disconnect();
         void DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback);
+
+    private:
+        static std::array<unsigned short, 2> ParseVidPid(const std::string& modalias);
     };
 
 }
