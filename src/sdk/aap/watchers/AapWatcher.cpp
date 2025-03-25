@@ -3,7 +3,7 @@
 namespace MagicPodsCore
 {
 
-    AapWatcher::AapWatcher(std::string tag) : _tag{tag}
+    AapWatcher::AapWatcher(std::string tag) : _tag{std::move(tag)}
     {
     }
 

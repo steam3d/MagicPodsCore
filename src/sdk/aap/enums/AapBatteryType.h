@@ -22,4 +22,20 @@ namespace MagicPodsCore
         }
     }
 
+    static std::string AapBatteryTypeToString(AapBatteryType status)
+    {
+        switch (status)
+        {
+        case AapBatteryType::Single:
+            return "Single";
+        case AapBatteryType::Left:
+            return "Left  ";
+        case AapBatteryType::Right:
+            return "Right ";
+        case AapBatteryType::Case:
+            return "Case  ";
+        default:
+            return "Unknown";
+        }
+    }
 }

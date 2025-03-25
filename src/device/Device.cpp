@@ -7,8 +7,8 @@ namespace MagicPodsCore {
         for (auto& c: capabilities){
             size_t id = c->GetChangedEvent().Subscribe([this](size_t id, const Capability &capability)
             {
-                _onCapabilityChangedEvent.FireEvent(capability);
-                LOG_DEBUG("Capability changed");
+                _onCapabilityChangedEvent.FireEvent(capability);                
+                LOG_DEBUG("Capability: %s changed", capability.GetName().c_str());
             });
             capabilityEventIds.push_back(id);
         }

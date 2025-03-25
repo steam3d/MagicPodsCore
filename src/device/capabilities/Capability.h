@@ -23,7 +23,7 @@ namespace MagicPodsCore
             return _onChanged;
         }
 
-        std::string& GetName(){
+        const std::string& GetName() const {
             return name;
         }
 

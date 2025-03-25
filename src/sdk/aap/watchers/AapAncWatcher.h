@@ -19,9 +19,6 @@ namespace MagicPodsCore
         {
             return _event;
         }
-
-    private:
-        std::string DummyConvertAncMode(AapAncMode mode);
     };
 
 }

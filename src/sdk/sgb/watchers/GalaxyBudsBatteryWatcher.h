@@ -19,11 +19,11 @@ namespace MagicPodsCore
 
     public:
         explicit GalaxyBudsBatteryWatcher(GalaxyBudsModelIds model) : model(model) {}
-        bool IsCaseBatterySupport(GalaxyBudsModelIds model);
         void ProcessResponse(const GalaxyBudsResponseData &data);
         Event<std::vector<DeviceBatteryData>> &GetBatteryChangedEvent()
         {
             return _batteryChanged;
         }
+        static bool IsCaseBatterySupport(GalaxyBudsModelIds model);
     };
 }

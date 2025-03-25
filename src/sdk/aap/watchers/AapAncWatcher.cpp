@@ -24,23 +24,7 @@ namespace MagicPodsCore
 
         AapAncMode ancMode = static_cast<AapAncMode>(data[7]);
 
-        LOG_DEBUG("%s: %s", _tag.c_str(), DummyConvertAncMode(ancMode).c_str());
+        LOG_DEBUG("%s: %s", _tag.c_str(), AapAncModeToString(ancMode).c_str());
         _event.FireEvent(ancMode);
     }
-
-    std::string AapAncWatcher::DummyConvertAncMode(AapAncMode mode)
-    {
-        switch (mode)
-        {
-        case AapAncMode::Anc:
-            return "On";
-        case AapAncMode::Off:
-            return "Off";
-        case AapAncMode::Transparency:
-            return "Tra";
-        default:
-            return "Unknown";
-        }
-    }
-
 }
