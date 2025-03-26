@@ -29,6 +29,7 @@ namespace MagicPodsCore {
         _connectionStatus.SetValue(deviceInterface.at("Connected").get<bool>());
 
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
+            //TODO: See Device.cpp comment
             if (values.contains("Connected")) {
                 _connectionStatus.SetValue(values["Connected"].get<bool>());
             }

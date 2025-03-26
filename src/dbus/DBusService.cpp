@@ -3,6 +3,7 @@
 namespace MagicPodsCore {
 
     DBusService::DBusService() : _rootProxy{sdbus::createProxy("org.bluez", "/")},  _defaultBluetoothAdapterProxy{sdbus::createProxy("org.bluez", "/org/bluez/hci0")} {
+        //TODO: See comment DeviceFetcher.cpp
         _rootProxy->uponSignal("InterfacesAdded").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces) {
             TryCreateDevice(objectPath, interfaces);
         });
