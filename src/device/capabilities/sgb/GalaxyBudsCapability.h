@@ -12,16 +12,18 @@ namespace MagicPodsCore
     {
     private:
         size_t responseDataRecivedId;
+        size_t onConnectedPropertyChangedId;
     
     protected:
-        GalaxyBudsDevice &device;
+        std::weak_ptr<GalaxyBudsDevice> weakDevice;
         virtual void OnReceivedData(const GalaxyBudsResponseData &data) = 0;
         void SendData(const GalaxyBudsSetAnc& setter);
+        void Reset() override;
 
     public:
         explicit GalaxyBudsCapability(const std::string &name,
                                       bool isReadOnly,
-                                      GalaxyBudsDevice &device);
+                                      std::shared_ptr<GalaxyBudsDevice> device);
         ~GalaxyBudsCapability() override;
     };
 }

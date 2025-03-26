@@ -48,7 +48,10 @@ namespace MagicPodsCore
     // DEMO
     nlohmann::json GalaxyBudsAncCapability::CreateJsonBody()
     {
-        std::vector<GalaxyBudsAnc> modes = watcher.GetAncModesFor(static_cast<GalaxyBudsModelIds>(device.GetProductId()));
+        std::vector<GalaxyBudsAnc> modes{};
+        if (auto dev = weakDevice.lock()) {
+            modes = watcher.GetAncModesFor(static_cast<GalaxyBudsModelIds>(dev->GetProductId()));
+        }
 
         unsigned char optionsFlag = 0;
         for (auto mode : modes)
@@ -67,8 +70,8 @@ namespace MagicPodsCore
         watcher.ProcessResponse(data);
     }
 
-    GalaxyBudsAncCapability::GalaxyBudsAncCapability(GalaxyBudsDevice &device) : GalaxyBudsCapability("anc", false, device),
-                                                                                                           watcher(GalaxyBudsAncWatcher(static_cast<GalaxyBudsModelIds>(device.GetProductId())))
+    GalaxyBudsAncCapability::GalaxyBudsAncCapability(std::shared_ptr<GalaxyBudsDevice> device) : GalaxyBudsCapability("anc", false, device),
+                                                                                                           watcher(GalaxyBudsAncWatcher(static_cast<GalaxyBudsModelIds>(device->GetProductId())))
     {
         watcherAncChangedEventId = watcher.GetAncChangedEvent().Subscribe([this](size_t id, GalaxyBudsAnc mode){
             DeviceAncModes newOption = GalaxyBudsAncToDeviceAncModes(mode);
@@ -83,7 +86,7 @@ namespace MagicPodsCore
                 option = newOption;
                 LOG_DEBUG("GalaxyBudsAncCapability: %s", DeviceAncModesToString(option).c_str());
                 _onChanged.FireEvent(*this);
-            }    
+            }
         });
     }
 
@@ -92,10 +95,10 @@ namespace MagicPodsCore
     }
 
     void GalaxyBudsAncCapability::SetFromJson(const nlohmann::json &json)
-    {                
+    {
         if (!json.contains(name))
             return;
-        
+
         const auto& capability = json.at(name);
 
         if (capability.contains("selected") && capability["selected"].is_number_integer())

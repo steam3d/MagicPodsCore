@@ -12,11 +12,17 @@ namespace MagicPodsCore
         watcher.ProcessResponse(data);
     }
 
-    GalaxyBudsBatteryCapability::GalaxyBudsBatteryCapability(GalaxyBudsDevice &device) : GalaxyBudsCapability("battery", true, device),
-                                                                                         battery(true),
-                                                                                         watcher(GalaxyBudsBatteryWatcher(static_cast<GalaxyBudsModelIds>(device.GetProductId())))
+    void GalaxyBudsBatteryCapability::Reset()
     {
-        batteryChangedEventId = battery.GetBatteryChangedEvent().Subscribe([this](size_t id, std::vector<DeviceBatteryData> b){
+        battery.ClearBattery();
+        GalaxyBudsCapability::Reset();
+    }
+
+    GalaxyBudsBatteryCapability::GalaxyBudsBatteryCapability(std::shared_ptr<GalaxyBudsDevice> device) : GalaxyBudsCapability("battery", true, device),
+                                                                                         battery(true),
+                                                                                         watcher(GalaxyBudsBatteryWatcher(static_cast<GalaxyBudsModelIds>(device->GetProductId())))
+    {
+        batteryChangedEventId = battery.GetBatteryChangedEvent().Subscribe([this](size_t id, const std::vector<DeviceBatteryData> &b){
             if (!isAvailable)
                 isAvailable = true;
 
@@ -24,7 +30,7 @@ namespace MagicPodsCore
             LOG_DEBUG("AapAncCapability::GetBatteryChangedEvent");
         });
 
-        watcherBatteryChangedEventId = watcher.GetBatteryChangedEvent().Subscribe([this](size_t id, std::vector<DeviceBatteryData> b){
+        watcherBatteryChangedEventId = watcher.GetBatteryChangedEvent().Subscribe([this](size_t id, const std::vector<DeviceBatteryData> &b){
             battery.UpdateBattery(b); });
     }
 
