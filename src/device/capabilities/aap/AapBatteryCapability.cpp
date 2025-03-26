@@ -19,7 +19,7 @@ namespace MagicPodsCore
         AapCapability::Reset();
     }
 
-    AapBatteryCapability::AapBatteryCapability(AapDevice &device) : AapCapability("battery", true, device),
+    AapBatteryCapability::AapBatteryCapability(std::shared_ptr<AapDevice> device) : AapCapability("battery", true, device),
                                                                     battery(true)
     {
         batteryChangedEventId = battery.GetBatteryChangedEvent().Subscribe([this](size_t id, const std::vector<DeviceBatteryData> &b){

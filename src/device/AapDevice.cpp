@@ -13,31 +13,30 @@ namespace MagicPodsCore
     }
 
     AapDevice::AapDevice(const sdbus::ObjectPath &objectPath, const std::map<std::string, sdbus::Variant> &deviceInterface)
-        : Device(objectPath, deviceInterface)
-    {
-        capabilities.push_back(std::make_unique<AapBatteryCapability>(*this));
-        capabilities.push_back(std::make_unique<AapAncCapability>(*this));
-    }
+        : Device(objectPath, deviceInterface){}
 
-    void AapDevice::SendData(const AapRequest &setter) // TODO MAKE COMMON CLASS FOR SETTERS
+    void AapDevice::SendData(const AapRequest &setter) //TODO: MAKE COMMON CLASS FOR SETTERS
     {
         _client->SendData(setter.Request());
     }
 
-    std::unique_ptr<AapDevice> AapDevice::Create(const sdbus::ObjectPath &objectPath, const std::map<std::string, sdbus::Variant> &deviceInterface)
+    std::shared_ptr<AapDevice> AapDevice::Create(const sdbus::ObjectPath &objectPath, const std::map<std::string, sdbus::Variant> &deviceInterface)
     {
-        auto device = new AapDevice(objectPath, deviceInterface);
+        auto device =std::make_shared<AapDevice>(objectPath, deviceInterface);        
         
+        device->capabilities.push_back(std::make_unique<AapBatteryCapability>(device));
+        device->capabilities.push_back(std::make_unique<AapAncCapability>(device));
+
         std::vector<std::vector<unsigned char>> initData;        
         initData.push_back(AapInit{}.Request());
         initData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown1}.Request());      
         if (AapInitExt::IsSupported(device->_productId))
-        initData.push_back(AapInitExt{}.Request());
+            initData.push_back(AapInitExt{}.Request());
         
-        //TODO:Add initData to client
+        //TODO: Add initData to client
         device->_client = Client::CreateL2CAP(device->_address, 0x1001);
         
         device->Init();
-        return std::unique_ptr<AapDevice>(device);
+        return device;
     }
 }

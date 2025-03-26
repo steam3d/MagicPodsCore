@@ -23,7 +23,7 @@ namespace MagicPodsCore
 
         void SendData(const AapRequest &setter);
 
-        static std::unique_ptr<AapDevice> Create(const sdbus::ObjectPath &objectPath,
+        static std::shared_ptr<AapDevice> Create(const sdbus::ObjectPath &objectPath,
                                                  const std::map<std::string, sdbus::Variant> &deviceInterface);
     };
 }

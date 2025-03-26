@@ -10,7 +10,7 @@ namespace MagicPodsCore
     private:
         DeviceBattery battery;
         size_t batteryChangedEventId;
-        
+
         AapBatteryWatcher watcher{};
         size_t watcherBatteryChangedEventId;
 
@@ -20,7 +20,7 @@ namespace MagicPodsCore
         void Reset() override;
 
     public:
-        explicit AapBatteryCapability(AapDevice &device);
+        explicit AapBatteryCapability(std::shared_ptr<AapDevice> device);
         ~AapBatteryCapability() override;
         void SetFromJson(const nlohmann::json &json) override {};
     };

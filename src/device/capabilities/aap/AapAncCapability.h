@@ -20,7 +20,7 @@ namespace MagicPodsCore
         void OnReceivedData(const std::vector<unsigned char> &data) override;
 
     public:
-        explicit AapAncCapability(AapDevice &device);
+        explicit AapAncCapability(std::shared_ptr<AapDevice> device);
         ~AapAncCapability() override;
         void SetFromJson(const nlohmann::json &json) override;
     };

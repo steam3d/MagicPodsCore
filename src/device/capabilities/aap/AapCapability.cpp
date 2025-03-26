@@ -4,7 +4,9 @@ namespace MagicPodsCore
 {
     void AapCapability::SendData(const AapRequest &setter)
     {
-        device.SendData(setter);
+        if (auto dev = this->weakDevice.lock()) {
+            dev->SendData(setter);
+        }
     }
 
     void AapCapability::Reset()
@@ -14,24 +16,25 @@ namespace MagicPodsCore
 
     AapCapability::AapCapability(const std::string &name,
                                  bool isReadOnly,
-                                 AapDevice &device) : Capability(name, isReadOnly),
-                                                      device(device)
+                                 std::shared_ptr<AapDevice> device) : Capability(name, isReadOnly),
+                                                      weakDevice(device)
     {
-        responseDataRecivedId = device.GetResponseDataRecived().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
-            {
-                OnReceivedData(data);
-            });
+        if (auto dev = this->weakDevice.lock()) {
+            responseDataRecivedId = dev->GetResponseDataRecived().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
+                {
+                    OnReceivedData(data);
+                });
 
-        onConnectedPropertyChangedId = device.GetConnectedPropertyChangedEvent().Subscribe([this](size_t id, bool isConnected)
-            {
-                if (!isConnected)
-                    Reset();
-            });
+            onConnectedPropertyChangedId = dev->GetConnectedPropertyChangedEvent().Subscribe([this](size_t id, bool isConnected)
+                {
+                    if (!isConnected)
+                        Reset();
+                });
+        }
     }
 
     AapCapability::~AapCapability()
     {
-        device.GetResponseDataRecived().Unsubscribe(responseDataRecivedId);
-        device.GetResponseDataRecived().Unsubscribe(onConnectedPropertyChangedId);
+        //Do not use the device here. All events will be released in ~Device.
     }
 }
