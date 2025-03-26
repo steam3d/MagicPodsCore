@@ -20,15 +20,21 @@ namespace MagicPodsCore {
         ClearAndFillDevicesMap();
 
         _rootProxy->uponSignal("InterfacesAdded").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces) {
-            LOG_DEBUG("OnInterfacesAdded");
+            LOG_DEBUG("OnInterfacesAdded:%s", static_cast<std::string>(objectPath).c_str());
 
             std::set<std::shared_ptr<Device>, DeviceComparator> addedDevices{};
 
+            //TODO: Check format of objectPath and `org.bluez.Device1` interface in OnAddedInterface and OnRemovedInterface
+            //A device can be added or removed only when `org.bluez.Device1` exists.
             const std::regex DEVICE_INSTANCE_RE{"^/org/bluez/hci[0-9]/dev(_[0-9A-F]{2}){6}$"};
             std::smatch match;
             if (std::regex_match(objectPath, match, DEVICE_INSTANCE_RE)) {
                 if (interfaces.contains("org.bluez.Device1")) {
                     auto deviceInterface = interfaces.at("org.bluez.Device1");
+
+                    if (deviceInterface.contains("Name")) {
+                        LOG_DEBUG("    %s", deviceInterface.at("Name").get<std::string>().c_str());
+                    }
 
                     if (!_devicesMap.contains(objectPath)) {
                         if (auto device = TryCreateDevice(objectPath, deviceInterface)) {
@@ -46,20 +52,33 @@ namespace MagicPodsCore {
         });
 
         _rootProxy->uponSignal("InterfacesRemoved").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::vector<std::string> array) {
-            LOG_DEBUG("OnInterfacesRemoved");
+            LOG_DEBUG("OnInterfacesRemoved:%s", static_cast<std::string>(objectPath).c_str());
 
-            std::set<std::shared_ptr<Device>, DeviceComparator> removedDevices{};
-
-            if (_devicesMap.contains(objectPath)) {
-                removedDevices.emplace(_devicesMap[objectPath]);
-                _devicesMap.erase(objectPath);
-
+            for (auto a: array){
+                LOG_DEBUG("    %s", a.c_str());
             }
 
-            TrySelectNewActiveDevice();
+            //TODO: Check format of objectPath and `org.bluez.Device1` interface in OnAddedInterface and OnRemovedInterface
+            //A device can be added or removed only when `org.bluez.Device1` exists.
+            const std::regex DEVICE_INSTANCE_RE{"^/org/bluez/hci[0-9]/dev(_[0-9A-F]{2}){6}$"};
+            std::smatch match;
+            if (std::regex_match(objectPath, match, DEVICE_INSTANCE_RE)) {
+                if (std::find(array.begin(), array.end(), "org.bluez.Device1") != array.end()){
 
-            if (!removedDevices.empty())
-                OnDevicesRemove(removedDevices);
+                    std::set<std::shared_ptr<Device>, DeviceComparator> removedDevices{};
+
+                    if (_devicesMap.contains(objectPath)) {
+                        removedDevices.emplace(_devicesMap[objectPath]);
+                        _devicesMap.erase(objectPath);
+
+                    }
+
+                    TrySelectNewActiveDevice();
+
+                    if (!removedDevices.empty())
+                        OnDevicesRemove(removedDevices);
+                }
+            }
         });
 
         _defaultBluetoothAdapterProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
@@ -180,11 +199,11 @@ namespace MagicPodsCore {
             });
             return newDevice;
         } else if (deviceInterface.contains("Modalias") && checkHardcodedModalias(deviceInterface.at("Modalias").get<std::string>())){
-            auto newDevice = GalaxyBudsDevice::Create(objectPath, deviceInterface, 9);
-            newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
-                TrySelectNewActiveDevice();
-            });
-            return newDevice;
+            //auto newDevice = GalaxyBudsDevice::Create(objectPath, deviceInterface, 9);
+            //newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
+            //    TrySelectNewActiveDevice();
+            //});
+            //return newDevice;
         }
         return nullptr;
     }
@@ -240,8 +259,9 @@ namespace MagicPodsCore {
 
     void DevicesInfoFetcher::OnDevicesRemove(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices) {
         LOG_RELEASE("--- OnDevicesRemove ---");
-        for (const auto& device : devices)
+        for (const auto& device : devices){
             LOG_RELEASE("%s %s",  device->GetName().c_str(), device->GetAddress().c_str());
+        }
 
         _onDevicesRemoveEvent.FireEvent(devices);
     }
