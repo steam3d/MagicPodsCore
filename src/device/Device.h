@@ -18,14 +18,14 @@ namespace MagicPodsCore {
         std::unique_ptr<sdbus::IProxy> _deviceProxy{};
 
         std::string _name{};
-        bool _connected{};    
+        bool _connected{};
         Event<bool> _onConnectedPropertyChangedEvent{};
         Event<Capability> _onCapabilityChangedEvent{};
         size_t clientReceivedDataEventId;
         virtual void OnResponseDataReceived(const std::vector<unsigned char> &data) = 0;
         void SubscribeCapabilitiesChanges();
         void UnsubscribeCapabilitiesChanges();
-        
+
     protected:
         unsigned short _vendorId = 0;
         unsigned short _productId = 0; //model
@@ -69,7 +69,7 @@ namespace MagicPodsCore {
         Event<bool>& GetConnectedPropertyChangedEvent() {
             return _onConnectedPropertyChangedEvent;
         }
-        
+
         Event<Capability>& GetCapabilityChangedEvent() {
             return _onCapabilityChangedEvent;
         }

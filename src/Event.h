@@ -37,4 +37,5 @@ namespace MagicPodsCore {
             value(key, dataType);
     }
 
+    //TODO: Should I use a destructor or create a method called UnsubscribeAll?
 }

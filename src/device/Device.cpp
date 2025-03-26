@@ -7,7 +7,7 @@ namespace MagicPodsCore {
         for (auto& c: capabilities){
             size_t id = c->GetChangedEvent().Subscribe([this](size_t id, const Capability &capability)
             {
-                _onCapabilityChangedEvent.FireEvent(capability);                
+                _onCapabilityChangedEvent.FireEvent(capability);
                 LOG_DEBUG("Capability: %s changed", capability.GetName().c_str());
             });
             capabilityEventIds.push_back(id);
@@ -56,17 +56,9 @@ namespace MagicPodsCore {
         clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
         { OnResponseDataReceived(data); });
 
-        LOG_DEBUG("_connected 0 %s", _connected ? "true" : "false");
-        if (_connected){
-            _client->Start();
-            LOG_RELEASE("_client started 0");
-        }
-
-        // When the client above is connected, PropertiesChanged will fire twice.
-        // First connection false
-        // Second connections true
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
-            //LOG_RELEASE("PropertiesChanged");
+            //TODO: The device changes connection status only when the org.bluez.Device1 interface changes. Add a check for org.bluez.Device1.
+            LOG_RELEASE("PropertiesChanged: %s", interfaceName.c_str());
             if (values.contains("Connected")) {
                 auto newConnectedValue = values["Connected"].get<bool>();
                 if (_connected != newConnectedValue) {
@@ -86,12 +78,22 @@ namespace MagicPodsCore {
         });
 
         _deviceProxy->finishRegistration();
+
+        LOG_DEBUG("_connected 0 %s", _connected ? "true" : "false");
+        if (_connected){
+            _client->Start();
+            LOG_RELEASE("_client started 0");
+        }
     }
 
     Device::~Device()
     {
-        _client->GetOnReceivedDataEvent().Unsubscribe(clientReceivedDataEventId);
         UnsubscribeCapabilitiesChanges();
+        capabilities.clear();
+
+        _client->GetOnReceivedDataEvent().Unsubscribe(clientReceivedDataEventId);
+
+        //TODO: Unsubscribe all listeners from all events in device. See the event.h
     }
 
     void Device::Connect() {
