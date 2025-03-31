@@ -1,18 +1,16 @@
 #include "DevicesInfoFetcher.h"
 
 #include "BtVendorIds.h"
-#include "sdk/aap/enums/AapModelIds.h"
 #include "sdk/aap/AapHelper.h"
+#include "sdk/sgb/GalaxyBudsHelper.h"
 #include "StringUtils.h"
 #include "Logger.h"
+#include "device/GalaxyBudsDevice.h"
+#include "device/AapDevice.h"
 
 #include <regex>
 #include <iostream>
 #include <algorithm>
-#include "device/GalaxyBudsDevice.h"
-#include "device/AapDevice.h"
-#include <regex>
-
 
 namespace MagicPodsCore {
 
@@ -122,32 +120,19 @@ namespace MagicPodsCore {
     }
 
     std::shared_ptr<Device> DevicesInfoFetcher::TryCreateDevice(const std::shared_ptr<DBusDeviceInfo>& deviceInfo) {
-        /*
-        // TODO: удалить?
-        // HARDCODED TEST
-        const static auto checkHardcodedModalias = [](const std::string& modalias) -> bool {
-            LOG_RELEASE("%s", modalias.c_str());
-            return modalias == "bluetooth:v0075pA013d0001";
-        };
-        // HARDCODED TEST
-        */
-
         if (AapHelper::IsAapDevice(deviceInfo->GetVendorId(), deviceInfo->GetProductId())){
             auto newDevice = AapDevice::Create(deviceInfo);
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
             return newDevice;
-        } 
-        /*
-        else if (deviceInterface.contains("Modalias") && checkHardcodedModalias(deviceInterface.at("Modalias").get<std::string>())) {
-            //auto newDevice = GalaxyBudsDevice::Create(objectPath, deviceInterface, 9);
-            //newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
-            //    TrySelectNewActiveDevice();
-            //});
-            //return newDevice;
         }
-        */
+        else if (GalaxyBudsHelper::IsGalaxyBudsDevice(deviceInfo->GetUuids()))
+        {
+            auto keyPair = GalaxyBudsHelper::SearchModelColor(deviceInfo->GetUuids(), deviceInfo->GetName());
+            auto newDevice = GalaxyBudsDevice::Create(deviceInfo, static_cast<unsigned short>(keyPair.first));
+            return newDevice;
+        }
         return nullptr;
     }
 
