@@ -13,7 +13,7 @@ namespace MagicPodsCore
         size_t onConnectedPropertyChangedId;
 
     protected:
-        std::weak_ptr<AapDevice> weakDevice;
+        AapDevice& device;
         virtual void OnReceivedData(const std::vector<unsigned char> &data) = 0;
         void SendData(const AapRequest &setter);
         void Reset() override;
@@ -22,7 +22,7 @@ namespace MagicPodsCore
     public:
         explicit AapCapability(const std::string &name,
                                bool isReadOnly,
-                               std::shared_ptr<AapDevice> device);
+                               AapDevice& device);
         ~AapCapability() override;
     };
 }

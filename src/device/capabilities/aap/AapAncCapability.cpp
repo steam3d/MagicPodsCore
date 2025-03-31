@@ -48,10 +48,7 @@ namespace MagicPodsCore
     // DEMO
     nlohmann::json AapAncCapability::CreateJsonBody()
     {
-        std::vector<AapAncMode> modes{};
-        if (auto dev = weakDevice.lock()) {
-            modes = AapSetAnc::GetAncModesFor(dev->GetProductId());
-        }
+        std::vector<AapAncMode> modes = AapSetAnc::GetAncModesFor(device.GetProductId());        
 
         unsigned char optionsFlag = 0;
         for (auto mode : modes)
@@ -70,7 +67,7 @@ namespace MagicPodsCore
         watcher.ProcessResponse(data);
     }
 
-    AapAncCapability::AapAncCapability(std::shared_ptr<AapDevice> device) : AapCapability("anc", false, device)
+    AapAncCapability::AapAncCapability(AapDevice& device) : AapCapability("anc", false, device)
     {
         watcherAncChangedEventId = watcher.GetEvent().Subscribe([this](size_t id, AapAncMode mode){
             DeviceAncModes newOption = AapAncModeToDeviceAncModes(mode);

@@ -22,6 +22,6 @@ namespace MagicPodsCore
 
         void SendData(const AapRequest &setter);
 
-        static std::shared_ptr<AapDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo);
+        static std::unique_ptr<AapDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo);
     };
 }

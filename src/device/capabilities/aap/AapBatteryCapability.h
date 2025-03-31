@@ -20,7 +20,7 @@ namespace MagicPodsCore
         void Reset() override;
 
     public:
-        explicit AapBatteryCapability(std::shared_ptr<AapDevice> device);
+        explicit AapBatteryCapability(AapDevice& device);
         ~AapBatteryCapability() override;
         void SetFromJson(const nlohmann::json &json) override {};
     };

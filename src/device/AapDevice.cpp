@@ -21,12 +21,12 @@ namespace MagicPodsCore
         _client->SendData(setter.Request());
     }
 
-    std::shared_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo)
+    std::unique_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo)
     {
-        auto device = std::make_shared<AapDevice>(deviceInfo);        
+        auto device = std::make_unique<AapDevice>(deviceInfo);        
         
-        device->capabilities.push_back(std::make_unique<AapBatteryCapability>(device));
-        device->capabilities.push_back(std::make_unique<AapAncCapability>(device));
+        device->capabilities.push_back(std::make_unique<AapBatteryCapability>(*device));
+        device->capabilities.push_back(std::make_unique<AapAncCapability>(*device));
 
         std::vector<std::vector<unsigned char>> initData;        
         initData.push_back(AapInit{}.Request());
