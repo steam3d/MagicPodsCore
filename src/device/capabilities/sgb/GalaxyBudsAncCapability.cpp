@@ -48,10 +48,7 @@ namespace MagicPodsCore
     // DEMO
     nlohmann::json GalaxyBudsAncCapability::CreateJsonBody()
     {
-        std::vector<GalaxyBudsAnc> modes{};
-        if (auto dev = weakDevice.lock()) {
-            modes = watcher.GetAncModesFor(static_cast<GalaxyBudsModelIds>(dev->GetProductId()));
-        }
+        std::vector<GalaxyBudsAnc> modes = watcher.GetAncModesFor(static_cast<GalaxyBudsModelIds>(device.GetProductId()));
 
         unsigned char optionsFlag = 0;
         for (auto mode : modes)
@@ -70,8 +67,8 @@ namespace MagicPodsCore
         watcher.ProcessResponse(data);
     }
 
-    GalaxyBudsAncCapability::GalaxyBudsAncCapability(std::shared_ptr<GalaxyBudsDevice> device) : GalaxyBudsCapability("anc", false, device),
-                                                                                                           watcher(GalaxyBudsAncWatcher(static_cast<GalaxyBudsModelIds>(device->GetProductId())))
+    GalaxyBudsAncCapability::GalaxyBudsAncCapability(GalaxyBudsDevice& device) : GalaxyBudsCapability("anc", false, device),
+                                                                                                           watcher(GalaxyBudsAncWatcher(static_cast<GalaxyBudsModelIds>(device.GetProductId())))
     {
         watcherAncChangedEventId = watcher.GetAncChangedEvent().Subscribe([this](size_t id, GalaxyBudsAnc mode){
             DeviceAncModes newOption = GalaxyBudsAncToDeviceAncModes(mode);

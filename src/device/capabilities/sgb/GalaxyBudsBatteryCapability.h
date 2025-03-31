@@ -20,7 +20,7 @@ namespace MagicPodsCore
         void Reset() override;
 
     public:
-        explicit GalaxyBudsBatteryCapability(std::shared_ptr<GalaxyBudsDevice> device);
+        explicit GalaxyBudsBatteryCapability(GalaxyBudsDevice& device);
         ~GalaxyBudsBatteryCapability() override;
         void SetFromJson(const nlohmann::json &json) override {};
     };

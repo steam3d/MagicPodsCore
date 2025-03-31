@@ -19,7 +19,7 @@ namespace MagicPodsCore
         void OnReceivedData(const GalaxyBudsResponseData &data);
 
     public:
-        explicit GalaxyBudsAncCapability(std::shared_ptr<GalaxyBudsDevice> device);
+        explicit GalaxyBudsAncCapability(GalaxyBudsDevice& device);
         ~GalaxyBudsAncCapability() override;
         void SetFromJson(const nlohmann::json &json) override;
     };

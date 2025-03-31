@@ -18,9 +18,9 @@ namespace MagicPodsCore
         GalaxyBudsCapability::Reset();
     }
 
-    GalaxyBudsBatteryCapability::GalaxyBudsBatteryCapability(std::shared_ptr<GalaxyBudsDevice> device) : GalaxyBudsCapability("battery", true, device),
+    GalaxyBudsBatteryCapability::GalaxyBudsBatteryCapability(GalaxyBudsDevice& device) : GalaxyBudsCapability("battery", true, device),
                                                                                          battery(true),
-                                                                                         watcher(GalaxyBudsBatteryWatcher(static_cast<GalaxyBudsModelIds>(device->GetProductId())))
+                                                                                         watcher(GalaxyBudsBatteryWatcher(static_cast<GalaxyBudsModelIds>(device.GetProductId())))
     {
         batteryChangedEventId = battery.GetBatteryChangedEvent().Subscribe([this](size_t id, const std::vector<DeviceBatteryData> &b){
             if (!isAvailable)

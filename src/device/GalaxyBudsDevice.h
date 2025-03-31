@@ -31,6 +31,6 @@ namespace MagicPodsCore
 
         void SendData(const GalaxyBudsSetAnc &setter);
 
-        static std::shared_ptr<GalaxyBudsDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, unsigned short model);
+        static std::unique_ptr<GalaxyBudsDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, unsigned short model);        
     };
 }

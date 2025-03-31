@@ -5,9 +5,7 @@ namespace MagicPodsCore
 {
     void GalaxyBudsCapability::SendData(const GalaxyBudsSetAnc &setter) // TODO MAKE COMMON CLASS FOR SETTERS
     {
-        if (auto dev = this->weakDevice.lock()){
-            dev->SendData(setter);
-        }
+        device.SendData(setter);
     }
 
     void GalaxyBudsCapability::Reset()
@@ -17,21 +15,20 @@ namespace MagicPodsCore
 
     GalaxyBudsCapability::GalaxyBudsCapability(const std::string &name,
                                                bool isReadOnly,
-                                               std::shared_ptr<GalaxyBudsDevice> device) : Capability(name, isReadOnly),
-                                                                           weakDevice(device)
+                                               GalaxyBudsDevice& device) : Capability(name, isReadOnly),
+                                                                           device(device)
     {
-        if (auto dev = this->weakDevice.lock()) {
-            responseDataRecivedId = dev->GetResponseDataRecived().Subscribe([this](size_t id, const GalaxyBudsResponseData &data)
-                {
-                    OnReceivedData(data);
-                });
+        responseDataRecivedId = this->device.GetResponseDataRecived().Subscribe([this](size_t id, const GalaxyBudsResponseData &data)
+            {
+                OnReceivedData(data);
+            });
 
-            onConnectedPropertyChangedId = dev->GetConnectedPropertyChangedEvent().Subscribe([this](size_t id, bool isConnected)
-                {
-                    if (!isConnected)
-                        Reset();
-                });
-        }
+        onConnectedPropertyChangedId = this->device.GetConnectedPropertyChangedEvent().Subscribe([this](size_t id, bool isConnected)
+            {
+                if (!isConnected)
+                    Reset();
+            });
+
     }
 
     GalaxyBudsCapability::~GalaxyBudsCapability()
