@@ -39,6 +39,22 @@ namespace MagicPodsCore {
         return devices;
     }
 
+    void DBusService::EnableBluetoothAdapter() {
+        _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke([this](const sdbus::Error* err) {});
+    }
+
+    void DBusService::EnableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback) {
+        _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke(callback);
+    }
+
+    void DBusService::DisableBluetoothAdapter() {
+        _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke([this](const sdbus::Error* err) {});
+    }
+
+    void DBusService::DisableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback) {
+        _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke(callback);
+    }
+
     std::shared_ptr<DBusDeviceInfo> DBusService::TryCreateDevice(sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces) {
         const std::regex DEVICE_INSTANCE_RE{"^/org/bluez/hci[0-9]/dev(_[0-9A-F]{2}){6}$"};
         std::smatch match;

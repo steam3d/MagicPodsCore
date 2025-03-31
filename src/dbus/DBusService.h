@@ -32,21 +32,10 @@ namespace MagicPodsCore {
             return _isBluetoothAdapterPowered;
         }
 
-        void EnableBluetoothAdapter() {
-            _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke([this](const sdbus::Error* err) {});
-        }
-    
-        void EnableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback) {
-            _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke(callback);
-        }
-    
-        void DisableBluetoothAdapter() {
-            _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke([this](const sdbus::Error* err) {});
-        }
-    
-        void DisableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback) {
-            _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke(callback);
-        }
+        void EnableBluetoothAdapter();
+        void EnableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback);
+        void DisableBluetoothAdapter();
+        void DisableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback);
 
         Event<std::shared_ptr<DBusDeviceInfo>>& GetOnDeviceAddedEvent()
         {
