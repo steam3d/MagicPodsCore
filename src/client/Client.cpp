@@ -240,4 +240,9 @@ namespace MagicPodsCore {
         return port.has_value() ? std::unique_ptr<Client>(new Client(address, port.value(), ClientConnectionType::RFCOMM)) : nullptr;
     }
 
+    Client::~Client()
+    {
+        Stop();
+        LOG_DEBUG("Client::~Client()");
+    }
 }

@@ -73,6 +73,7 @@ namespace MagicPodsCore {
         static std::unique_ptr<Client> CreateL2CAP(const std::string& address, unsigned short port);
         static std::unique_ptr<Client> CreateRFCOMM(const std::string& address, unsigned short port);
         static std::unique_ptr<Client> CreateRFCOMM(const std::string& address, const std::string& serviceUuid);
+        ~Client();
     };
 
 

@@ -70,7 +70,10 @@ namespace MagicPodsCore {
         UnsubscribeCapabilitiesChanges();
         capabilities.clear();
 
+        _client->Stop();
         _client->GetOnReceivedDataEvent().Unsubscribe(clientReceivedDataEventId);
+
+        LOG_DEBUG("Device::~Device");
 
         //TODO: Unsubscribe all listeners from all events in device. See the event.h
     }
