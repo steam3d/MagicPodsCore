@@ -132,7 +132,7 @@ namespace MagicPodsCore {
         // HARDCODED TEST
         */
 
-        if (AapHelper::IsAapDevice(deviceInfo->GetProductId(), deviceInfo->GetVendorId())){
+        if (AapHelper::IsAapDevice(deviceInfo->GetVendorId(), deviceInfo->GetProductId())){
             auto newDevice = AapDevice::Create(deviceInfo);
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();

@@ -37,7 +37,7 @@ namespace MagicPodsCore {
 
         clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
         { OnResponseDataReceived(data); });
-
+        
         _deviceConnectedStatusChangedEvent = _deviceInfo->GetConnectionStatus().GetEvent().Subscribe([this](size_t listenerId, bool newConnectedValue) {
             if (_connected != newConnectedValue) {
                 _connected = newConnectedValue;
@@ -54,6 +54,8 @@ namespace MagicPodsCore {
             }
         });
 
+        _connected = _deviceInfo->GetConnectionStatus().GetValue();
+        
         LOG_DEBUG("_connected 0 %s", _connected ? "true" : "false");
         if (_connected){
             _client->Start();

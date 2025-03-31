@@ -24,6 +24,7 @@ namespace MagicPodsCore {
 
         void SetValue(const DataType& newValue) {
             _value = std::move(newValue);
+            _event.FireEvent(_value);
         }
     };
 

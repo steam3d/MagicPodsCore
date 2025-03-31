@@ -1,17 +1,22 @@
 #include "./dbus/DBusDeviceInfo.h"
 
+#include "Logger.h"
+
 namespace MagicPodsCore {
 
     DBusDeviceInfo::DBusDeviceInfo(const sdbus::ObjectPath& objectPath, const std::map<std::string, std::map<std::string, sdbus::Variant>>& interfaces) : _deviceProxy{sdbus::createProxy("org.bluez", objectPath)}
     {
         auto deviceInterface = interfaces.at("org.bluez.Device1");
 
-        _address = deviceInterface.at("Address").get<std::string>();
-        // if (deviceInterface.contains("Modalias")) {
-        //     const auto vidPid = ParseVidPid(deviceInterface.at("Modalias").get<std::string>());
-        //     _vendorId = vidPid[0];
-        //     _productId = vidPid[1];
-        // }
+        if (deviceInterface.contains("Address")){
+            _address = deviceInterface.at("Address").get<std::string>();
+        }
+
+        if (deviceInterface.contains("Modalias")) {
+            const auto vidPid = ParseVidPid(deviceInterface.at("Modalias").get<std::string>());
+            _vendorId = vidPid[0];
+            _productId = vidPid[1];
+        }
         _uuids = std::vector<std::string>{};
         for (const auto& [interface, properties] : interfaces) {
             auto uuidsIterator = properties.find("UUIDs");
@@ -22,15 +27,20 @@ namespace MagicPodsCore {
                 }
             }
         }
-        _clazz = deviceInterface.contains("Class") 
-                    ? std::optional<unsigned int>{ deviceInterface.at("Class").get<unsigned int>() } 
+        _clazz = deviceInterface.contains("Class")
+                    ? std::optional<unsigned int>{ deviceInterface.at("Class").get<unsigned int>() }
                     : std::nullopt;
-        _name = deviceInterface.at("Name").get<std::string>();
-        _connectionStatus.SetValue(deviceInterface.at("Connected").get<bool>());
+
+        _name = deviceInterface.contains("Name")
+                    ? deviceInterface.at("Name").get<std::string>()
+                    : _address;
+
+        if (deviceInterface.contains("Connected")){
+            _connectionStatus.SetValue(deviceInterface.at("Connected").get<bool>());
+        }
 
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
-            //TODO: See Device.cpp comment
-            if (values.contains("Connected")) {
+            if(interfaceName == "org.bluez.Device1" && values.contains("Connected")){
                 _connectionStatus.SetValue(values["Connected"].get<bool>());
             }
         });
