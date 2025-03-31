@@ -1,5 +1,6 @@
-#include "DBusDeviceInfo.h"
+#pragma once
 
+#include "DBusDeviceInfo.h"
 #include "ObservableVariable.h"
 
 #include <memory>
@@ -29,6 +30,32 @@ namespace MagicPodsCore {
 
         ObservableVariable<bool>& IsBluetoothAdapterPowered() {
             return _isBluetoothAdapterPowered;
+        }
+
+        void EnableBluetoothAdapter() {
+            _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke([this](const sdbus::Error* err) {});
+        }
+    
+        void EnableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback) {
+            _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke(callback);
+        }
+    
+        void DisableBluetoothAdapter() {
+            _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke([this](const sdbus::Error* err) {});
+        }
+    
+        void DisableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback) {
+            _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke(callback);
+        }
+
+        Event<std::shared_ptr<DBusDeviceInfo>>& GetOnDeviceAddedEvent()
+        {
+            return _onDeviceAddedEvent;
+        }
+
+        Event<std::shared_ptr<DBusDeviceInfo>>& GetOnDeviceRemovedEvent()
+        {
+            return _onDeviceRemovedEvent;
         }
 
     private:

@@ -1,19 +1,18 @@
 #pragma once
 
+#include "device/Device.h"
+#include "Event.h"
+#include "./dbus/DBusService.h"
+
 #include <string>
 #include <vector>
 #include <regex>
 #include <functional>
 #include <set>
 #include <map>
-
+#include <array>
 #include <sdbus-c++/sdbus-c++.h>
 #include <json.hpp>
-
-#include "device/Device.h"
-#include "Event.h"
-
-#include <array>
 
 namespace MagicPodsCore {
 
@@ -26,18 +25,15 @@ namespace MagicPodsCore {
 
     class DevicesInfoFetcher {
     private:
-        std::unique_ptr<sdbus::IProxy> _rootProxy{};
-        std::unique_ptr<sdbus::IProxy> _defaultBluetoothAdapterProxy{};
+        DBusService _dbusService{};
 
-        std::map<sdbus::ObjectPath, std::shared_ptr<Device>> _devicesMap{};
+        std::map<std::string, std::shared_ptr<Device>> _devicesMap{}; // address -> device
         std::shared_ptr<Device> _activeDevice{};
 
         Event<std::shared_ptr<Device>> _onActiveDeviceChangedEvent{};
-        Event<std::set<std::shared_ptr<Device>, DeviceComparator>> _onDevicesAddEvent{};
-        Event<std::set<std::shared_ptr<Device>, DeviceComparator>> _onDevicesRemoveEvent{};
+        Event<std::shared_ptr<Device>> _onDeviceAddEvent{};
+        Event<std::shared_ptr<Device>> _onDeviceRemoveEvent{};
         Event<bool> _onDefaultAdapterChangeEnabled{};
-
-        bool _isBluetoothAdapterPowered{};
 
     public:
         DevicesInfoFetcher();
@@ -53,8 +49,8 @@ namespace MagicPodsCore {
         void Disconnect(const std::string& deviceAddress);
         void SetCapabilities(const nlohmann::json& json);
 
-        bool IsBluetoothAdapterPowered() const {
-            return _isBluetoothAdapterPowered;
+        bool IsBluetoothAdapterPowered() {
+            return _dbusService.IsBluetoothAdapterPowered().GetValue();
         }
         void EnableBluetoothAdapter(); // TODO: выпилить?
         void EnableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback);
@@ -65,12 +61,12 @@ namespace MagicPodsCore {
             return _onActiveDeviceChangedEvent;
         }
 
-        Event<std::set<std::shared_ptr<Device>, DeviceComparator>>& GetOnDevicesAddEvent() {
-            return _onDevicesAddEvent;
+        Event<std::shared_ptr<Device>>& GetOnDeviceAddEvent() {
+            return _onDeviceAddEvent;
         }
 
-        Event<std::set<std::shared_ptr<Device>, DeviceComparator>>& GetOnDevicesRemoveEvent() {
-            return _onDevicesRemoveEvent;
+        Event<std::shared_ptr<Device>>& GetOnDeviceRemoveEvent() {
+            return _onDeviceRemoveEvent;
         }
 
         Event<bool>& GetOnDefaultAdapterChangeEnabledEvent() {
@@ -78,13 +74,10 @@ namespace MagicPodsCore {
         }
 
     private:
-        std::shared_ptr<Device> TryCreateDevice(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
+        std::shared_ptr<Device> TryCreateDevice(const std::shared_ptr<DBusDeviceInfo>& deviceInfo);
 
         void ClearAndFillDevicesMap();
         void TrySelectNewActiveDevice();
-
-        void OnDevicesAdd(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices);
-        void OnDevicesRemove(const std::set<std::shared_ptr<Device>, DeviceComparator>& devices);
 
         public:
             static std::array<unsigned short, 2>ParseVidPid(const std::string& modalias);

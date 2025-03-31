@@ -16,9 +16,7 @@ namespace MagicPodsCore
         GalaxyBudsPacket _packet;
         void OnResponseDataReceived(const std::vector<unsigned char> &data) override;
     public:
-        explicit GalaxyBudsDevice(const sdbus::ObjectPath &objectPath,
-                                  const std::map<std::string, sdbus::Variant> &deviceInterface,
-                                  unsigned short model);
+        explicit GalaxyBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, unsigned short model);
 
         unsigned short GetProductId() const override
         {
@@ -33,8 +31,6 @@ namespace MagicPodsCore
 
         void SendData(const GalaxyBudsSetAnc &setter);
 
-        static std::shared_ptr<GalaxyBudsDevice> Create(const sdbus::ObjectPath &objectPath,
-                                                        const std::map<std::string, sdbus::Variant> &deviceInterface,
-                                                        unsigned short model);
+        static std::shared_ptr<GalaxyBudsDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, unsigned short model);
     };
 }

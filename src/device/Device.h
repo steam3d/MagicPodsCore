@@ -1,12 +1,13 @@
 #pragma once
 
-#include <sdbus-c++/sdbus-c++.h>
-
 #include "device/capabilities/Capability.h"
 #include "client/Client.h"
 #include "Event.h"
 #include "StringUtils.h"
 #include "Logger.h"
+#include "dbus/DBusDeviceInfo.h"
+
+#include <sdbus-c++/sdbus-c++.h>
 #include <iostream>
 #include <vector>
 #include <json.hpp>
@@ -15,29 +16,27 @@ namespace MagicPodsCore {
 
     class Device {
     private:
-        std::unique_ptr<sdbus::IProxy> _deviceProxy{};
+        std::shared_ptr<DBusDeviceInfo> _deviceInfo{};
 
         std::string _name{};
         bool _connected{};
         Event<bool> _onConnectedPropertyChangedEvent{};
         Event<Capability> _onCapabilityChangedEvent{};
         size_t clientReceivedDataEventId;
+        size_t _deviceConnectedStatusChangedEvent{};
         virtual void OnResponseDataReceived(const std::vector<unsigned char> &data) = 0;
         void SubscribeCapabilitiesChanges();
         void UnsubscribeCapabilitiesChanges();
 
     protected:
-        unsigned short _vendorId = 0;
-        unsigned short _productId = 0; //model
         mutable std::mutex _propertyMutex{};
         std::unique_ptr<Client> _client;
-        std::string _address{};
         std::vector<std::unique_ptr<Capability>> capabilities{};
         std::vector<size_t> capabilityEventIds{};
         void Init();
 
     public:
-        Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface);
+        Device(std::shared_ptr<DBusDeviceInfo> deviceInfo);
         virtual ~Device(); //wrong
         // TODO: убрать возможность копирования
 
@@ -48,22 +47,22 @@ namespace MagicPodsCore {
 
         std::string GetAddress() const {
             std::lock_guard lock{_propertyMutex};
-            return _address;
+            return _deviceInfo->GetAddress();
         }
 
         bool GetConnected() const {
             std::lock_guard lock{_propertyMutex};
-            return _connected;
+            return _deviceInfo->GetConnectionStatus().GetValue();
         }
 
         virtual unsigned short GetVendorId() const {
             std::lock_guard lock{_propertyMutex};
-            return _vendorId;
+            return _deviceInfo->GetVendorId();
         }
 
         virtual unsigned short GetProductId() const {
             std::lock_guard lock{_propertyMutex};
-            return _productId;
+            return _deviceInfo->GetProductId();
         }
 
         Event<bool>& GetConnectedPropertyChangedEvent() {

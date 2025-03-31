@@ -12,17 +12,18 @@ namespace MagicPodsCore
         _onResponseDataRecived.FireEvent(data);
     }
 
-    AapDevice::AapDevice(const sdbus::ObjectPath &objectPath, const std::map<std::string, sdbus::Variant> &deviceInterface)
-        : Device(objectPath, deviceInterface){}
+    AapDevice::AapDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo) : Device(deviceInfo)
+    {
+    }
 
     void AapDevice::SendData(const AapRequest &setter) //TODO: MAKE COMMON CLASS FOR SETTERS
     {
         _client->SendData(setter.Request());
     }
 
-    std::shared_ptr<AapDevice> AapDevice::Create(const sdbus::ObjectPath &objectPath, const std::map<std::string, sdbus::Variant> &deviceInterface)
+    std::shared_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo)
     {
-        auto device =std::make_shared<AapDevice>(objectPath, deviceInterface);        
+        auto device = std::make_shared<AapDevice>(deviceInfo);        
         
         device->capabilities.push_back(std::make_unique<AapBatteryCapability>(device));
         device->capabilities.push_back(std::make_unique<AapAncCapability>(device));
@@ -30,11 +31,11 @@ namespace MagicPodsCore
         std::vector<std::vector<unsigned char>> initData;        
         initData.push_back(AapInit{}.Request());
         initData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown1}.Request());      
-        if (AapInitExt::IsSupported(device->_productId))
+        if (AapInitExt::IsSupported(deviceInfo->GetProductId()))
             initData.push_back(AapInitExt{}.Request());
         
         //TODO: Add initData to client
-        device->_client = Client::CreateL2CAP(device->_address, 0x1001);
+        device->_client = Client::CreateL2CAP(deviceInfo->GetAddress(), 0x1001);
         
         device->Init();
         return device;

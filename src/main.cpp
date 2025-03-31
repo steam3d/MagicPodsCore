@@ -9,8 +9,6 @@
 #include "Logger.h"
 #include "Config.h"
 
-
-
 using namespace MagicPodsCore;
 
 nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
@@ -223,15 +221,13 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
             onConnectedChangedListener(weakDevice.lock(), newValue);
         });
     }
-    devicesInfoFetcher.GetOnDevicesAddEvent().Subscribe([onCapabilityChangedListener, onConnectedChangedListener](size_t listenerId, auto newDevices) {
-        for (auto& device : newDevices) {
-            device->GetCapabilityChangedEvent().Subscribe([onCapabilityChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto& newValues) {
-                onCapabilityChangedListener(weakDevice.lock(), newValues);
-            });
-            device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
-                onConnectedChangedListener(weakDevice.lock(), newValue);
-            });
-        }
+    devicesInfoFetcher.GetOnDeviceAddEvent().Subscribe([onCapabilityChangedListener, onConnectedChangedListener](size_t listenerId, auto device) {
+        device->GetCapabilityChangedEvent().Subscribe([onCapabilityChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto& newValues) {
+            onCapabilityChangedListener(weakDevice.lock(), newValues);
+        });
+        device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
+            onConnectedChangedListener(weakDevice.lock(), newValue);
+        });
     });
     devicesInfoFetcher.GetOnActiveDeviceChangedEvent().Subscribe([onActiveDeviceChanged](size_t listenerId, auto newDevice) {
         onActiveDeviceChanged(newDevice);

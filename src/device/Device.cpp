@@ -26,26 +26,8 @@ namespace MagicPodsCore {
         capabilityEventIds.clear();
     }
 
-    Device::Device(const sdbus::ObjectPath& objectPath, const std::map<std::string, sdbus::Variant>& deviceInterface): _deviceProxy{sdbus::createProxy("org.bluez", objectPath)}
+    Device::Device(std::shared_ptr<DBusDeviceInfo> deviceInfo) : _deviceInfo{deviceInfo} 
     {
-        if (deviceInterface.contains("Name")) {
-            _name = deviceInterface.at("Name").get<std::string>();
-        }
-
-        if (deviceInterface.contains("Address")) {
-            _address = deviceInterface.at("Address").get<std::string>();
-        }
-
-        if (deviceInterface.contains("Connected")) {
-            _connected = deviceInterface.at("Connected").get<bool>();
-            LOG_DEBUG("_connected: %s", _connected ? "true" : "false");
-        }
-
-        if (deviceInterface.contains("Modalias")) {
-            auto vp = DevicesInfoFetcher::ParseVidPid(deviceInterface.at("Modalias").get<std::string>());
-            _vendorId = vp[0];
-            _productId = vp[1];
-        }
     }
 
     void Device::Init()
@@ -56,28 +38,21 @@ namespace MagicPodsCore {
         clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
         { OnResponseDataReceived(data); });
 
-        _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
-            //TODO: The device changes connection status only when the org.bluez.Device1 interface changes. Add a check for org.bluez.Device1.
-            LOG_RELEASE("PropertiesChanged: %s", interfaceName.c_str());
-            if (values.contains("Connected")) {
-                auto newConnectedValue = values["Connected"].get<bool>();
-                if (_connected != newConnectedValue) {
-                    _connected = newConnectedValue;
-                    LOG_DEBUG("PropertiesChanged:Connected %s", _connected ? "true" : "false");
-                    _onConnectedPropertyChangedEvent.FireEvent(_connected);
-                }
-                if (_connected){
-                    _client->Start();
-                    LOG_RELEASE("_client started 1");
-                }
-                else{
-                    _client->Stop();
-                    LOG_RELEASE("_client stopped 1");
-                }
+        _deviceConnectedStatusChangedEvent = _deviceInfo->GetConnectionStatus().GetEvent().Subscribe([this](size_t listenerId, bool newConnectedValue) {
+            if (_connected != newConnectedValue) {
+                _connected = newConnectedValue;
+                LOG_DEBUG("PropertiesChanged:Connected %s", _connected ? "true" : "false");
+                _onConnectedPropertyChangedEvent.FireEvent(_connected);
+            }
+            if (_connected){
+                _client->Start();
+                LOG_RELEASE("_client started 1");
+            }
+            else{
+                _client->Stop();
+                LOG_RELEASE("_client stopped 1");
             }
         });
-
-        _deviceProxy->finishRegistration();
 
         LOG_DEBUG("_connected 0 %s", _connected ? "true" : "false");
         if (_connected){
@@ -88,6 +63,8 @@ namespace MagicPodsCore {
 
     Device::~Device()
     {
+        _deviceInfo->GetConnectionStatus().GetEvent().Unsubscribe(_deviceConnectedStatusChangedEvent);
+
         UnsubscribeCapabilitiesChanges();
         capabilities.clear();
 
@@ -97,19 +74,19 @@ namespace MagicPodsCore {
     }
 
     void Device::Connect() {
-        _deviceProxy->callMethod("Connect").onInterface("org.bluez.Device1").dontExpectReply();
+        _deviceInfo->Connect();
     }
 
     void Device::ConnectAsync(std::function<void(const sdbus::Error*)>&& callback) {
-        _deviceProxy->callMethodAsync("Connect").withTimeout(std::chrono::seconds(10)).onInterface("org.bluez.Device1").uponReplyInvoke(callback);
+        _deviceInfo->ConnectAsync(std::move(callback));
     }
 
     void Device::Disconnect() {
-        _deviceProxy->callMethod("Disconnect").onInterface("org.bluez.Device1").dontExpectReply();
+        _deviceInfo->Disconnect();
     }
 
     void Device::DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback) {
-        _deviceProxy->callMethodAsync("Disconnect").withTimeout(std::chrono::seconds(10)).onInterface("org.bluez.Device1").uponReplyInvoke(callback);
+        _deviceInfo->DisconnectAsync(std::move(callback));
     }
 
     void Device::SetCapabilities(const nlohmann::json &json)
