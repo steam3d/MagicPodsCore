@@ -8,7 +8,9 @@ namespace MagicPodsCore {
             TryCreateDevice(objectPath, interfaces);
         });
         _rootProxy->uponSignal("InterfacesRemoved").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::vector<std::string> array) {
-            TryRemoveDevice(objectPath);
+            if (std::find(array.begin(), array.end(), "org.bluez.Device1") != array.end()) {
+                TryRemoveDevice(objectPath);
+            }
         });
         _rootProxy->finishRegistration();
 
