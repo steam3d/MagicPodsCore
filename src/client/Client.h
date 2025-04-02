@@ -37,6 +37,8 @@ namespace MagicPodsCore {
     private:
         std::string _address{};
         unsigned short _port{};
+        std::string _serviceUuid{};
+
         ClientConnectionType _connectionType{};
 
         int _socket{};
@@ -68,10 +70,10 @@ namespace MagicPodsCore {
 
     private:
         explicit Client(const std::string& address, unsigned short port, ClientConnectionType connectionType);
+        explicit Client(const std::string& address, const std::string& serviceUuid, ClientConnectionType connectionType);
 
     public:
         static std::unique_ptr<Client> CreateL2CAP(const std::string& address, unsigned short port);
-        static std::unique_ptr<Client> CreateRFCOMM(const std::string& address, unsigned short port);
         static std::unique_ptr<Client> CreateRFCOMM(const std::string& address, const std::string& serviceUuid);
         ~Client();
     };

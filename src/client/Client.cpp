@@ -17,8 +17,11 @@
 #include <exception>
 
 namespace MagicPodsCore {
-    Client::Client(const std::string& address, unsigned short port, ClientConnectionType connectionType) : _address{address}, _port{port}, _connectionType{connectionType} {
-    }
+    Client::Client(const std::string& address, unsigned short port, ClientConnectionType connectionType) 
+        : _address{address}, _port{port}, _connectionType{connectionType} {}
+
+    Client::Client(const std::string& address, const std::string& serviceUuid, ClientConnectionType connectionType)
+        : _address{address}, _serviceUuid{serviceUuid}, _connectionType{connectionType} {}
 
     void Client::Start() {
         std::lock_guard lockGuard{_startStopMutex};
@@ -106,6 +109,15 @@ namespace MagicPodsCore {
         
         /* allocate a socket */
         _socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+
+        /* retreiving the port */
+        uint8_t uuid_bytes[16] = {0};
+        StringUtils::UuidStringToBytes(_serviceUuid.c_str(), uuid_bytes);
+        const auto optionalPort = RetrieveServicePortRFCOMM(uuid_bytes, _address.c_str());
+        if (!optionalPort.has_value()) {
+            return false;
+        }
+        _port = optionalPort.value();
 
         // set the connection parameters (who to connect to)
         addr.rc_family = AF_BLUETOOTH;
@@ -228,16 +240,8 @@ namespace MagicPodsCore {
         return std::unique_ptr<Client>(new Client(address, port, ClientConnectionType::L2CAP));
     }
 
-    std::unique_ptr<Client> Client::CreateRFCOMM(const std::string& address, unsigned short port) {
-        return std::unique_ptr<Client>(new Client(address, port, ClientConnectionType::RFCOMM));
-    }
-
     std::unique_ptr<Client> Client::CreateRFCOMM(const std::string& address, const std::string& serviceUuid) {
-        /* retreiving the port */
-        uint8_t uuid_bytes[16] = {0};
-        StringUtils::UuidStringToBytes(serviceUuid.c_str(), uuid_bytes);
-        const auto port = RetrieveServicePortRFCOMM(uuid_bytes, address.c_str());
-        return port.has_value() ? std::unique_ptr<Client>(new Client(address, port.value(), ClientConnectionType::RFCOMM)) : nullptr;
+        return std::unique_ptr<Client>(new Client(address, serviceUuid, ClientConnectionType::RFCOMM));
     }
 
     Client::~Client()
