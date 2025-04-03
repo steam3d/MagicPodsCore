@@ -23,7 +23,7 @@ namespace MagicPodsCore {
     Client::Client(const std::string& address, const std::string& serviceUuid, ClientConnectionType connectionType)
         : _address{address}, _serviceUuid{serviceUuid}, _connectionType{connectionType} {}
 
-    void Client::Start() {
+    void Client::Start(const std::function<void(Client&)>& justAfterStartLogic) {
         std::lock_guard lockGuard{_startStopMutex};
 
         if (_isStarted)
@@ -72,7 +72,8 @@ namespace MagicPodsCore {
         });
         readingThread.detach();
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        justAfterStartLogic(*this);
+        // std::this_thread::sleep_for(std::chrono::seconds(1));
         // SendRequest(AapInit{});
         // std::this_thread::sleep_for(std::chrono::seconds(1));
         // SendRequest(AapEnableNotifications{NotificationsMode::Unknown1});

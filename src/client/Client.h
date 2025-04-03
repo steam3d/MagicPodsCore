@@ -31,6 +31,7 @@
 #include <memory>
 #include <optional>
 #include <mutex>
+#include <functional>
 
 namespace MagicPodsCore {
 
@@ -52,7 +53,7 @@ namespace MagicPodsCore {
         Event<std::vector<unsigned char>> _onReceivedDataEvent{};
 
     public:
-        void Start();
+        void Start(const std::function<void(Client&)>& justAfterStartLogic = {});
         void Stop();
 
         bool IsStarted() const {
