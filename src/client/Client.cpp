@@ -33,9 +33,9 @@ namespace MagicPodsCore {
         LOG_RELEASE("Start Bluetooth client, server addr %s", _address.c_str());
 
         /* connect to server */
-        if(!ConnectToSocket()) {
-            perror("failed to connect");
-            exit(1);
+        if(!ConnectToSocket(CONNECTION_TO_SOCKET_ATTEMPTS_NUMBER)) {
+            _isStarted = false;
+            return;
         }
         LOG_RELEASE("connected...");
 
@@ -107,7 +107,7 @@ namespace MagicPodsCore {
         str2ba(_address.c_str(), &addr.l2_bdaddr);		/* server's Bluetooth Address */
 
         /* connect to server */
-        if(connect(_socket, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        if(connect(_socket, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
             return false;
         }
 
@@ -135,22 +135,30 @@ namespace MagicPodsCore {
         str2ba(_address.c_str(), &addr.rc_bdaddr);
     
         /* connect to server */
-        if(connect(_socket, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        if(connect(_socket, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
             return false;
         }
 
         return true;
     }
 
-    bool Client::ConnectToSocket() {
-        switch (_connectionType)
-        {
-        case ClientConnectionType::L2CAP:
-            return ConnectToSocketL2CAP();
-        case ClientConnectionType::RFCOMM:
-            return ConnectToSocketRFCOMM();
+    bool Client::ConnectToSocket(int attemptsNumber) {
+        bool isConnected{false};
+        while (true) {
+            --attemptsNumber;
+            switch (_connectionType)
+            {
+            case ClientConnectionType::L2CAP:
+                isConnected = ConnectToSocketL2CAP();
+            case ClientConnectionType::RFCOMM:
+                isConnected = ConnectToSocketRFCOMM();
+            }
+            if (attemptsNumber == 0 || isConnected || !_isStarted) {
+                break;
+            }
+            std::this_thread::sleep_for(std::chrono::seconds(1)); // TODO: вероятно delay можно выставить для connect()
         }
-        return false;
+        return isConnected;
     }
 
     std::optional<uint8_t> Client::RetrieveServicePortRFCOMM(uint8_t* uuid, const char* deviceAddress)

@@ -37,6 +37,8 @@ namespace MagicPodsCore {
 
     class Client {
     private:
+        static const int CONNECTION_TO_SOCKET_ATTEMPTS_NUMBER = 3;
+
         std::string _address{};
         unsigned short _port{};
         std::string _serviceUuid{};
@@ -69,7 +71,7 @@ namespace MagicPodsCore {
     private:
         inline bool ConnectToSocketL2CAP();
         inline bool ConnectToSocketRFCOMM();
-        inline bool ConnectToSocket();
+        inline bool ConnectToSocket(int attemptsNumber);
         inline static std::optional<uint8_t> RetrieveServicePortRFCOMM(uint8_t* uuid, const char* deviceAddress);
 
     private:
