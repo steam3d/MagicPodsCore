@@ -11,6 +11,7 @@
 #include "IRequest.h"
 #include "ClientConnectionType.h"
 #include "Event.h"
+#include "BlockingQueue.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -46,6 +47,8 @@ namespace MagicPodsCore {
 
         std::mutex _startStopMutex{};
 
+        BlockingQueue<std::vector<unsigned char>> _outcomeMessagesQueue{};
+
         Event<std::vector<unsigned char>> _onReceivedDataEvent{};
 
     public:
@@ -77,10 +80,4 @@ namespace MagicPodsCore {
         static std::unique_ptr<Client> CreateRFCOMM(const std::string& address, const std::string& serviceUuid);
         ~Client();
     };
-
-
-    // rfcomm (address, uuid)
-    // l2cap (addres, port)
-    // Return uuid list ()
-    // Event
 }

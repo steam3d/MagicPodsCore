@@ -39,7 +39,18 @@ namespace MagicPodsCore {
         }
         LOG_RELEASE("connected...");
 
-        std::thread thread([this]() {           
+        std::thread writingThread([this]() {
+            while (_isStarted) {
+                const auto data = _outcomeMessagesQueue.Take();        
+                ssize_t sendedBytesLength = send(_socket, data.data(), data.size(), 0);
+                LOG_DEBUG("s:%s",StringUtils::BytesToHexString(data.data(), data.size()).c_str());
+            }
+
+            LOG_DEBUG("Writing thread stopped");
+        });
+        writingThread.detach();
+
+        std::thread readingThread([this]() {           
             unsigned char buffer[1024];
             std::vector<unsigned char> vectorBuffer(1024); // optimize
             while(_isStarted) {
@@ -57,9 +68,9 @@ namespace MagicPodsCore {
                 }
             }
 
-            LOG_DEBUG("Thread stopped");
+            LOG_DEBUG("Reading thread stopped");
         });
-        thread.detach();
+        readingThread.detach();
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
         // SendRequest(AapInit{});
@@ -79,10 +90,8 @@ namespace MagicPodsCore {
         LOG_RELEASE("Stop Bluetooth client, server addr %s", _address.c_str());
     }
 
-    void Client::SendData(const std::vector<unsigned char>& data){
-        ssize_t sendedBytesLength = send(_socket, data.data(), data.size(), 0);
-        LOG_DEBUG("s:%s",StringUtils::BytesToHexString(data.data(), data.size()).c_str());
-        
+    void Client::SendData(const std::vector<unsigned char>& data) {
+        _outcomeMessagesQueue.Put(data);
     }
 
     bool Client::ConnectToSocketL2CAP() {
