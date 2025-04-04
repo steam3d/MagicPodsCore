@@ -29,7 +29,7 @@ nlohmann::json MakeGetActiveDeviceInfoResponse(DevicesInfoFetcher& devicesInfoFe
     if (activeDevice)
         return nlohmann::json{{"info", activeDevice->GetAsJson()}};
 
-    return {};
+    return nlohmann::json::object();
 }
 
 nlohmann::json MakeGetDefaultBluetoothAdapterResponse(DevicesInfoFetcher& devicesInfoFetcher) {

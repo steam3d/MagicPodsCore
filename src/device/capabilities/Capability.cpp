@@ -5,7 +5,7 @@ namespace MagicPodsCore
 {
     nlohmann::json Capability::CreateJsonBody()
     {
-        return nlohmann::json();
+        return nlohmann::json::object();
     }
 
     void Capability::Reset()
