@@ -30,7 +30,7 @@ namespace MagicPodsCore {
         DBusDeviceInfo& operator=(const DBusDeviceInfo& info) = delete;
         DBusDeviceInfo& operator=(DBusDeviceInfo&& info) noexcept = delete;
 
-        const std::string GetAddress() const {
+        const std::string& GetAddress() const {
             return _address;
         }
 

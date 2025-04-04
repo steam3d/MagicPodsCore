@@ -17,8 +17,7 @@ namespace MagicPodsCore {
     class Device {
     private:
         std::shared_ptr<DBusDeviceInfo> _deviceInfo{};
-
-        std::string _name{};
+        
         bool _connected{};
         Event<bool> _onConnectedPropertyChangedEvent{};
         Event<Capability> _onCapabilityChangedEvent{};
@@ -31,6 +30,7 @@ namespace MagicPodsCore {
     protected:
         mutable std::mutex _propertyMutex{};
         std::unique_ptr<Client> _client;
+        std::vector<std::vector<unsigned char>>_clientStartData {};
         std::vector<std::unique_ptr<Capability>> capabilities{};
         std::vector<size_t> capabilityEventIds{};
         void Init();
@@ -40,12 +40,12 @@ namespace MagicPodsCore {
         virtual ~Device(); //wrong
         // TODO: убрать возможность копирования
 
-        std::string GetName() const {
+        const std::string& GetName() const {
             std::lock_guard lock{_propertyMutex};
-            return _name;
+            return _deviceInfo->GetName();
         }
 
-        std::string GetAddress() const {
+        const std::string& GetAddress() const {
             std::lock_guard lock{_propertyMutex};
             return _deviceInfo->GetAddress();
         }
