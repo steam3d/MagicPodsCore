@@ -24,6 +24,7 @@ namespace MagicPodsCore {
                     _devicesMap.emplace(addedDeviceInfo->GetAddress(), device);
                     _onDeviceAddEvent.FireEvent(device);
                 }
+                //TrySelectNewActiveDevice();
                 // TODO: уведомление о добавлении устройства
             }
         });
@@ -131,6 +132,9 @@ namespace MagicPodsCore {
         {
             auto keyPair = GalaxyBudsHelper::SearchModelColor(deviceInfo->GetUuids(), deviceInfo->GetName());
             auto newDevice = GalaxyBudsDevice::Create(deviceInfo, static_cast<unsigned short>(keyPair.first));
+            newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
+                TrySelectNewActiveDevice();
+            });
             return newDevice;
         }
         return nullptr;
