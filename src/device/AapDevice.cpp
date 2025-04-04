@@ -23,20 +23,19 @@ namespace MagicPodsCore
 
     std::unique_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo)
     {
-        auto device = std::make_unique<AapDevice>(deviceInfo);        
-        
+        auto device = std::make_unique<AapDevice>(deviceInfo);
+
         device->capabilities.push_back(std::make_unique<AapBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAncCapability>(*device));
 
-        std::vector<std::vector<unsigned char>> initData;        
-        initData.push_back(AapInit{}.Request());
-        initData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown1}.Request());      
+        device->_clientStartData.push_back(AapInit{}.Request());
+        device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown1}.Request());
         if (AapInitExt::IsSupported(deviceInfo->GetProductId()))
-            initData.push_back(AapInitExt{}.Request());
-        
+            device->_clientStartData.push_back(AapInitExt{}.Request());
+
         //TODO: Add initData to client
         device->_client = Client::CreateL2CAP(deviceInfo->GetAddress(), 0x1001);
-        
+
         device->Init();
         return device;
     }
