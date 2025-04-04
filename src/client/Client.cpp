@@ -35,6 +35,7 @@ namespace MagicPodsCore {
         /* connect to server */
         if(!ConnectToSocket(CONNECTION_TO_SOCKET_ATTEMPTS_NUMBER)) {
             _isStarted = false;
+            LOG_RELEASE("Connect to socket is failed. Stopping client");
             return;
         }
         LOG_RELEASE("connected...");
@@ -73,10 +74,6 @@ namespace MagicPodsCore {
         readingThread.detach();
 
         justAfterStartLogic(*this);
-        // std::this_thread::sleep_for(std::chrono::seconds(1));
-        // SendRequest(AapInit{});
-        // std::this_thread::sleep_for(std::chrono::seconds(1));
-        // SendRequest(AapEnableNotifications{NotificationsMode::Unknown1});
     }
 
     void Client::Stop() {
@@ -150,8 +147,10 @@ namespace MagicPodsCore {
             {
             case ClientConnectionType::L2CAP:
                 isConnected = ConnectToSocketL2CAP();
+                break;
             case ClientConnectionType::RFCOMM:
                 isConnected = ConnectToSocketRFCOMM();
+                break;
             }
             if (attemptsNumber == 0 || isConnected || !_isStarted) {
                 break;
@@ -171,7 +170,7 @@ namespace MagicPodsCore {
 
         sdp_session_t* session = sdp_connect(&tmp, (bdaddr_t*)&address, SDP_RETRY_IF_BUSY);
         if (!session) {
-            LOG_DEBUG("-- can't connect to sdp server! \n");
+            LOG_RELEASE("-- can't connect to sdp server! \n");
             return std::nullopt;
         }
 
