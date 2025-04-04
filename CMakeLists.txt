@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 configure_file(config/Config.h.in src/Config.h)
 
 add_executable(MagicPodsCore 
-    src/test_main.cpp
+    src/main.cpp
 
     src/tests/TestsSgb.cpp
 
