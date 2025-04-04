@@ -143,6 +143,7 @@ namespace MagicPodsCore {
         bool isConnected{false};
         while (true) {
             --attemptsNumber;
+            LOG_RELEASE("Attempt to connect. Left %d", attemptsNumber);
             switch (_connectionType)
             {
             case ClientConnectionType::L2CAP:
