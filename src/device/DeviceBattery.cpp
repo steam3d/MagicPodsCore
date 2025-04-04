@@ -34,7 +34,7 @@ namespace MagicPodsCore
             return false;
 
         // Do not update the battery, use previews (cached) values. If battery is zero then the previous value empty
-        if (_cached && it->Battery > 0 && it->Status == DeviceBatteryStatus::Disconnected)
+        if (_cached && it->Battery > 0 && battery.Status == DeviceBatteryStatus::Disconnected)
         {
             if (it->Status != DeviceBatteryStatus::Cached)
             {
