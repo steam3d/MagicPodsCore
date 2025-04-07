@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <map>
+#include <set>
 #include <regex>
 #include <sdbus-c++/sdbus-c++.h>
 #include <iostream>
@@ -16,7 +17,8 @@ namespace MagicPodsCore {
         std::unique_ptr<sdbus::IProxy> _rootProxy{};
         std::unique_ptr<sdbus::IProxy> _defaultBluetoothAdapterProxy{};
 
-        std::map<sdbus::ObjectPath, std::shared_ptr<DBusDeviceInfo>> _cache{};
+        std::map<sdbus::ObjectPath, std::shared_ptr<DBusDeviceInfo>> _knownDevices{};
+        std::set<std::shared_ptr<DBusDeviceInfo>> _pairedDevices{};
 
         Event<std::shared_ptr<DBusDeviceInfo>> _onDeviceAddedEvent{};
         Event<std::shared_ptr<DBusDeviceInfo>> _onDeviceRemovedEvent{};
@@ -26,7 +28,7 @@ namespace MagicPodsCore {
     public:
         explicit DBusService();
 
-        std::vector<std::shared_ptr<DBusDeviceInfo>> GetBtDevices();
+        std::set<std::shared_ptr<DBusDeviceInfo>> GetBtDevices();
 
         ObservableVariable<bool>& IsBluetoothAdapterPowered() {
             return _isBluetoothAdapterPowered;

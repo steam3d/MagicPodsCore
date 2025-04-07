@@ -24,21 +24,17 @@ namespace MagicPodsCore {
         _isBluetoothAdapterPowered.SetValue(_defaultBluetoothAdapterProxy->getProperty("Powered").onInterface("org.bluez.Adapter1").get<bool>());
     }
 
-    std::vector<std::shared_ptr<DBusDeviceInfo>> DBusService::GetBtDevices() {
-        std::vector<std::shared_ptr<DBusDeviceInfo>> devices{};
-
+    std::set<std::shared_ptr<DBusDeviceInfo>> DBusService::GetBtDevices() {
         std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>> managedObjects{};
         _rootProxy->callMethod("GetManagedObjects").onInterface("org.freedesktop.DBus.ObjectManager").storeResultsTo<std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>>>(managedObjects);
 
-        _cache.clear();
+        _knownDevices.clear();
 
         for (const auto& [objectPath, interfaces] : managedObjects) {
-            auto deviceInfo = TryCreateDevice(objectPath, interfaces);
-            if (deviceInfo != nullptr) {
-                devices.push_back(deviceInfo);
-            }
+            TryCreateDevice(objectPath, interfaces);
         }
-        return devices;
+
+        return _pairedDevices;
     }
 
     void DBusService::EnableBluetoothAdapter() {
@@ -65,12 +61,26 @@ namespace MagicPodsCore {
             if (interfaces.contains("org.bluez.Device1")) {
                 auto deviceInfo = std::make_shared<DBusDeviceInfo>(objectPath, interfaces);
                     
-                if (_cache.contains(objectPath)) {
-                    _cache.erase(objectPath);
+                if (_knownDevices.contains(objectPath)) {
+                    _knownDevices.erase(objectPath);
                 }
-                _cache.emplace(objectPath, deviceInfo);
+                _knownDevices.emplace(objectPath, deviceInfo);
 
-                _onDeviceAddedEvent.FireEvent(deviceInfo);
+                if (deviceInfo->GetPairedStatus().GetValue()) {
+                    _pairedDevices.emplace(deviceInfo);
+                    _onDeviceAddedEvent.FireEvent(deviceInfo);
+                }
+                else {
+                    deviceInfo->GetPairedStatus().GetEvent().Subscribe([this, objectPath](size_t listenerId, bool newValue) {
+                        if (newValue && _knownDevices.contains(objectPath)) {
+                            auto device = _knownDevices.at(objectPath);
+                            if (!_pairedDevices.contains(device)) {
+                                _pairedDevices.emplace(device);
+                                _onDeviceAddedEvent.FireEvent(device);
+                            }
+                        }
+                    });
+                }
 
                 return deviceInfo;
             }
@@ -79,10 +89,15 @@ namespace MagicPodsCore {
     }
 
     bool DBusService::TryRemoveDevice(sdbus::ObjectPath objectPath) {
-        if (_cache.contains(objectPath)) {
-            _onDeviceRemovedEvent.FireEvent(_cache.at(objectPath));
+        if (_knownDevices.contains(objectPath)) {
+            const auto& deviceInfo = _knownDevices.at(objectPath);
 
-            _cache.erase(objectPath);
+            _onDeviceRemovedEvent.FireEvent(deviceInfo);
+
+            if (_pairedDevices.contains(deviceInfo)) {
+                _pairedDevices.erase(deviceInfo);
+            }
+            _knownDevices.erase(objectPath);
 
             return true;
         }
