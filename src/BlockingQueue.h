@@ -4,6 +4,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <queue>
+#include "Logger.h"
+#include <optional>
 
 namespace MagicPodsCore {
 
@@ -14,10 +16,19 @@ namespace MagicPodsCore {
         std::queue<TDataType> _queue{};
         std::mutex _putTakeMutex{};
         std::condition_variable _conditionNotEmptyQueue{};
+        bool _isDestructed{false};
 
     public:
         void Put(const TDataType& newValue);
-        TDataType Take();
+        std::optional<TDataType> Take();
+        ~BlockingQueue(){
+            {
+                std::unique_lock<std::mutex> lock{_putTakeMutex};
+                _isDestructed = true;
+            }
+            _conditionNotEmptyQueue.notify_all();
+            LOG_DEBUG("~BlockingQueue");
+        }
     };
 
     template<typename TDataType>
@@ -28,11 +39,14 @@ namespace MagicPodsCore {
     }
 
     template<typename TDataType>
-    TDataType BlockingQueue<TDataType>::Take() {
+    std::optional<TDataType> BlockingQueue<TDataType>::Take() {
         std::unique_lock<std::mutex> lock{_putTakeMutex};
         _conditionNotEmptyQueue.wait(lock, [this]() {
-            return !_queue.empty();
+            return !_queue.empty() || _isDestructed;
         });
+        if (_isDestructed)
+            return std::nullopt;
+
         const auto value = _queue.front();
         _queue.pop();
         return value;
