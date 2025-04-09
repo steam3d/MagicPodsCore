@@ -42,9 +42,13 @@ namespace MagicPodsCore {
 
         std::thread writingThread([this]() {
             while (_isStarted) {
-                const auto data = _outcomeMessagesQueue.Take();        
-                ssize_t sendedBytesLength = send(_socket, data.data(), data.size(), 0);
-                LOG_DEBUG("s:%s",StringUtils::BytesToHexString(data.data(), data.size()).c_str());
+                const auto data = _outcomeMessagesQueue.Take(); 
+                
+                if (!data.has_value())
+                    break;       
+                
+                ssize_t sendedBytesLength = send(_socket, data.value().data(), data.value().size(), 0);
+                LOG_DEBUG("s:%s",StringUtils::BytesToHexString(data.value().data(), data.value().size()).c_str());
             }
 
             LOG_DEBUG("Writing thread stopped");

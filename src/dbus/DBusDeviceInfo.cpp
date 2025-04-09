@@ -8,7 +8,7 @@ namespace MagicPodsCore {
     {
         auto deviceInterface = interfaces.at("org.bluez.Device1");
 
-        if (deviceInterface.contains("Address")){
+        if (deviceInterface.contains("Address")) {
             _address = deviceInterface.at("Address").get<std::string>();
         }
 
@@ -17,6 +17,7 @@ namespace MagicPodsCore {
             _vendorId = vidPid[0];
             _productId = vidPid[1];
         }
+
         _uuids = std::vector<std::string>{};
         for (const auto& [interface, properties] : interfaces) {
             auto uuidsIterator = properties.find("UUIDs");
@@ -35,13 +36,27 @@ namespace MagicPodsCore {
                     ? deviceInterface.at("Name").get<std::string>()
                     : _address;
 
-        if (deviceInterface.contains("Connected")){
+        if (deviceInterface.contains("Connected")) {
             _connectionStatus.SetValue(deviceInterface.at("Connected").get<bool>());
         }
 
+        if (deviceInterface.contains("Paired")) {
+            _pairedStatus.SetValue(deviceInterface.at("Paired").get<bool>());
+        }
+
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
-            if(interfaceName == "org.bluez.Device1" && values.contains("Connected")){
-                _connectionStatus.SetValue(values["Connected"].get<bool>());
+            if (interfaceName == "org.bluez.Device1") {
+                if (values.contains("Modalias")) {
+                    const auto vidPid = ParseVidPid(values.at("Modalias").get<std::string>());
+                    _vendorId = vidPid[0];
+                    _productId = vidPid[1];
+                }
+                if (values.contains("Connected")) {
+                    _connectionStatus.SetValue(values["Connected"].get<bool>());
+                }
+                if (values.contains("Paired")) {
+                    _pairedStatus.SetValue(values.at("Paired").get<bool>());
+                }
             }
         });
         _deviceProxy->finishRegistration();

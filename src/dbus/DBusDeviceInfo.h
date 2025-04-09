@@ -21,6 +21,7 @@ namespace MagicPodsCore {
         std::optional<unsigned int> _clazz{};
         std::string _name{};
         ObservableVariable<bool> _connectionStatus{false};
+        ObservableVariable<bool> _pairedStatus{false};
 
     public:
         explicit DBusDeviceInfo(const sdbus::ObjectPath& objectPath, const std::map<std::string, std::map<std::string, sdbus::Variant>>& interfaces);
@@ -58,10 +59,18 @@ namespace MagicPodsCore {
             return _connectionStatus;
         }
 
+        ObservableVariable<bool>& GetPairedStatus() {
+            return _pairedStatus;
+        }
+
         void Connect();
         void ConnectAsync(std::function<void(const sdbus::Error*)>&& callback);
         void Disconnect();
         void DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback);
+
+        friend auto operator<=>(const DBusDeviceInfo& t1, const DBusDeviceInfo& t2) {
+            return t1.GetAddress() <=> t2.GetAddress();
+        }
 
     private:
         static std::array<unsigned short, 2> ParseVidPid(const std::string& modalias);
