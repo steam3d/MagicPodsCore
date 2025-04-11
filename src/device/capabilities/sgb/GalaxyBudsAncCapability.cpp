@@ -76,12 +76,12 @@ namespace MagicPodsCore
                 //When we get ANC mode for the first time, we must notify. But on the second and subsequent times, we should notify only if the option has changed.
                 isAvailable = true;
                 option = newOption;
-                Logger::Debug("GalaxyBudsAncCapability: %s", DeviceAncModesToString(option).c_str());
+                Logger::Info("ANC updated: %s", DeviceAncModesToString(option).c_str());                
                 _onChanged.FireEvent(*this);
             }
             else if (option != newOption){
                 option = newOption;
-                Logger::Debug("GalaxyBudsAncCapability: %s", DeviceAncModesToString(option).c_str());
+                Logger::Info("ANC updated: %s", DeviceAncModesToString(option).c_str());                
                 _onChanged.FireEvent(*this);
             }
         });

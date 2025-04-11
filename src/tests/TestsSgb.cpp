@@ -15,6 +15,7 @@
 #include <iostream>
 #include <cstring>
 #include <future>
+#include "Logger.h"
 
 using namespace MagicPodsCore;
 
@@ -534,11 +535,11 @@ void TestsSgb::Test(const char *name, bool b)
 
     if (b)
     {
-        std::cout << name << space << ": PASS" << std::endl;
+        Logger::Debug("%s%s: PASS", name, space.c_str());        
     }
     else
     {
-        std::cout << name << space << ": FAIL" << std::endl;
+        Logger::Debug("%s%s: FAIL", name, space.c_str());        
     }
 }
 

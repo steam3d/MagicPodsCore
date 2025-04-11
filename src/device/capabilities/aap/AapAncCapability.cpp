@@ -75,10 +75,12 @@ namespace MagicPodsCore
                     //When we get ANC mode for the first time, we must notify. But on the second and subsequent times, we should notify only if the option has changed.
                     isAvailable = true;
                     option = newOption;
+                    Logger::Info("ANC updated: %s", DeviceAncModesToString(option).c_str());
                     _onChanged.FireEvent(*this);
                 }
                 else if (option != newOption){
                     option = newOption;
+                    Logger::Info("ANC updated: %s", DeviceAncModesToString(option).c_str());
                     _onChanged.FireEvent(*this);
                 }
         });
@@ -108,12 +110,12 @@ namespace MagicPodsCore
             }
             else
             {
-                Logger::Info("Error: AapAncCapability::SetFromJson got unexpected option: %d", selected);
+                Logger::Error("Error: AapAncCapability::SetFromJson got unexpected option: %d", selected);
             }
         }
         else
         {
-            Logger::Info("Error: AapAncCapability::SetFromJson got no value or value is not an integer");
+            Logger::Error("Error: AapAncCapability::SetFromJson got no value or value is not an integer");
         }
     }
 }

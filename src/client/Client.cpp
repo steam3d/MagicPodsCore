@@ -62,7 +62,7 @@ namespace MagicPodsCore {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(_socket, buffer, sizeof(buffer), 0);
                 if (receivedBytesLength > 0) {
-                    Logger::Debug("r:%s", StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
+                    Logger::Trace("r:%s", StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
                     
                     _onReceivedDataEvent.FireEvent(vectorBuffer);
