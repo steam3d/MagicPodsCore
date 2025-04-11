@@ -104,16 +104,16 @@ namespace MagicPodsCore
             {
                 AapAncMode nativeMode = DeviceAncModesToAapAncMode(static_cast<DeviceAncModes>(selected));
                 SendData(AapSetAnc(nativeMode));
-                LOG_DEBUG("AapAncCapability::SetFromJson set option to %s", AapAncModeToString(nativeMode).c_str());
+                Logger::Debug("AapAncCapability::SetFromJson set option to %s", AapAncModeToString(nativeMode).c_str());
             }
             else
             {
-                LOG_RELEASE("Error: AapAncCapability::SetFromJson got unexpected option: %d", selected);
+                Logger::Info("Error: AapAncCapability::SetFromJson got unexpected option: %d", selected);
             }
         }
         else
         {
-            LOG_RELEASE("Error: AapAncCapability::SetFromJson got no value or value is not an integer");
+            Logger::Info("Error: AapAncCapability::SetFromJson got no value or value is not an integer");
         }
     }
 }

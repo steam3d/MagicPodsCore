@@ -30,15 +30,15 @@ namespace MagicPodsCore {
             return;
         _isStarted = true;
 
-        LOG_RELEASE("Start Bluetooth client, server addr %s", _address.c_str());
+        Logger::Info("Start Bluetooth client, server addr %s", _address.c_str());
 
         /* connect to server */
         if(!ConnectToSocket(CONNECTION_TO_SOCKET_ATTEMPTS_NUMBER)) {
             _isStarted = false;
-            LOG_RELEASE("Connect to socket is failed. Stopping client");
+            Logger::Info("Connect to socket is failed. Stopping client");
             return;
         }
-        LOG_RELEASE("connected...");
+        Logger::Info("connected...");
 
         std::thread writingThread([this]() {
             while (_isStarted) {
@@ -48,10 +48,10 @@ namespace MagicPodsCore {
                     break;       
                 
                 ssize_t sendedBytesLength = send(_socket, data.value().data(), data.value().size(), 0);
-                LOG_DEBUG("s:%s",StringUtils::BytesToHexString(data.value().data(), data.value().size()).c_str());
+                Logger::Debug("s:%s",StringUtils::BytesToHexString(data.value().data(), data.value().size()).c_str());
             }
 
-            LOG_DEBUG("Writing thread stopped");
+            Logger::Debug("Writing thread stopped");
         });
         writingThread.detach();
 
@@ -62,18 +62,18 @@ namespace MagicPodsCore {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(_socket, buffer, sizeof(buffer), 0);
                 if (receivedBytesLength > 0) {
-                    LOG_DEBUG("r:%s", StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
+                    Logger::Debug("r:%s", StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
                     
                     _onReceivedDataEvent.FireEvent(vectorBuffer);
                 }
                 else {
-                    LOG_DEBUG("stop listening");
+                    Logger::Debug("stop listening");
                     break;
                 }
             }
 
-            LOG_DEBUG("Reading thread stopped");
+            Logger::Debug("Reading thread stopped");
         });
         readingThread.detach();
 
@@ -89,7 +89,7 @@ namespace MagicPodsCore {
 
         close(_socket);
 
-        LOG_RELEASE("Stop Bluetooth client, server addr %s", _address.c_str());
+        Logger::Info("Stop Bluetooth client, server addr %s", _address.c_str());
     }
 
     void Client::SendData(const std::vector<unsigned char>& data) {
@@ -147,7 +147,7 @@ namespace MagicPodsCore {
         bool isConnected{false};
         while (true) {
             --attemptsNumber;
-            LOG_RELEASE("Attempt to connect. Left %d", attemptsNumber);
+            Logger::Info("Attempt to connect. Left %d", attemptsNumber);
             switch (_connectionType)
             {
             case ClientConnectionType::L2CAP:
@@ -175,7 +175,7 @@ namespace MagicPodsCore {
 
         sdp_session_t* session = sdp_connect(&tmp, (bdaddr_t*)&address, SDP_RETRY_IF_BUSY);
         if (!session) {
-            LOG_RELEASE("-- can't connect to sdp server! \n");
+            Logger::Info("-- can't connect to sdp server! \n");
             return std::nullopt;
         }
 
@@ -192,14 +192,14 @@ namespace MagicPodsCore {
         int success = sdp_service_search_attr_req(
             session, searchList, SDP_ATTR_REQ_RANGE, attrIdList, &responseList);
         if (success) {
-            LOG_DEBUG("-- search failed! \n");
+            Logger::Debug("-- search failed! \n");
             return std::nullopt;
         }
 
         // check responses
         success = sdp_list_len(responseList);
         if (success <= 0) {
-            LOG_DEBUG("-- no responses! \n");
+            Logger::Debug("-- no responses! \n");
             return std::nullopt;
         }
 
@@ -212,7 +212,7 @@ namespace MagicPodsCore {
             sdp_list_t* protoList;
             success = sdp_get_access_protos(record, &protoList);
             if (success) {
-                LOG_DEBUG("-- can't access protocols! \n");
+                Logger::Debug("-- can't access protocols! \n");
                 return std::nullopt;
             }
 
@@ -269,6 +269,6 @@ namespace MagicPodsCore {
     Client::~Client()
     {
         Stop();
-        LOG_DEBUG("Client::~Client()");
+        Logger::Debug("Client::~Client()");
     }
 }

@@ -42,14 +42,14 @@ nlohmann::json MakeGetDefaultBluetoothAdapterResponse(DevicesInfoFetcher& device
 }
 
 void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleGetDevicesRequest");
+    Logger::Info("HandleGetDevicesRequest");
 
     auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
 void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleConnectDeviceRequest");
+    Logger::Info("HandleConnectDeviceRequest");
 
     auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
     auto device = devicesInfoFetcher.GetDevice(deviceAddress);
@@ -69,7 +69,7 @@ void HandleConnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCod
 }
 
 void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleDisconnectDeviceRequest");
+    Logger::Info("HandleDisconnectDeviceRequest");
 
     auto deviceAddress = json.at("arguments").at("address").template get<std::string>();
     auto device = devicesInfoFetcher.GetDevice(deviceAddress);
@@ -89,20 +89,20 @@ void HandleDisconnectDeviceRequest(auto *ws, const nlohmann::json& json, uWS::Op
 }
 
 void HandleSetCapabilitiesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleSetAncRequest");
+    Logger::Info("HandleSetAncRequest");
     devicesInfoFetcher.SetCapabilities(json);
 }
 
 
 void HandleGetDefaultBluetoothAdapterRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleGetDefaultBluetoothAdapterRequest");
+    Logger::Info("HandleGetDefaultBluetoothAdapterRequest");
 
     auto response = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
 void HandleEnableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleEnableDefaultBluetoothAdapter");
+    Logger::Info("HandleEnableDefaultBluetoothAdapter");
 
     devicesInfoFetcher.EnableBluetoothAdapterAsync([ws, &app, &devicesInfoFetcher, opCode](const sdbus::Error* error) {
         app.getLoop()->defer([ws, &app, &devicesInfoFetcher, opCode](){
@@ -113,7 +113,7 @@ void HandleEnableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, u
 }
 
 void HandleDisableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleDisableDefaultBluetoothAdapter");
+    Logger::Info("HandleDisableDefaultBluetoothAdapter");
 
     devicesInfoFetcher.DisableBluetoothAdapterAsync([ws, &app, &devicesInfoFetcher, opCode](const sdbus::Error* error) {
         app.getLoop()->defer([ws, &app, &devicesInfoFetcher, opCode](){
@@ -124,14 +124,14 @@ void HandleDisableDefaultBluetoothAdapter(auto *ws, const nlohmann::json& json, 
 }
 
 void HandleGetActiveDeviceInfoRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleGetActiveDeviceInfoRequest");
+    Logger::Info("HandleGetActiveDeviceInfoRequest");
 
     auto response = MakeGetActiveDeviceInfoResponse(devicesInfoFetcher).dump();
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
 void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
-    LOG_RELEASE("HandleGetAll");
+    Logger::Info("HandleGetAll");
 
     auto rootObject = nlohmann::json::object();
     auto getDevicesResponseJson = MakeGetDeviceResponse(devicesInfoFetcher);
@@ -184,7 +184,7 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
 void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
     auto onCapabilityChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, const Capability& newValues) {
         if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
-            LOG_RELEASE("onCapabilityChanged Broadcast was triggered");
+            Logger::Info("onCapabilityChanged Broadcast was triggered");
             app.getLoop()->defer([&app, &devicesInfoFetcher](){
                 auto response = MakeGetActiveDeviceInfoResponse(devicesInfoFetcher).dump();
                 app.publish("onCapabilityChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
@@ -193,21 +193,21 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
     };
 
     auto onConnectedChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, bool newValue) {
-        LOG_RELEASE("OnConnectedChanged Broadcast was triggered");
+        Logger::Info("OnConnectedChanged Broadcast was triggered");
         app.getLoop()->defer([&app, &devicesInfoFetcher]() {
             auto response = MakeGetDeviceResponse(devicesInfoFetcher).dump();
             app.publish("OnConnectedChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
         });
     };
     auto onActiveDeviceChanged = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device) {
-        LOG_RELEASE("OnActiveDeviceChanged Broadcast was triggered");
+        Logger::Info("OnActiveDeviceChanged Broadcast was triggered");
         app.getLoop()->defer([&app, &devicesInfoFetcher]() {
             auto response = MakeGetActiveDeviceInfoResponse(devicesInfoFetcher).dump();
             app.publish("OnActiveDeviceChanged", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
         });
     };
     auto onDefaultAdapterChangeEnabled = [&app, &devicesInfoFetcher](bool newValue) {
-        LOG_RELEASE("OnDefaultAdapterChangeEnabled Broadcast was triggered");
+        Logger::Info("OnDefaultAdapterChangeEnabled Broadcast was triggered");
         app.getLoop()->defer([&app, &devicesInfoFetcher]() {
             auto response = MakeGetDefaultBluetoothAdapterResponse(devicesInfoFetcher).dump();
             app.publish("OnDefaultAdapterChangeEnabled", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
@@ -242,11 +242,11 @@ bool TryToParseArguments(int argc, char** argv) {
     for (int i = 0; i < argc; ++i) {
         std::string argument{argv[i]};
         if (argument == "--version" || argument == "-version" || argument == "-v") {
-            LOG_RELEASE(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
+            Logger::Info(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
             return true;
         }
         else if (argument == "--help" || argument == "-help" || argument == "-h" || argc > 2) {
-            LOG_RELEASE(
+            Logger::Info(
                 "Help is under development. For more information and to contact us, please visit magicpods.app.\n"
                 "Developed by Aleksandr Maslov<MagicPods@outlook.com> and Andrei Litvintsev<a.a.litvintsev@gmail.com>");
             return true;
@@ -265,7 +265,7 @@ int main(int argc, char** argv) {
     if (TryToParseArguments(argc, argv))
         return 0;
 
-    LOG_RELEASE(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
+    Logger::Info(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
 
     DevicesInfoFetcher devicesInfoFetcher{};
 
@@ -293,7 +293,7 @@ int main(int argc, char** argv) {
         .upgrade = nullptr,
         .open = [](auto* ws) {
             /* Open event here, you may access ws->getUserData() which points to a PerSocketData struct */
-            LOG_RELEASE("On open websocket connected");
+            Logger::Info("On open websocket connected");
             ws->subscribe("onCapabilityChanged");
             ws->subscribe("OnConnectedChanged");
             ws->subscribe("OnActiveDeviceChanged");
@@ -305,7 +305,7 @@ int main(int argc, char** argv) {
             /* This is the opposite of what you probably want; compress if message is LARGER than 16 kb
              * the reason we do the opposite here; compress if SMALLER than 16 kb is to allow for
              * benchmarking of large message sending without compression */
-            LOG_RELEASE("Received: %s", std::string{message}.c_str());
+            Logger::Info("Received: %s", std::string{message}.c_str());
         },
         .dropped = [](auto */*ws*/, std::string_view /*message*/, uWS::OpCode /*opCode*/) {
             /* A message was dropped due to set maxBackpressure and closeOnBackpressureLimit limit */
@@ -321,11 +321,11 @@ int main(int argc, char** argv) {
         },
         .close = [](auto */*ws*/, int /*code*/, std::string_view /*message*/) {
             /* You may access ws->getUserData() here */
-            LOG_RELEASE("On open websocket closed");
+            Logger::Info("On open websocket closed");
         }
     }).listen(2020, [](auto *listen_socket) {
         if (listen_socket) {
-            LOG_RELEASE("Listening on port %d", 2020);
+            Logger::Info("Listening on port %d", 2020);
         }
     }).run();
 }

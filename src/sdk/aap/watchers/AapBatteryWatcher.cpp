@@ -76,7 +76,7 @@ namespace MagicPodsCore
 
         if (batteryData.size() > 0)
         {
-            LOG_DEBUG("%s: %s", _tag.c_str(), readableStr.c_str());
+            Logger::Debug("%s: %s", _tag.c_str(), readableStr.c_str());
             _event.FireEvent(batteryData);
         }
     }

@@ -10,6 +10,6 @@ namespace MagicPodsCore
     void AapRequest::PrintAsHex()
     {
         std::vector<unsigned char> bytes = Request();
-        LOG_DEBUG("%s: %s", _tag.c_str(), StringUtils::BytesToHexString(bytes).c_str());
+        Logger::Debug("%s: %s", _tag.c_str(), StringUtils::BytesToHexString(bytes).c_str());
     }
 }

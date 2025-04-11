@@ -8,7 +8,7 @@ namespace MagicPodsCore {
             size_t id = c->GetChangedEvent().Subscribe([this](size_t id, const Capability &capability)
             {
                 _onCapabilityChangedEvent.FireEvent(capability);
-                LOG_DEBUG("%s: capability: %s changed", this->GetName().c_str(), capability.GetName().c_str());
+                Logger::Debug("%s: capability: %s changed", this->GetName().c_str(), capability.GetName().c_str());
                 
             });
             capabilityEventIds.push_back(id);
@@ -33,7 +33,7 @@ namespace MagicPodsCore {
 
     void Device::Init()
     {
-        LOG_RELEASE("%s: Init", GetName().c_str());
+        Logger::Info("%s: Init", GetName().c_str());
         SubscribeCapabilitiesChanges();
 
         clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
@@ -42,7 +42,7 @@ namespace MagicPodsCore {
         _deviceConnectedStatusChangedEvent = _deviceInfo->GetConnectionStatus().GetEvent().Subscribe([this](size_t listenerId, bool newConnectedValue) {
             if (_connected != newConnectedValue) {
                 _connected = newConnectedValue;
-                LOG_DEBUG("%s: PropertiesChanged:Connected %s",GetName().c_str(), _connected ? "true" : "false");
+                Logger::Debug("%s: PropertiesChanged:Connected %s",GetName().c_str(), _connected ? "true" : "false");
                 _onConnectedPropertyChangedEvent.FireEvent(_connected);
             }
             if (_connected){                
@@ -52,17 +52,17 @@ namespace MagicPodsCore {
                         std::this_thread::sleep_for(std::chrono::milliseconds(300));
                     }
                 });
-                LOG_RELEASE("%s _client started from PropertiesChanged", GetName().c_str());
+                Logger::Info("%s _client started from PropertiesChanged", GetName().c_str());
             }
             else{
                 _client->Stop();
-                LOG_RELEASE("%s _client stopped from PropertiesChanged", GetName().c_str());
+                Logger::Info("%s _client stopped from PropertiesChanged", GetName().c_str());
             }
         });
 
         _connected = _deviceInfo->GetConnectionStatus().GetValue();
         
-        LOG_DEBUG("%s: Init:Connected %s",GetName().c_str(), _connected ? "true" : "false");
+        Logger::Debug("%s: Init:Connected %s",GetName().c_str(), _connected ? "true" : "false");
         if (_connected){
             _client->Start([this](Client& _client) {
                 for (auto& data: this->_clientStartData){
@@ -70,7 +70,7 @@ namespace MagicPodsCore {
                     std::this_thread::sleep_for(std::chrono::milliseconds(300));
                 }
             });
-            LOG_RELEASE("%s _client started from Init", GetName().c_str());
+            Logger::Info("%s _client started from Init", GetName().c_str());
         }
     }
 
@@ -84,7 +84,7 @@ namespace MagicPodsCore {
         _client->Stop();
         _client->GetOnReceivedDataEvent().Unsubscribe(clientReceivedDataEventId);
 
-        LOG_DEBUG("Device::~Device");
+        Logger::Debug("Device::~Device");
 
         //TODO: Unsubscribe all listeners from all events in device. See the event.h
     }

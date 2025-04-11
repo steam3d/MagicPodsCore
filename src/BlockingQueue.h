@@ -27,7 +27,7 @@ namespace MagicPodsCore {
                 _isDestructed = true;
             }
             _conditionNotEmptyQueue.notify_all();
-            LOG_DEBUG("~BlockingQueue");
+            Logger::Debug("~BlockingQueue");
         }
     };
 

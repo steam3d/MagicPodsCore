@@ -18,7 +18,7 @@ namespace MagicPodsCore {
         ClearAndFillDevicesMap();
 
         _dbusService.GetOnDeviceAddedEvent().Subscribe([this](size_t listenerId, const std::shared_ptr<DBusDeviceInfo>& addedDeviceInfo) {
-            LOG_DEBUG("OnDeviceAdded: %s", addedDeviceInfo->GetAddress().c_str());
+            Logger::Debug("OnDeviceAdded: %s", addedDeviceInfo->GetAddress().c_str());
             if (!_devicesMap.contains(addedDeviceInfo->GetAddress())) {
                 if (auto device = TryCreateDevice(addedDeviceInfo)) {
                     _devicesMap.emplace(addedDeviceInfo->GetAddress(), device);
@@ -30,7 +30,7 @@ namespace MagicPodsCore {
         });
 
         _dbusService.GetOnDeviceRemovedEvent().Subscribe([this](size_t listenerId, const std::shared_ptr<DBusDeviceInfo>& removedDeviceInfo) {
-            LOG_DEBUG("OnDeviceRemoved: %s", removedDeviceInfo->GetAddress().c_str());
+            Logger::Debug("OnDeviceRemoved: %s", removedDeviceInfo->GetAddress().c_str());
             
             if (_devicesMap.contains(removedDeviceInfo->GetAddress())) {
                 _onDeviceRemoveEvent.FireEvent(_devicesMap.at(removedDeviceInfo->GetAddress()));
@@ -82,11 +82,11 @@ namespace MagicPodsCore {
 
     void DevicesInfoFetcher::SetCapabilities(const nlohmann::json &json)
     {
-        LOG_RELEASE("DevicesInfoFetcher::SetCapabilities");
+        Logger::Info("DevicesInfoFetcher::SetCapabilities");
 
         if (!json.contains("arguments") || !json["arguments"].contains("address") || !json["arguments"].contains("capabilities"))
         {
-            LOG_RELEASE("Error: missing required fields in SetCapabilities");
+            Logger::Info("Error: missing required fields in SetCapabilities");
             return;
         }
 
@@ -153,7 +153,7 @@ namespace MagicPodsCore {
 
         TrySelectNewActiveDevice();
 
-        LOG_RELEASE("Devices created: %zu", _devicesMap.size());
+        Logger::Info("Devices created: %zu", _devicesMap.size());
     }
 
     void DevicesInfoFetcher::TrySelectNewActiveDevice() {

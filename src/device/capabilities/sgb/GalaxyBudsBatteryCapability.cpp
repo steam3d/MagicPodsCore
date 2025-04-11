@@ -27,7 +27,7 @@ namespace MagicPodsCore
                 isAvailable = true;
 
             _onChanged.FireEvent(*this);
-            LOG_DEBUG("AapAncCapability::GetBatteryChangedEvent");
+            Logger::Debug("AapAncCapability::GetBatteryChangedEvent");
         });
 
         watcherBatteryChangedEventId = watcher.GetBatteryChangedEvent().Subscribe([this](size_t id, const std::vector<DeviceBatteryData> &b){

@@ -24,7 +24,7 @@ namespace MagicPodsCore
 
         AapAncMode ancMode = static_cast<AapAncMode>(data[7]);
 
-        LOG_DEBUG("%s: %s", _tag.c_str(), AapAncModeToString(ancMode).c_str());
+        Logger::Debug("%s: %s", _tag.c_str(), AapAncModeToString(ancMode).c_str());
         _event.FireEvent(ancMode);
     }
 }

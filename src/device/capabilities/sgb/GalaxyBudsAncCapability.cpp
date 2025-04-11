@@ -76,12 +76,12 @@ namespace MagicPodsCore
                 //When we get ANC mode for the first time, we must notify. But on the second and subsequent times, we should notify only if the option has changed.
                 isAvailable = true;
                 option = newOption;
-                LOG_DEBUG("GalaxyBudsAncCapability: %s", DeviceAncModesToString(option).c_str());
+                Logger::Debug("GalaxyBudsAncCapability: %s", DeviceAncModesToString(option).c_str());
                 _onChanged.FireEvent(*this);
             }
             else if (option != newOption){
                 option = newOption;
-                LOG_DEBUG("GalaxyBudsAncCapability: %s", DeviceAncModesToString(option).c_str());
+                Logger::Debug("GalaxyBudsAncCapability: %s", DeviceAncModesToString(option).c_str());
                 _onChanged.FireEvent(*this);
             }
         });
@@ -105,16 +105,16 @@ namespace MagicPodsCore
             {
                 GalaxyBudsAnc nativeMode = DeviceAncModesToGalaxyBudsAnc(static_cast<DeviceAncModes>(selected));
                 SendData(GalaxyBudsSetAnc(nativeMode));
-                LOG_DEBUG("GalaxyBudsAncCapability::SetFromJson set option to %s", GalaxyBudsAncToString(nativeMode).c_str());
+                Logger::Debug("GalaxyBudsAncCapability::SetFromJson set option to %s", GalaxyBudsAncToString(nativeMode).c_str());
             }
             else
             {
-                LOG_RELEASE("Error: GalaxyBudsAncCapability::SetFromJson got unexpected option: %d", selected);
+                Logger::Info("Error: GalaxyBudsAncCapability::SetFromJson got unexpected option: %d", selected);
             }
         }
         else
         {
-            LOG_RELEASE("Error: GalaxyBudsAncCapability::SetFromJson got no value or value is not an integer");
+            Logger::Info("Error: GalaxyBudsAncCapability::SetFromJson got no value or value is not an integer");
         }
     }
 

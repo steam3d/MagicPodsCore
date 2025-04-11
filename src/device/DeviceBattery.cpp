@@ -40,7 +40,7 @@ namespace MagicPodsCore
             {
                 // Say UI that battery from cache now
                 it->Status = DeviceBatteryStatus::Cached;
-                LOG_RELEASE("%s changed to cache", DeviceBatteryTypeToString(it->Type).c_str());
+                Logger::Info("%s changed to cache", DeviceBatteryTypeToString(it->Type).c_str());
                 return true;
             }
             else
@@ -84,7 +84,7 @@ namespace MagicPodsCore
 
         if (isUpdated)
         {
-            LOG_RELEASE("Battery updated: %s", ToString(_batteryStatus).c_str());
+            Logger::Info("Battery updated: %s", ToString(_batteryStatus).c_str());
             _batteryChanged.FireEvent(_batteryStatus);
         }
     }

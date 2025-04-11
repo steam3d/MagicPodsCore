@@ -11,7 +11,7 @@ namespace MagicPodsCore
     void Capability::Reset()
     {
         isAvailable = false;
-        LOG_DEBUG("Capability: %s was reset", name.c_str());
+        Logger::Debug("Capability: %s was reset", name.c_str());
     }
 
     nlohmann::json Capability::GetAsJson()
