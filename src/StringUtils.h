@@ -34,6 +34,13 @@ namespace MagicPodsCore {
             return std::string(buffer, stringLength);
         }
 
+        template<typename ... Args>
+        static std::string Format(const char* format, const Args&... args) {
+            char buffer[512];
+            int stringLength = std::sprintf(buffer, format, args...);
+            return std::string(buffer, stringLength);
+        }
+
         // 327 -> 0147
         static std::string int16ToHex(int16_t value) {
             std::stringstream ss;
