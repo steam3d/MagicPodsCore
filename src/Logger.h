@@ -41,18 +41,18 @@ class DefaultFormatter : public ILoggerFormatter {
 private:
     inline static std::string LogLevelToString(LogLevel logLevel) {
         switch (logLevel) {
-            case LogLevel::Trace: return "TR";
-            case LogLevel::Debug: return "DE";
-            case LogLevel::Info: return "IN";
-            case LogLevel::Warn: return "WA";
-            case LogLevel::Error: return "ER";
-            case LogLevel::Critical: return "CT";
+            case LogLevel::Trace: return "TRC";
+            case LogLevel::Debug: return "DBG";
+            case LogLevel::Info: return "INF";
+            case LogLevel::Warn: return "WRN";
+            case LogLevel::Error: return "ERR";
+            case LogLevel::Critical: return "CRT";
             default: return "__";
         }
     }
 public:
     std::string Format(LogLevel loggingLevel, const std::string& message) override {
-        return MagicPodsCore::StringUtils::Format("[%s] %s", LogLevelToString(loggingLevel).c_str(), message.c_str());
+        return MagicPodsCore::StringUtils::Format("%s %s", LogLevelToString(loggingLevel).c_str(), message.c_str());
     }
 };
 
