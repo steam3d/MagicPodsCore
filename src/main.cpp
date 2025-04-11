@@ -145,6 +145,16 @@ void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
+void HandleSetLogLevel(auto *ws,const nlohmann::json& json, uWS::OpCode opCode) {
+    Logger::Info("HandleSetLogLevel");
+
+    auto selected = json.at("arguments").at("selected").template get<int>();
+    Logger::SetLoggingLevelForGlobalLogger(selected);
+    //std::string emptyResponse{};
+    //ws->send(emptyResponse, opCode, emptyResponse.length() < 16 * 1024);
+}
+
+
 void HandleIncorrectResponse(auto *ws, uWS::OpCode opCode) {
     std::string emptyResponse{};
     ws->send(emptyResponse, opCode, emptyResponse.length() < 16 * 1024);
@@ -173,6 +183,8 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
                 HandleGetActiveDeviceInfoRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "GetAll")
                 HandleGetAllRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "SetLogLevel")
+                HandleSetLogLevel(ws, json, opCode);
             else
                 HandleIncorrectResponse(ws, opCode);
     }
@@ -258,6 +270,9 @@ bool TryToParseArguments(int argc, char** argv) {
 int main(int argc, char** argv) {
     #ifdef DEBUG
     TestsSgb sgb;
+    Logger::SetLoggingLevelForGlobalLogger(LogLevel::Info);
+    #else
+    Logger::SetLoggingLevelForGlobalLogger(LogLevel::Info);
     #endif
     // fix stdout buffering issue, when python does not receive output
     setvbuf(stdout, NULL, _IONBF, 0);
