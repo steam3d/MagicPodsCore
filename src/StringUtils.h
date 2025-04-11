@@ -27,17 +27,15 @@ namespace MagicPodsCore {
             return newString;
         }
 
+        // unsafety to use with user input
         template<typename ... Args>
-        static std::string Format(std::string format, const Args&... args) {
-            char buffer[512];
-            int stringLength = std::sprintf(buffer, format.c_str(), args...);
-            return std::string(buffer, stringLength);
-        }
-
-        template<typename ... Args>
-        static std::string Format(const char* format, const Args&... args) {
-            char buffer[512];
-            int stringLength = std::sprintf(buffer, format, args...);
+        static std::string Format(const std::string& format, const Args&... args) {
+            const size_t bufferLength = 512;
+            char buffer[bufferLength];
+            #pragma GCC diagnostic push // for suppressing warnings related with passing string literals
+            #pragma GCC diagnostic ignored "-Wformat-security"
+            int stringLength = std::snprintf(buffer, bufferLength, format.c_str(), args...);
+            #pragma GCC diagnostic pop
             return std::string(buffer, stringLength);
         }
 
