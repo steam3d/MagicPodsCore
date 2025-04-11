@@ -10,12 +10,26 @@
 
 enum class LogLevel {
     Trace = 0,
-    Debug = 1,
-    Info = 2,
-    Warn = 3,
-    Error = 4,
-    Off = 5
+    Debug = 10,
+    Info = 20,
+    Warn = 30,
+    Error = 40,
+    Critical = 50
 };
+
+static bool isValidLogLevel(int value){
+    switch (static_cast<LogLevel>(value)) {
+        case LogLevel::Trace:
+        case LogLevel::Debug:
+        case LogLevel::Info:
+        case LogLevel::Warn:
+        case LogLevel::Error:
+        case LogLevel::Critical:
+            return true;
+        default:
+            return false;
+    }
+}
 
 class ILoggerFormatter {
 public:
@@ -32,6 +46,7 @@ private:
             case LogLevel::Info: return "IN";
             case LogLevel::Warn: return "WA";
             case LogLevel::Error: return "ER";
+            case LogLevel::Critical: return "CT";
             default: return "__";
         }
     }
@@ -61,7 +76,7 @@ public:
     template <typename... Args>
     void Log(LogLevel loggingLevel, const char* format, const Args&... args) {
         std::lock_guard<std::mutex> lock{_mutex};
-        if (static_cast<int>(loggingLevel) < static_cast<int>(_loggingLevel) || loggingLevel == LogLevel::Off)
+        if (static_cast<int>(loggingLevel) < static_cast<int>(_loggingLevel))
             return;
         printf("%s\n", _formatter->Format(loggingLevel, MagicPodsCore::StringUtils::Format(format, args...)).c_str());
     }
@@ -101,8 +116,20 @@ public:
         GetGlobalInstance().Log(LogLevel::Error, format, args...);
     }
 
+    template <typename... Args>
+    static void Critical(const char* format, const Args&... args) {
+        GetGlobalInstance().Log(LogLevel::Critical, format, args...);
+    }
+
     static void SetLoggingLevelForGlobalLogger(LogLevel loggingLevel) {
         GetGlobalInstance().SetLoggingLevel(loggingLevel);
+        Critical("Set log level to %d", loggingLevel);
+    }
+
+    static void SetLoggingLevelForGlobalLogger(int loggingLevel) {
+        if (isValidLogLevel(loggingLevel)){
+            SetLoggingLevelForGlobalLogger(static_cast<LogLevel>(loggingLevel));
+        }
     }
 
     void SetFormatterForGlobalLogger(std::unique_ptr<ILoggerFormatter> formatter) {
