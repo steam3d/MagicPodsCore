@@ -13,7 +13,7 @@
 #include <exception>
 
 namespace MagicPodsCore {
-    Client::Client(const std::string& address, unsigned short port, ClientConnectionType connectionType) 
+    Client::Client(const std::string& address, unsigned short port, ClientConnectionType connectionType)
         : _address{address}, _port{port}, _connectionType{connectionType} {}
 
     Client::Client(const std::string& address, const std::string& serviceUuid, ClientConnectionType connectionType)
@@ -31,18 +31,18 @@ namespace MagicPodsCore {
         /* connect to server */
         if(!ConnectToSocket(CONNECTION_TO_SOCKET_ATTEMPTS_NUMBER)) {
             _isStarted = false;
-            Logger::Info("Connect to socket is failed. Stopping client");
-            return;
+            Logger::Error("Connect to socket is failed.");
+            throw std::exception();
         }
         Logger::Info("connected...");
 
         std::thread writingThread([this]() {
             while (_isStarted) {
-                const auto data = _outcomeMessagesQueue.Take(); 
-                
+                const auto data = _outcomeMessagesQueue.Take();
+
                 if (!data.has_value())
-                    break;       
-                
+                    break;
+
                 ssize_t sendedBytesLength = send(_socket, data.value().data(), data.value().size(), 0);
                 Logger::Debug("s:%s",StringUtils::BytesToHexString(data.value().data(), data.value().size()).c_str());
             }
@@ -51,7 +51,7 @@ namespace MagicPodsCore {
         });
         writingThread.detach();
 
-        std::thread readingThread([this]() {           
+        std::thread readingThread([this]() {
             unsigned char buffer[1024];
             std::vector<unsigned char> vectorBuffer(1024); // optimize
             while(_isStarted) {
@@ -60,7 +60,7 @@ namespace MagicPodsCore {
                 if (receivedBytesLength > 0) {
                     Logger::Trace("r:%s", StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
-                    
+
                     _onReceivedDataEvent.FireEvent(vectorBuffer);
                 }
                 else {
@@ -94,7 +94,7 @@ namespace MagicPodsCore {
 
     bool Client::ConnectToSocketL2CAP() {
         struct sockaddr_l2 addr = { 0 };
-        
+
         /* allocate a socket */
         _socket = socket(AF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
 
@@ -113,7 +113,7 @@ namespace MagicPodsCore {
 
     bool Client::ConnectToSocketRFCOMM() {
         struct sockaddr_rc addr = { 0 };
-        
+
         /* allocate a socket */
         _socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 
@@ -130,7 +130,7 @@ namespace MagicPodsCore {
         addr.rc_family = AF_BLUETOOTH;
         addr.rc_channel = _port;
         str2ba(_address.c_str(), &addr.rc_bdaddr);
-    
+
         /* connect to server */
         if(connect(_socket, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
             return false;
@@ -141,6 +141,7 @@ namespace MagicPodsCore {
 
     bool Client::ConnectToSocket(int attemptsNumber) {
         bool isConnected{false};
+
         while (true) {
             --attemptsNumber;
             Logger::Info("Attempt to connect. Left %d", attemptsNumber);
@@ -153,7 +154,7 @@ namespace MagicPodsCore {
                 isConnected = ConnectToSocketRFCOMM();
                 break;
             }
-            if (attemptsNumber == 0 || isConnected || !_isStarted) {
+            if (attemptsNumber <= 0 || isConnected || !_isStarted) {
                 break;
             }
             std::this_thread::sleep_for(std::chrono::seconds(1)); // TODO: вероятно delay можно выставить для connect()
