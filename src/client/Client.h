@@ -1,10 +1,6 @@
-//
-// MagicPodsCore
-// https://github.com/steam3d/MagicPodsCore
-//
-// Copyright: 2020-2024 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
-// License: AGPL-3.O
-//
+// MagicPodsCore: https://github.com/steam3d/MagicPodsCore
+// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// License: GPL-3.0
 
 #pragma once
 
