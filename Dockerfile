@@ -25,7 +25,7 @@ WORKDIR /app/build
 RUN cmake -DCMAKE_BUILD_TYPE=Release ../
 RUN cmake --build ./
 
-FROM scratch as copy_results_stage
+FROM scratch AS copy_results_stage
 
 COPY --from=build_stage /app/build/MagicPodsCore /
 
