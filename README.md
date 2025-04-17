@@ -48,7 +48,7 @@ Connect to 172.0.1.0:2020 WebSocket and use the API below to communicate with Ma
 
 ## 📘 API reference
 
-List of available commands and events.
+List of available commands and events.  
 ⚠️ The API is in alpha stage and may change between updates.
 
 <details><summary>Get default Bluetooth adapter</summary>
