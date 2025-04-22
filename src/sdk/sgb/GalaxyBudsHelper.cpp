@@ -236,6 +236,10 @@ namespace MagicPodsCore
         {
             return std::string(GALAXYBUDSNEW);
         }
+        else if (model == GalaxyBudsModelIds::GalaxyBudsFe)
+        {
+            return std::string(GALAXYBUDSNEW);
+        }
         else if (model == GalaxyBudsModelIds::GalaxyBuds3)
         {
             return std::string(GALAXYBUDSNEW);
