@@ -32,7 +32,7 @@ namespace MagicPodsCore {
         if(!ConnectToSocket(CONNECTION_TO_SOCKET_ATTEMPTS_NUMBER)) {
             _isStarted = false;
             Logger::Error("%s Connect to socket is failed.",_address.c_str());
-            throw std::exception();
+            std::exit(-1);
         }
         Logger::Info("%s connected", _address.c_str());
 
@@ -114,7 +114,7 @@ namespace MagicPodsCore {
     bool Client::ConnectToSocketRFCOMM() {
         Logger::Debug("%s is trying to connect to %s", _address.c_str(), _serviceUuid.c_str());
 
-        if (_serviceUuid == ""){
+        if (_serviceUuid.empty()){
             Logger::Error("Failed to connect. UUID is empty.");
             return false;
         }
