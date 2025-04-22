@@ -26,15 +26,15 @@ namespace MagicPodsCore {
             return;
         _isStarted = true;
 
-        Logger::Info("Start Bluetooth client, server addr %s", _address.c_str());
+        Logger::Info("%s Start Bluetooth client", _address.c_str());
 
         /* connect to server */
         if(!ConnectToSocket(CONNECTION_TO_SOCKET_ATTEMPTS_NUMBER)) {
             _isStarted = false;
-            Logger::Error("Connect to socket is failed.");
+            Logger::Error("%s Connect to socket is failed.",_address.c_str());
             throw std::exception();
         }
-        Logger::Info("connected...");
+        Logger::Info("%s connected", _address.c_str());
 
         std::thread writingThread([this]() {
             while (_isStarted) {
@@ -47,7 +47,7 @@ namespace MagicPodsCore {
                 Logger::Debug("s:%s",StringUtils::BytesToHexString(data.value().data(), data.value().size()).c_str());
             }
 
-            Logger::Debug("Writing thread stopped");
+            Logger::Debug("%s Writing thread stopped", _address.c_str());
         });
         writingThread.detach();
 
@@ -64,12 +64,12 @@ namespace MagicPodsCore {
                     _onReceivedDataEvent.FireEvent(vectorBuffer);
                 }
                 else {
-                    Logger::Debug("stop listening");
+                    Logger::Debug("%s stop listening", _address.c_str());
                     break;
                 }
             }
 
-            Logger::Debug("Reading thread stopped");
+            Logger::Debug("%s Reading thread stopped", _address.c_str());
         });
         readingThread.detach();
 
@@ -112,6 +112,13 @@ namespace MagicPodsCore {
     }
 
     bool Client::ConnectToSocketRFCOMM() {
+        Logger::Debug("%s is trying to connect to %s", _address.c_str(), _serviceUuid.c_str());
+
+        if (_serviceUuid == ""){
+            Logger::Error("Failed to connect. UUID is empty.");
+            return false;
+        }
+
         struct sockaddr_rc addr = { 0 };
 
         /* allocate a socket */
@@ -144,7 +151,7 @@ namespace MagicPodsCore {
 
         while (true) {
             --attemptsNumber;
-            Logger::Info("Attempt to connect. Left %d", attemptsNumber);
+            Logger::Info("%s Attempt to connect. Left %d", _address.c_str(), attemptsNumber);
             switch (_connectionType)
             {
             case ClientConnectionType::L2CAP:
@@ -172,7 +179,7 @@ namespace MagicPodsCore {
 
         sdp_session_t* session = sdp_connect(&tmp, (bdaddr_t*)&address, SDP_RETRY_IF_BUSY);
         if (!session) {
-            Logger::Info("-- can't connect to sdp server! \n");
+            Logger::Error("%s SDP can't connect to sdp server!", deviceAddress);
             return std::nullopt;
         }
 
@@ -189,14 +196,14 @@ namespace MagicPodsCore {
         int success = sdp_service_search_attr_req(
             session, searchList, SDP_ATTR_REQ_RANGE, attrIdList, &responseList);
         if (success) {
-            Logger::Debug("-- search failed! \n");
+            Logger::Error("%s SDP search failed!", deviceAddress);
             return std::nullopt;
         }
 
         // check responses
         success = sdp_list_len(responseList);
         if (success <= 0) {
-            Logger::Debug("-- no responses! \n");
+            Logger::Error("%s SDP no responses!", deviceAddress);
             return std::nullopt;
         }
 
@@ -209,7 +216,7 @@ namespace MagicPodsCore {
             sdp_list_t* protoList;
             success = sdp_get_access_protos(record, &protoList);
             if (success) {
-                Logger::Debug("-- can't access protocols! \n");
+                Logger::Error("%s SDP can't access protocols!", deviceAddress);
                 return std::nullopt;
             }
 

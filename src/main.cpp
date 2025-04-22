@@ -274,7 +274,7 @@ bool TryToParseArguments(int argc, char** argv) {
 int main(int argc, char** argv) {
     #ifdef DEBUG
     TestsSgb sgb;
-    Logger::SetLoggingLevelForGlobalLogger(LogLevel::Info);
+    Logger::SetLoggingLevelForGlobalLogger(LogLevel::Debug);
     #else
     Logger::SetLoggingLevelForGlobalLogger(LogLevel::Info);
     #endif

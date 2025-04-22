@@ -125,6 +125,15 @@ namespace MagicPodsCore {
     }
 
     std::shared_ptr<Device> DevicesInfoFetcher::TryCreateDevice(const std::shared_ptr<DBusDeviceInfo>& deviceInfo) {
+        
+        Logger::Debug("%s (%s)", deviceInfo->GetName().c_str(), deviceInfo->GetAddress().c_str());
+        Logger::Debug("    Vendor: %d",deviceInfo->GetVendorId());
+        Logger::Debug("    Product: %d",deviceInfo->GetProductId());
+        Logger::Debug("    Services:");
+        for (const auto& uuid : deviceInfo->GetUuids()) {
+            Logger::Debug("        %s", uuid.c_str());            
+        }
+
         if (AapHelper::IsAapDevice(deviceInfo->GetVendorId(), deviceInfo->GetProductId())){
             auto newDevice = AapDevice::Create(deviceInfo);
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
@@ -135,6 +144,12 @@ namespace MagicPodsCore {
         else if (GalaxyBudsHelper::IsGalaxyBudsDevice(deviceInfo->GetUuids()))
         {
             auto keyPair = GalaxyBudsHelper::SearchModelColor(deviceInfo->GetUuids(), deviceInfo->GetName());
+            
+            if (keyPair.first == GalaxyBudsModelIds::Unknown){
+                Logger::Error("Creating device failed.Galaxy Buds modes is Unknown");
+                return nullptr;
+            }
+
             auto newDevice = GalaxyBudsDevice::Create(deviceInfo, static_cast<unsigned short>(keyPair.first));
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
