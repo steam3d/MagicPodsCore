@@ -261,7 +261,7 @@ bool TryToParseArguments(int argc, char** argv) {
             Logger::Info(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
             return true;
         }
-        else if (argument == "--help" || argument == "-help" || argument == "-h" || argc > 2) {
+        else if (argument == "--help" || argument == "-help" || argument == "-h") {
             Logger::Info(
                 "Help is under development. For more information and to contact us, please visit magicpods.app.\n"
                 "Developed by Aleksandr Maslov<MagicPods@outlook.com> and Andrei Litvintsev<a.a.litvintsev@gmail.com>");
@@ -271,18 +271,47 @@ bool TryToParseArguments(int argc, char** argv) {
     return false;
 }
 
-int main(int argc, char** argv) {
-    #ifdef DEBUG
-    TestsSgb sgb;
-    Logger::SetLoggingLevelForGlobalLogger(LogLevel::Debug);
-    #else
-    Logger::SetLoggingLevelForGlobalLogger(LogLevel::Info);
-    #endif
-    // fix stdout buffering issue, when python does not receive output
-    setvbuf(stdout, NULL, _IONBF, 0);
 
+bool TryToSetLogLevelFromArguments(int argc, char** argv) {
+    for (int i = 0; i < argc; ++i) {
+        std::string argument{argv[i]};
+        if (argument == "--loglevel" || argument == "-loglevel" || argument == "-l") {
+            if (i + 1 < argc) {
+                int level = std::stoi(argv[++i]);
+
+                if (level > 50)
+                    level = 50;
+
+                if (level < 0)
+                    level = 0;
+
+                Logger::SetLoggingLevelForGlobalLogger(static_cast<LogLevel>(level));
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int main(int argc, char** argv) {
     if (TryToParseArguments(argc, argv))
         return 0;
+
+    // set logs
+    if (!TryToSetLogLevelFromArguments(argc, argv)){
+        #ifdef DEBUG
+        Logger::SetLoggingLevelForGlobalLogger(LogLevel::Debug);
+        #else
+        Logger::SetLoggingLevelForGlobalLogger(LogLevel::Info);
+        #endif
+    }
+
+    #ifdef DEBUG
+    TestsSgb sgb;
+    #endif
+
+    // fix stdout buffering issue, when python does not receive output
+    setvbuf(stdout, NULL, _IONBF, 0);
 
     Logger::Info(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
 
