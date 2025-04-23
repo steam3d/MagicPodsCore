@@ -5,16 +5,18 @@
 #include "GalaxyBudsAncWatcher.h"
 #include "sdk/sgb/enums/GalaxyBudsMsgIds.h"
 
+// Galaxy Buds Live were disabled due to user feedback that the ANC switch does not work.
 namespace MagicPodsCore
 {
 
     std::optional<GalaxyBudsAnc> GalaxyBudsAncWatcher::ExtractState(unsigned char b)
     {
-        if (model == GalaxyBudsModelIds::GalaxyBudsLive)
-        {
-            return b == 1 ? GalaxyBudsAnc::NoiseReduction : GalaxyBudsAnc::Off; // Unknown usage
-        }
-        else if (model == GalaxyBudsModelIds::GalaxyBudsPro ||
+        //if (model == GalaxyBudsModelIds::GalaxyBudsLive)
+        //{
+        //    return b == 1 ? GalaxyBudsAnc::NoiseReduction : GalaxyBudsAnc::Off; // Unknown usage
+        //}
+        //else
+        if (model == GalaxyBudsModelIds::GalaxyBudsPro ||
                  model == GalaxyBudsModelIds::GalaxyBuds2 ||
                  model == GalaxyBudsModelIds::GalaxyBuds2Pro ||
                  model == GalaxyBudsModelIds::GalaxyBudsFe ||
@@ -97,8 +99,8 @@ namespace MagicPodsCore
 
     bool GalaxyBudsAncWatcher::IsSupport(GalaxyBudsModelIds model)
     {
-        return (model == GalaxyBudsModelIds::GalaxyBudsLive ||
-                model == GalaxyBudsModelIds::GalaxyBudsPro ||
+        //return (model == GalaxyBudsModelIds::GalaxyBudsLive ||
+        return (model == GalaxyBudsModelIds::GalaxyBudsPro ||
                 model == GalaxyBudsModelIds::GalaxyBuds2 ||
                 model == GalaxyBudsModelIds::GalaxyBuds2Pro ||
                 model == GalaxyBudsModelIds::GalaxyBudsFe ||
@@ -108,8 +110,8 @@ namespace MagicPodsCore
 
     std::vector<GalaxyBudsAnc> GalaxyBudsAncWatcher::GetAncModesFor(GalaxyBudsModelIds model)
     {
-        if (model == GalaxyBudsModelIds::GalaxyBudsLive ||
-            model == GalaxyBudsModelIds::GalaxyBuds3)
+        //if (model == GalaxyBudsModelIds::GalaxyBudsLive ||
+        if (model == GalaxyBudsModelIds::GalaxyBuds3)
         {
             return std::vector<GalaxyBudsAnc>{
                 GalaxyBudsAnc::Off,
