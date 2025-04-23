@@ -24,6 +24,7 @@ A command-line utility for managing AirPods, Beats, and Galaxy Buds.
 |                  | Beats Studio 3         |                   |
 |                  | Beats X                |                   |
 |                  | Beats Flex             |                   |
+|                  | Beats Solo Buds        |                   |
 
 Some of the headphones in the table do not have or do not support the noise control feature.
 
