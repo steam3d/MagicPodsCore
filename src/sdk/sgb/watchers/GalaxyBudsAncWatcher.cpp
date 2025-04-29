@@ -119,7 +119,9 @@ namespace MagicPodsCore
             };
         }
         else if (model == GalaxyBudsModelIds::GalaxyBudsPro ||
-                 model == GalaxyBudsModelIds::GalaxyBuds2)
+                 model == GalaxyBudsModelIds::GalaxyBuds2 ||
+                 model == GalaxyBudsModelIds::GalaxyBuds2Pro ||
+                 model == GalaxyBudsModelIds::GalaxyBudsFe)
         {
             return std::vector<GalaxyBudsAnc>{
                 GalaxyBudsAnc::Off,
@@ -127,9 +129,7 @@ namespace MagicPodsCore
                 GalaxyBudsAnc::NoiseReduction,
             };
         }
-        else if (model == GalaxyBudsModelIds::GalaxyBuds2Pro ||
-                 model == GalaxyBudsModelIds::GalaxyBudsFe ||
-                 model == GalaxyBudsModelIds::GalaxyBuds3Pro)
+        else if (model == GalaxyBudsModelIds::GalaxyBuds3Pro)
         {
             return std::vector<GalaxyBudsAnc>{
                 GalaxyBudsAnc::Off,
