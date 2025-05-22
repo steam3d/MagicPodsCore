@@ -45,6 +45,7 @@ namespace MagicPodsCore {
 
                 ssize_t sendedBytesLength = send(_socket, data.value().data(), data.value().size(), 0);
                 Logger::Debug("s:%s",StringUtils::BytesToHexString(data.value().data(), data.value().size()).c_str());
+                std::this_thread::sleep_for(std::chrono::milliseconds{500});
             }
 
             Logger::Debug("%s Writing thread stopped", _address.c_str());
