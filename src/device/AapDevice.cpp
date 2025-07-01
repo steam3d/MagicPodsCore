@@ -33,6 +33,7 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapAncCapability>(*device));
 
         device->_clientStartData.push_back(AapInit{}.Request());
+        device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown2}.Request());
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown1}.Request());
         if (AapInitExt::IsSupported(deviceInfo->GetProductId()))
             device->_clientStartData.push_back(AapInitExt{}.Request());
