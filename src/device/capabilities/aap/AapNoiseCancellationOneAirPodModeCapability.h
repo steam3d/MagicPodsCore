@@ -13,7 +13,7 @@ namespace MagicPodsCore
     private:
         bool option;        
         AapNoiseCancellationOneAirPodWatcher watcher{};
-        size_t watcherAncChangedEventId;        
+        size_t watcherEventId;        
         
     protected:
         nlohmann::json CreateJsonBody() override;

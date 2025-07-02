@@ -22,7 +22,7 @@ namespace MagicPodsCore
 
     AapNoiseCancellationOneAirPodModeCapability::AapNoiseCancellationOneAirPodModeCapability(AapDevice& device) : AapCapability("ancOneAirPod", false, device)
     {
-        watcherAncChangedEventId = watcher.GetEvent().Subscribe([this](size_t id, AapNoiseCancellationOneAirPodMode mode){
+        watcherEventId = watcher.GetEvent().Subscribe([this](size_t id, AapNoiseCancellationOneAirPodMode mode){
             bool newOption = mode == AapNoiseCancellationOneAirPodMode::On;            
             
             if (!isAvailable){
@@ -43,7 +43,7 @@ namespace MagicPodsCore
 
     AapNoiseCancellationOneAirPodModeCapability::~AapNoiseCancellationOneAirPodModeCapability()
     {
-        watcher.GetEvent().Unsubscribe(watcherAncChangedEventId);
+        watcher.GetEvent().Unsubscribe(watcherEventId);
     }
 
     void AapNoiseCancellationOneAirPodModeCapability::SetFromJson(const nlohmann::json &json)

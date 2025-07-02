@@ -22,7 +22,7 @@ namespace MagicPodsCore
 
     AapConversationAwarenessCapability::AapConversationAwarenessCapability(AapDevice& device) : AapCapability("conversationAwareness", false, device)
     {
-        watcherAncChangedEventId = watcher.GetEvent().Subscribe([this](size_t id, AapConversationAwarenessMode mode){
+        watcherEventId = watcher.GetEvent().Subscribe([this](size_t id, AapConversationAwarenessMode mode){
             bool newOption = mode == AapConversationAwarenessMode::On;            
             
             if (!isAvailable){
@@ -43,7 +43,7 @@ namespace MagicPodsCore
 
     AapConversationAwarenessCapability::~AapConversationAwarenessCapability()
     {
-        watcher.GetEvent().Unsubscribe(watcherAncChangedEventId);
+        watcher.GetEvent().Unsubscribe(watcherEventId);
     }
 
     void AapConversationAwarenessCapability::SetFromJson(const nlohmann::json &json)

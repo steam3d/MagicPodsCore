@@ -29,7 +29,7 @@ namespace MagicPodsCore
 
     AapConversationAwarenessStateCapability::AapConversationAwarenessStateCapability(AapDevice& device) : AapCapability("conversationAwarenessSpeaking", true, device)
     {
-        watcherAncChangedEventId = watcher.GetEvent().Subscribe([this](size_t id, AapConversationAwarenessState mode){
+        watcherEventId = watcher.GetEvent().Subscribe([this](size_t id, AapConversationAwarenessState mode){
             bool newOption = AapConversationAwarenessStateToBoolean(mode);
             
             if (!isAvailable){
@@ -50,6 +50,6 @@ namespace MagicPodsCore
 
     AapConversationAwarenessStateCapability::~AapConversationAwarenessStateCapability()
     {
-        watcher.GetEvent().Unsubscribe(watcherAncChangedEventId);
+        watcher.GetEvent().Unsubscribe(watcherEventId);
     }
 }

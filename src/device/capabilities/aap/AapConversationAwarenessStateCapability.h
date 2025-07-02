@@ -14,7 +14,7 @@ namespace MagicPodsCore
     private:
         bool option;        
         AapConversationAwarenessStateWatcher watcher{};
-        size_t watcherAncChangedEventId;
+        size_t watcherEventId;
         bool AapConversationAwarenessStateToBoolean(AapConversationAwarenessState mode);        
         
     protected:
