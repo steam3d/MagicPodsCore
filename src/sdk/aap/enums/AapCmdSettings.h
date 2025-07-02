@@ -16,5 +16,6 @@ namespace MagicPodsCore
         PressAndHoldDuration = 0x18,
         PressSpeed = 0x17,
         VolumeSwipe = 0x25,
+        VolumeSwipeLength = 0x23,
     };
 }
