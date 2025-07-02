@@ -12,6 +12,7 @@ namespace MagicPodsCore
         //Events
         Anc = 0x0d,
         ConversationAwareness = 0x28,
-        NoiseCancellationOneAirPod = 0x1b
+        NoiseCancellationOneAirPod = 0x1b,
+        PressAndHoldDuration = 0x18,
     };
 }
