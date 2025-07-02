@@ -14,5 +14,6 @@ namespace MagicPodsCore
         ConversationAwareness = 0x28,
         NoiseCancellationOneAirPod = 0x1b,
         PressAndHoldDuration = 0x18,
+        PressSpeed = 0x17,
     };
 }

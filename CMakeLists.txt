@@ -24,6 +24,7 @@ add_executable(MagicPodsCore
     src/sdk/aap/setters/AapSetConversationAwarenessStatus.cpp
     src/sdk/aap/setters/AapSetNoiseCancellationOneAirPod.cpp
     src/sdk/aap/setters/AapSetPressAndHoldDuration.cpp
+    src/sdk/aap/setters/AapSetPressSpeed.cpp
 
     src/sdk/aap/watchers/AapAncWatcher.cpp
     src/sdk/aap/watchers/AapBatteryWatcher.cpp
@@ -32,6 +33,7 @@ add_executable(MagicPodsCore
     src/sdk/aap/watchers/AapConversationAwarenessStateWatcher.cpp
     src/sdk/aap/watchers/AapNoiseCancellationOneAirPodWatcher.cpp
     src/sdk/aap/watchers/AapPressAndHoldDurationWatcher.cpp
+    src/sdk/aap/watchers/AapPressSpeedWatcher.cpp
 
     src/sdk/sgb/watchers/GalaxyBudsAncWatcher.cpp
     src/sdk/sgb/watchers/GalaxyBudsBatteryWatcher.cpp
@@ -47,6 +49,7 @@ add_executable(MagicPodsCore
     src/device/capabilities/aap/AapConversationAwarenessStateCapability.cpp
     src/device/capabilities/aap/AapNoiseCancellationOneAirPodModeCapability.cpp
     src/device/capabilities/aap/AapAapPressAndHoldDurationCapability.cpp
+    src/device/capabilities/aap/AapPressSpeedCapability.cpp
     
     src/device/capabilities/sgb/GalaxyBudsCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
