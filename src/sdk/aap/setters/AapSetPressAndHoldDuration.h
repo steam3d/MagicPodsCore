@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "sdk/aap/enums/AapAapPressAndHoldDurationMode.h"
+#include "sdk/aap/enums/AapPressAndHoldDurationMode.h"
 #include "AapRequest.h"
 
 namespace MagicPodsCore
@@ -27,10 +27,10 @@ namespace MagicPodsCore
     class AapSetPressAndHoldDuration : public AapRequest
     {
     private:
-        AapAapPressAndHoldDurationMode _mode;
+        AapPressAndHoldDurationMode _mode;
 
     public:
-        AapSetPressAndHoldDuration(AapAapPressAndHoldDurationMode mode);
+        AapSetPressAndHoldDuration(AapPressAndHoldDurationMode mode);
         std::vector<unsigned char> Request() const override;        
     };
 }

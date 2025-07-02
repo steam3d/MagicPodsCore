@@ -8,33 +8,33 @@
 namespace MagicPodsCore
 {
     // Byte 7 indicates the packet type
-    enum class AapAapPressAndHoldDurationMode : unsigned char
+    enum class AapPressAndHoldDurationMode : unsigned char
     {
         Default = 0x00,
         Shorter = 0x01,
         Shortest = 0x02,
     };
 
-    static bool isValidAapAapPressAndHoldDurationMode(unsigned char value){
-        switch (static_cast<AapAapPressAndHoldDurationMode>(value)) {
-            case AapAapPressAndHoldDurationMode::Default:
-            case AapAapPressAndHoldDurationMode::Shorter:
-            case AapAapPressAndHoldDurationMode::Shortest:
+    static bool isValidAapPressAndHoldDurationMode(unsigned char value){
+        switch (static_cast<AapPressAndHoldDurationMode>(value)) {
+            case AapPressAndHoldDurationMode::Default:
+            case AapPressAndHoldDurationMode::Shorter:
+            case AapPressAndHoldDurationMode::Shortest:
                 return true;
             default:
                 return false;
         }
     }
 
-    static std::string AapAapPressAndHoldDurationModeToString(AapAapPressAndHoldDurationMode value)
+    static std::string AapPressAndHoldDurationModeToString(AapPressAndHoldDurationMode value)
     {
         switch (value)
         {
-        case AapAapPressAndHoldDurationMode::Default:
+        case AapPressAndHoldDurationMode::Default:
             return "Default";
-        case AapAapPressAndHoldDurationMode::Shorter:
+        case AapPressAndHoldDurationMode::Shorter:
             return "Shorter";
-        case AapAapPressAndHoldDurationMode::Shortest:
+        case AapPressAndHoldDurationMode::Shortest:
             return "Shortest";
         default:
             return "Unknown value";

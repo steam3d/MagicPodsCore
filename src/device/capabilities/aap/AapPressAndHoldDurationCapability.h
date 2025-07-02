@@ -5,14 +5,14 @@
 #pragma once
 #include "AapCapability.h"
 #include "sdk/aap/watchers/AapPressAndHoldDurationWatcher.h"
-#include "sdk/aap/enums/AapAapPressAndHoldDurationMode.h"
+#include "sdk/aap/enums/AapPressAndHoldDurationMode.h"
 
 namespace MagicPodsCore
 {
-    class AapAapPressAndHoldDurationCapability : public AapCapability
+    class AapPressAndHoldDurationCapability : public AapCapability
     {
     private:
-        AapAapPressAndHoldDurationMode option;        
+        AapPressAndHoldDurationMode option;        
         AapPressAndHoldDurationWatcher watcher{};
         size_t watcherEventId;        
         
@@ -21,8 +21,8 @@ namespace MagicPodsCore
         void OnReceivedData(const std::vector<unsigned char> &data) override;
 
     public:
-        explicit AapAapPressAndHoldDurationCapability(AapDevice& device);
-        ~AapAapPressAndHoldDurationCapability() override;
+        explicit AapPressAndHoldDurationCapability(AapDevice& device);
+        ~AapPressAndHoldDurationCapability() override;
         void SetFromJson(const nlohmann::json &json) override;
     };
 }

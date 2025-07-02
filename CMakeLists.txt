@@ -48,7 +48,7 @@ add_executable(MagicPodsCore
     src/device/capabilities/aap/AapConversationAwarenessCapability.cpp
     src/device/capabilities/aap/AapConversationAwarenessStateCapability.cpp
     src/device/capabilities/aap/AapNoiseCancellationOneAirPodModeCapability.cpp
-    src/device/capabilities/aap/AapAapPressAndHoldDurationCapability.cpp
+    src/device/capabilities/aap/AapPressAndHoldDurationCapability.cpp
     src/device/capabilities/aap/AapPressSpeedCapability.cpp
     
     src/device/capabilities/sgb/GalaxyBudsCapability.cpp

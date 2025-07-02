@@ -26,12 +26,12 @@ namespace MagicPodsCore
         if (data[6] != static_cast<unsigned char>(AapCmdSettings::PressAndHoldDuration)) // settings type: I think 0x02 is ConversationAwareness
             return;
 
-        if (!isValidAapAapPressAndHoldDurationMode(data[7]))
+        if (!isValidAapPressAndHoldDurationMode(data[7]))
             return;
 
-        AapAapPressAndHoldDurationMode mode = static_cast<AapAapPressAndHoldDurationMode>(data[7]);
+        AapPressAndHoldDurationMode mode = static_cast<AapPressAndHoldDurationMode>(data[7]);
 
-        Logger::Debug("%s: %s", _tag.c_str(), AapAapPressAndHoldDurationModeToString(mode).c_str());
+        Logger::Debug("%s: %s", _tag.c_str(), AapPressAndHoldDurationModeToString(mode).c_str());
         _event.FireEvent(mode);
     }
 }

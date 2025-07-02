@@ -9,7 +9,7 @@
 
 namespace MagicPodsCore
 {
-    AapSetPressAndHoldDuration::AapSetPressAndHoldDuration(AapAapPressAndHoldDurationMode mode) : AapRequest{"AapSetPressAndHoldDuration"}, _mode{mode}
+    AapSetPressAndHoldDuration::AapSetPressAndHoldDuration(AapPressAndHoldDurationMode mode) : AapRequest{"AapSetPressAndHoldDuration"}, _mode{mode}
     {
     }
 

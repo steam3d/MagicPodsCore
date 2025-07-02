@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Event.h"
-#include "sdk/aap/enums/AapAapPressAndHoldDurationMode.h"
+#include "sdk/aap/enums/AapPressAndHoldDurationMode.h"
 #include "AapWatcher.h"
 
 namespace MagicPodsCore
@@ -13,13 +13,13 @@ namespace MagicPodsCore
     class AapPressAndHoldDurationWatcher: public AapWatcher
     {
     private:
-        Event<AapAapPressAndHoldDurationMode> _event{};
+        Event<AapPressAndHoldDurationMode> _event{};
 
     public:
         AapPressAndHoldDurationWatcher();
         void ProcessResponse(const std::vector<unsigned char> &data) override;
 
-        Event<AapAapPressAndHoldDurationMode> &GetEvent()
+        Event<AapPressAndHoldDurationMode> &GetEvent()
         {
             return _event;
         }
