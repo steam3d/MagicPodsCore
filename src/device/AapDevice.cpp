@@ -10,6 +10,7 @@
 #include "capabilities/aap/AapPressAndHoldDurationCapability.h"
 #include "capabilities/aap/AapPressSpeedCapability.h"
 #include "capabilities/aap/AapVolumeSwipeCapability.h"
+#include "capabilities/aap/AapPersonalizedVolumeCapability.h"
 #include "capabilities/aap/AapBatteryCapability.h"
 #include "sdk/aap/setters/AapInit.h"
 #include "sdk/aap/setters/AapInitExt.h"
@@ -43,6 +44,7 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapPressAndHoldDurationCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapPressSpeedCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapVolumeSwipeCapability>(*device));
+        device->capabilities.push_back(std::make_unique<AapPersonalizedVolumeCapability>(*device));
 
         device->_clientStartData.push_back(AapInit{}.Request());
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown2}.Request());
