@@ -9,7 +9,9 @@ namespace MagicPodsCore
     // Byte 6 indicates the setting type
     enum class AapCmdSettings : unsigned char
     {
+        //Events
         Anc = 0x0d,
-        ConversationAwareness = 0x28
+        ConversationAwareness = 0x28,
+        NoiseCancellationOneAirPod = 0x1b
     };
 }
