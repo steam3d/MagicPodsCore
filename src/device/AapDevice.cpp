@@ -4,6 +4,7 @@
 
 #include "AapDevice.h"
 #include "capabilities/aap/AapAncCapability.h"
+#include "capabilities/aap/AapConversationAwarenessCapability.h"
 #include "capabilities/aap/AapBatteryCapability.h"
 #include "sdk/aap/setters/AapInit.h"
 #include "sdk/aap/setters/AapInitExt.h"
@@ -31,6 +32,7 @@ namespace MagicPodsCore
 
         device->capabilities.push_back(std::make_unique<AapBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAncCapability>(*device));
+        device->capabilities.push_back(std::make_unique<AapConversationAwarenessCapability>(*device));
 
         device->_clientStartData.push_back(AapInit{}.Request());
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown2}.Request());

@@ -10,5 +10,6 @@ namespace MagicPodsCore
     enum class AapCmdSettings : unsigned char
     {
         Anc = 0x0d,
+        ConversationAwareness = 0x28
     };
 }
