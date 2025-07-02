@@ -15,5 +15,6 @@ namespace MagicPodsCore
         NoiseCancellationOneAirPod = 0x1b,
         PressAndHoldDuration = 0x18,
         PressSpeed = 0x17,
+        VolumeSwipe = 0x25,
     };
 }
