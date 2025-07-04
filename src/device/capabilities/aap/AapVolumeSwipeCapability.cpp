@@ -3,7 +3,7 @@
 // License: GPL-3.0
 
 #include "AapVolumeSwipeCapability.h"
-#include "sdk/aap/enums/AapConversationAwarenessMode.h"
+#include "sdk/aap/enums/AapVolumeSwipeMode.h"
 #include "sdk/aap/setters/AapSetVolumeSwipe.h"
 
 namespace MagicPodsCore
