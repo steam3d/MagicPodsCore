@@ -20,5 +20,6 @@ namespace MagicPodsCore
         PersonalizedVolume = 0x26,
         ToneVolume = 0x1f,
         EndCall = 0x24,
+        AdaptiveAudioNoise = 0x2e,
     };
 }
