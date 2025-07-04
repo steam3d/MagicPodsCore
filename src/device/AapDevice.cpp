@@ -13,6 +13,7 @@
 #include "capabilities/aap/AapVolumeSwipeLengthCapability.h"
 #include "capabilities/aap/AapPersonalizedVolumeCapability.h"
 #include "capabilities/aap/AapToneVolumeCapability.h"
+#include "capabilities/aap/AapMuteMicrophoneEndCallCapability.h"
 #include "capabilities/aap/AapBatteryCapability.h"
 #include "sdk/aap/setters/AapInit.h"
 #include "sdk/aap/setters/AapInitExt.h"
@@ -49,6 +50,7 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapVolumeSwipeLengthCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapPersonalizedVolumeCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapToneVolumeCapability>(*device));
+        device->capabilities.push_back(std::make_unique<AapMuteMicrophoneEndCallCapability>(*device));
 
         device->_clientStartData.push_back(AapInit{}.Request());
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown2}.Request());

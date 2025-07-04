@@ -29,6 +29,7 @@ add_executable(MagicPodsCore
     src/sdk/aap/setters/AapSetVolumeSwipeLength.cpp
     src/sdk/aap/setters/AapSetPersonalizedVolume.cpp
     src/sdk/aap/setters/AapSetToneVolume.cpp
+    src/sdk/aap/setters/AapSetMuteMicrophoneEndCall.cpp
 
     src/sdk/aap/watchers/AapAncWatcher.cpp
     src/sdk/aap/watchers/AapBatteryWatcher.cpp
@@ -42,6 +43,7 @@ add_executable(MagicPodsCore
     src/sdk/aap/watchers/AapVolumeSwipeLengthWatcher.cpp
     src/sdk/aap/watchers/AapPersonalizedVolumeWatcher.cpp
     src/sdk/aap/watchers/AapToneVolumeWatcher.cpp
+    src/sdk/aap/watchers/AapMuteMicrophoneEndCallWatcher.cpp
 
     src/sdk/sgb/watchers/GalaxyBudsAncWatcher.cpp
     src/sdk/sgb/watchers/GalaxyBudsBatteryWatcher.cpp
@@ -62,6 +64,7 @@ add_executable(MagicPodsCore
     src/device/capabilities/aap/AapVolumeSwipeLengthCapability.cpp
     src/device/capabilities/aap/AapPersonalizedVolumeCapability.cpp
     src/device/capabilities/aap/AapToneVolumeCapability.cpp
+    src/device/capabilities/aap/AapMuteMicrophoneEndCallCapability.cpp
     
     src/device/capabilities/sgb/GalaxyBudsCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp

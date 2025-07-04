@@ -19,5 +19,6 @@ namespace MagicPodsCore
         VolumeSwipeLength = 0x23,
         PersonalizedVolume = 0x26,
         ToneVolume = 0x1f,
+        EndCall = 0x24,
     };
 }
