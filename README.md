@@ -7,6 +7,16 @@ A command-line utility for managing AirPods, Beats, and Galaxy Buds.
 🔋Battery level  
 ⚙️ Noise control
 
+### 🔥 Exclusive to AirPods and Beats
+
+- Conversation awareness
+- Personalized volume
+- Noise level adjustment in adaptive mode
+- Noise cancellation with one AirPod
+- Press duration adjustment
+- Press and hold duration adjustment
+- Customization of single and double tap for call control
+
 ## 🎧 Headphones supported
 
 | Apple            | Beats                  | Samsung           |
