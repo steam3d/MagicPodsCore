@@ -14,15 +14,12 @@ namespace MagicPodsCore
 
     void AapMuteMicrophoneEndCallWatcher::ProcessResponse(const std::vector<unsigned char> &data)
     {
-        // min length of the anc packet
         if (data.size() < 10)
             return;
 
-        // packet type must be Settings
         if (data[4] != static_cast<unsigned char>(AapCmd::Settings))
             return;
 
-        // settings type must be ConversationAwareness
         if (data[6] != static_cast<unsigned char>(AapCmdSettings::EndCall))
             return;
 
@@ -30,15 +27,15 @@ namespace MagicPodsCore
 
             if (!isValidAapMuteMicrophoneMode(data[8]))
                 return;
-                         
+
             if (!isValidAapEndCallMode(data[9]))
-                return;            
+                return;
 
             AapMuteMicrophoneEndCallMode mode;
             mode.muteMicrophoneMode = static_cast<AapMuteMicrophoneMode>(data[8]);;
             mode.endCallMode = static_cast<AapEndCallMode>(data[9]);
 
-            Logger::Debug("%s: %s/%s", _tag.c_str(), AapMuteMicrophoneModeToString(mode.muteMicrophoneMode).c_str(), AapEndCallModeToString(mode.endCallMode).c_str());
+            Logger::Debug("%s: Mute mic:%s/End call:%s", _tag.c_str(), AapMuteMicrophoneModeToString(mode.muteMicrophoneMode).c_str(), AapEndCallModeToString(mode.endCallMode).c_str());
             _event.FireEvent(mode);
         }
         //Custom possible AirPods firmware update or H2 chip
@@ -60,7 +57,7 @@ namespace MagicPodsCore
 
             Logger::Debug("%s: Mute mic:%s/End call:%s", _tag.c_str(), AapMuteMicrophoneModeToString(mode.muteMicrophoneMode).c_str(), AapEndCallModeToString(mode.endCallMode).c_str());
             _event.FireEvent(mode);
-        }        
+        }
 
     }
 }

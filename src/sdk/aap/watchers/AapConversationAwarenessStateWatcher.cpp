@@ -14,15 +14,12 @@ namespace MagicPodsCore
 
     void AapConversationAwarenessStateWatcher::ProcessResponse(const std::vector<unsigned char> &data)
     {
-        // min length of the anc packet
         if (data.size() < 10)
             return;
 
-        // packet type must be Settings
         if (data[4] != static_cast<unsigned char>(AapCmd::ConversationAwareness))
             return;
 
-        // settings type must be ConversationAwareness
         if (data[6] != 0x02) // settings type: I think 0x02 is ConversationAwareness
             return;
 

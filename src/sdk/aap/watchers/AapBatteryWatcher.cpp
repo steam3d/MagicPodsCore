@@ -12,7 +12,7 @@ namespace MagicPodsCore
     }
 
     void AapBatteryWatcher::ConvertBattery(std::vector<DeviceBatteryData> &batteryData, AapBatteryType type, AapChargingStatus status, unsigned char battery)
-    {        
+    {
         DeviceBatteryType dtype;
         switch (type)
         {
@@ -40,16 +40,13 @@ namespace MagicPodsCore
         batteryData.push_back(data);
     }
 
-    // !MUST BE TESTED ON ALL AIRPOD MODES!
     void AapBatteryWatcher::ProcessResponse(const std::vector<unsigned char> &data)
     {
-        // min length of the battery packet
         if (data.size() < 11)
             return;
 
-        // packet type must be battery
         if (data[4] != static_cast<unsigned char>(AapCmd::Battery))
-            return;        
+            return;
 
         int batteryCount = static_cast<int>(data[6]);
 
@@ -64,7 +61,7 @@ namespace MagicPodsCore
                 continue;
 
             AapBatteryType batteryType = static_cast<AapBatteryType>(data[startByte]);
-            
+
             //Fake AirPods send a value of 127 after the case is closed. Should we ignore values greater than 100?
             unsigned char battery = data[startByte + 2];
 
@@ -73,7 +70,7 @@ namespace MagicPodsCore
 
             AapChargingStatus charging = static_cast<AapChargingStatus>(data[startByte + 3]);
             startByte += 5;
-            
+
             ConvertBattery(batteryData, batteryType, charging, battery);
             readableStr += AapBatteryTypeToString(batteryType) + " " + std::to_string(battery) + " " + AapChargingStatusToString(charging) + " ";
         }

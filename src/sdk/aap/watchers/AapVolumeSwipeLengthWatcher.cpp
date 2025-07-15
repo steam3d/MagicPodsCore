@@ -14,15 +14,12 @@ namespace MagicPodsCore
 
     void AapVolumeSwipeLengthWatcher::ProcessResponse(const std::vector<unsigned char> &data)
     {
-        // min length of the anc packet
         if (data.size() < 10)
             return;
 
-        // packet type must be Settings
         if (data[4] != static_cast<unsigned char>(AapCmd::Settings))
             return;
 
-        // settings type must be ConversationAwareness
         if (data[6] != static_cast<unsigned char>(AapCmdSettings::VolumeSwipeLength))
             return;
 
