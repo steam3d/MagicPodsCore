@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #pragma once
@@ -26,6 +26,7 @@ namespace MagicPodsCore {
         std::string _name{};
         ObservableVariable<bool> _connectionStatus{false};
         ObservableVariable<bool> _pairedStatus{false};
+        ObservableVariable<uint8_t> _handsFreeBatteryStatus{100};
 
     public:
         explicit DBusDeviceInfo(const sdbus::ObjectPath& objectPath, const std::map<std::string, std::map<std::string, sdbus::Variant>>& interfaces);
@@ -67,10 +68,16 @@ namespace MagicPodsCore {
             return _pairedStatus;
         }
 
+        ObservableVariable<uint8_t>& GetHandsFreeBatteryStatus() {
+            return _handsFreeBatteryStatus;
+        }
+
         void Connect();
         void ConnectAsync(std::function<void(const sdbus::Error*)>&& callback);
         void Disconnect();
         void DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback);
+
+        void InterfaceAdded(const std::map<std::string, std::map<std::string, sdbus::Variant>>& interfaces);
 
         friend auto operator<=>(const DBusDeviceInfo& t1, const DBusDeviceInfo& t2) {
             return t1.GetAddress() <=> t2.GetAddress();

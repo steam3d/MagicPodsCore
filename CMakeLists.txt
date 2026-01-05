@@ -73,9 +73,12 @@ add_executable(MagicPodsCore
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsBatteryCapability.cpp
 
+    src/device/capabilities/bhf/BhfBatteryCapability.cpp
+
     src/device/capabilities/Capability.cpp
     src/device/AapDevice.cpp
     src/device/GalaxyBudsDevice.cpp
+    src/device/BhfDevice.cpp
     src/device/DeviceBattery.cpp    
     src/device/Device.cpp
 

@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #include "Device.h"
@@ -13,7 +13,6 @@ namespace MagicPodsCore {
             {
                 _onCapabilityChangedEvent.FireEvent(capability);
                 Logger::Debug("%s: capability: %s changed", this->GetName().c_str(), capability.GetName().c_str());
-                
             });
             capabilityEventIds.push_back(id);
         }
@@ -31,7 +30,7 @@ namespace MagicPodsCore {
         capabilityEventIds.clear();
     }
 
-    Device::Device(std::shared_ptr<DBusDeviceInfo> deviceInfo) : _deviceInfo{deviceInfo} 
+    Device::Device(std::shared_ptr<DBusDeviceInfo> deviceInfo) : _deviceInfo{deviceInfo}
     {
     }
 
@@ -40,34 +39,42 @@ namespace MagicPodsCore {
         Logger::Info("%s: Init", GetName().c_str());
         SubscribeCapabilitiesChanges();
 
-        clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
-        { OnResponseDataReceived(data); });
-        
+        if (_client){
+            clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
+            { OnResponseDataReceived(data); });
+        }
+
+        _deviceHandsFreeBatteryStatusChangedEvent = _deviceInfo->GetHandsFreeBatteryStatus().GetEvent().Subscribe([this](size_t listener_id, uint8_t newBatteryValue) {
+            Logger::Debug("%s: PropertiesChanged:HandsFreeBattery %u",GetName().c_str(), newBatteryValue);
+            _onHandsFreeBatteryPropertyChangedEvent.FireEvent(newBatteryValue);
+        });
+
         _deviceConnectedStatusChangedEvent = _deviceInfo->GetConnectionStatus().GetEvent().Subscribe([this](size_t listenerId, bool newConnectedValue) {
             if (_connected != newConnectedValue) {
                 _connected = newConnectedValue;
                 Logger::Debug("%s: PropertiesChanged:Connected %s",GetName().c_str(), _connected ? "true" : "false");
                 _onConnectedPropertyChangedEvent.FireEvent(_connected);
             }
-            if (_connected){                
-                _client->Start([this](Client& _client) {
-                    for (auto& data: this->_clientStartData){
-                        _client.SendData(data);
-                        std::this_thread::sleep_for(std::chrono::milliseconds(300));
-                    }
-                });
-                Logger::Info("%s _client started from PropertiesChanged", GetName().c_str());
-            }
-            else{
-                _client->Stop();
-                Logger::Info("%s _client stopped from PropertiesChanged", GetName().c_str());
+            if (_client){
+                if (_connected){
+                    _client->Start([this](Client& _client) {
+                        for (auto& data: this->_clientStartData){
+                            _client.SendData(data);
+                            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                        }
+                    });
+                    Logger::Info("%s _client started from PropertiesChanged", GetName().c_str());
+                }
+                else{
+                    _client->Stop();
+                    Logger::Info("%s _client stopped from PropertiesChanged", GetName().c_str());
+                }
             }
         });
 
         _connected = _deviceInfo->GetConnectionStatus().GetValue();
-        
         Logger::Debug("%s: Init:Connected %s",GetName().c_str(), _connected ? "true" : "false");
-        if (_connected){
+        if (_connected && _client){
             _client->Start([this](Client& _client) {
                 for (auto& data: this->_clientStartData){
                     _client.SendData(data);
@@ -81,13 +88,15 @@ namespace MagicPodsCore {
     Device::~Device()
     {
         _deviceInfo->GetConnectionStatus().GetEvent().Unsubscribe(_deviceConnectedStatusChangedEvent);
+        _deviceInfo->GetHandsFreeBatteryStatus().GetEvent().Unsubscribe(_deviceHandsFreeBatteryStatusChangedEvent);
 
         UnsubscribeCapabilitiesChanges();
         capabilities.clear();
 
-        _client->Stop();
-        _client->GetOnReceivedDataEvent().Unsubscribe(clientReceivedDataEventId);
-
+        if (_client) {
+            _client->Stop();
+            _client->GetOnReceivedDataEvent().Unsubscribe(clientReceivedDataEventId);
+        }
         Logger::Debug("Device::~Device");
 
         //TODO: Unsubscribe all listeners from all events in device. See the event.h

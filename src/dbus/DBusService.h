@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #pragma once
@@ -56,6 +56,9 @@ namespace MagicPodsCore {
     private:
         std::shared_ptr<DBusDeviceInfo> TryCreateDevice(sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces);
         bool TryRemoveDevice(sdbus::ObjectPath objectPath);
+
+        bool TryUpdateInterfaceAddedForDevice(sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces);
+        bool TryUpdateInterfaceRemovedForDevice(sdbus::ObjectPath objectPath);
     };
 
 }

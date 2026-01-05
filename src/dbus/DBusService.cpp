@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #include "./dbus/DBusService.h"
@@ -10,6 +10,7 @@ namespace MagicPodsCore {
         //TODO: See comment DeviceFetcher.cpp
         _rootProxy->uponSignal("InterfacesAdded").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces) {
             TryCreateDevice(objectPath, interfaces);
+            TryUpdateInterfaceAddedForDevice(objectPath, interfaces);
         });
         _rootProxy->uponSignal("InterfacesRemoved").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::vector<std::string> array) {
             if (std::find(array.begin(), array.end(), "org.bluez.Device1") != array.end()) {
@@ -108,4 +109,23 @@ namespace MagicPodsCore {
         return false;
     }
 
+    bool DBusService::TryUpdateInterfaceAddedForDevice(sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces)
+    {
+        const std::regex DEVICE_INSTANCE_RE{"^/org/bluez/hci[0-9]/dev(_[0-9A-F]{2}){6}$"};
+        std::smatch match;
+        
+        if (std::regex_match(objectPath, match, DEVICE_INSTANCE_RE)) {
+            if (_knownDevices.contains(objectPath)) {
+                auto device = _knownDevices.at(objectPath);
+                device->InterfaceAdded(interfaces);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    bool DBusService::TryUpdateInterfaceRemovedForDevice(sdbus::ObjectPath objectPath)
+    {
+        return false;
+    }
 }

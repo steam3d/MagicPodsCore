@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #include "DevicesInfoFetcher.h"
@@ -11,6 +11,7 @@
 #include "Logger.h"
 #include "device/GalaxyBudsDevice.h"
 #include "device/AapDevice.h"
+#include "device/BhfDevice.h"
 
 #include <regex>
 #include <iostream>
@@ -35,7 +36,6 @@ namespace MagicPodsCore {
 
         _dbusService.GetOnDeviceRemovedEvent().Subscribe([this](size_t listenerId, const std::shared_ptr<DBusDeviceInfo>& removedDeviceInfo) {
             Logger::Debug("OnDeviceRemoved: %s", removedDeviceInfo->GetAddress().c_str());
-            
             if (_devicesMap.contains(removedDeviceInfo->GetAddress())) {
                 _onDeviceRemoveEvent.FireEvent(_devicesMap.at(removedDeviceInfo->GetAddress()));
                 _devicesMap.erase(removedDeviceInfo->GetAddress());
@@ -125,13 +125,13 @@ namespace MagicPodsCore {
     }
 
     std::shared_ptr<Device> DevicesInfoFetcher::TryCreateDevice(const std::shared_ptr<DBusDeviceInfo>& deviceInfo) {
-        
+
         Logger::Debug("%s (%s)", deviceInfo->GetName().c_str(), deviceInfo->GetAddress().c_str());
         Logger::Debug("    Vendor: %d",deviceInfo->GetVendorId());
         Logger::Debug("    Product: %d",deviceInfo->GetProductId());
         Logger::Debug("    Services:");
         for (const auto& uuid : deviceInfo->GetUuids()) {
-            Logger::Debug("        %s", uuid.c_str());            
+            Logger::Debug("        %s", uuid.c_str());
         }
 
         if (AapHelper::IsAapDevice(deviceInfo->GetVendorId(), deviceInfo->GetProductId())){
@@ -141,17 +141,23 @@ namespace MagicPodsCore {
             });
             return newDevice;
         }
-        else if (GalaxyBudsHelper::IsGalaxyBudsDevice(deviceInfo->GetUuids()))
-        {
-            auto keyPair = GalaxyBudsHelper::SearchModelColor(deviceInfo->GetUuids(), deviceInfo->GetName());
-            
-            if (keyPair.first == GalaxyBudsModelIds::Unknown){
-                Logger::Error("Creating device failed.Galaxy Buds modes is Unknown");
-                return nullptr;
-            }
 
+        else if (std::pair<GalaxyBudsModelIds, std::string> keyPair{};
+                 GalaxyBudsHelper::IsGalaxyBudsDevice(deviceInfo->GetUuids()) &&
+                 ((keyPair = GalaxyBudsHelper::SearchModelColor(deviceInfo->GetUuids(), deviceInfo->GetName())).first != GalaxyBudsModelIds::Unknown))
+        {
             auto newDevice = GalaxyBudsDevice::Create(deviceInfo, static_cast<unsigned short>(keyPair.first));
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
+                TrySelectNewActiveDevice();
+            });
+            return newDevice;
+        }
+        //search headphones with handsfree service
+        else if (auto uuids = deviceInfo->GetUuids();
+                std::find(uuids.begin(), uuids.end(), "0000111e-0000-1000-8000-00805f9b34fb") != uuids.end()) {
+
+                auto newDevice = BhfDevice::Create(deviceInfo);
+                newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
             return newDevice;

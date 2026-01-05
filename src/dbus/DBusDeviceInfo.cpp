@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #include "./dbus/DBusDeviceInfo.h"
@@ -48,6 +48,15 @@ namespace MagicPodsCore {
             _pairedStatus.SetValue(deviceInterface.at("Paired").get<bool>());
         }
 
+        if (interfaces.contains("org.bluez.Battery1")){
+            auto deviceInterface = interfaces.at("org.bluez.Battery1");
+
+            if (deviceInterface.contains("Percentage")) {
+                _handsFreeBatteryStatus.SetValue(deviceInterface.at("Percentage").get<uint8_t>());
+                Logger::Trace("Battery level init: %u", _handsFreeBatteryStatus.GetValue());
+            }
+        }
+
         _deviceProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
             if (interfaceName == "org.bluez.Device1") {
                 if (values.contains("Modalias")) {
@@ -62,6 +71,14 @@ namespace MagicPodsCore {
                     _pairedStatus.SetValue(values.at("Paired").get<bool>());
                 }
             }
+
+            if (interfaceName == "org.bluez.Battery1"){
+                if (values.contains("Percentage")){
+                    _handsFreeBatteryStatus.SetValue(values.at("Percentage").get<uint8_t>());
+                    Logger::Trace("Battery level notif: %u", _handsFreeBatteryStatus.GetValue());
+                }
+            }
+
         });
         _deviceProxy->finishRegistration();
     }
@@ -98,4 +115,17 @@ namespace MagicPodsCore {
 
         return {vid, pid};
     }
+
+    void DBusDeviceInfo::InterfaceAdded(const std::map<std::string, std::map<std::string, sdbus::Variant>> &interfaces)
+    {
+        if (interfaces.contains("org.bluez.Battery1")){
+                auto deviceInterface = interfaces.at("org.bluez.Battery1");
+
+            if (deviceInterface.contains("Percentage")) {
+                _handsFreeBatteryStatus.SetValue(deviceInterface.at("Percentage").get<uint8_t>());
+                Logger::Trace("Battery level add: %u", _handsFreeBatteryStatus.GetValue());
+            }
+        }
+    }
 }
+

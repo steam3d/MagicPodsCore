@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #pragma once
@@ -21,12 +21,13 @@ namespace MagicPodsCore {
     class Device {
     private:
         std::shared_ptr<DBusDeviceInfo> _deviceInfo{};
-        
         bool _connected{};
         Event<bool> _onConnectedPropertyChangedEvent{};
         Event<Capability> _onCapabilityChangedEvent{};
+        Event<uint8_t> _onHandsFreeBatteryPropertyChangedEvent{};
         size_t clientReceivedDataEventId;
         size_t _deviceConnectedStatusChangedEvent{};
+        size_t _deviceHandsFreeBatteryStatusChangedEvent{};
         virtual void OnResponseDataReceived(const std::vector<unsigned char> &data) = 0;
         void SubscribeCapabilitiesChanges();
         void UnsubscribeCapabilitiesChanges();
@@ -69,6 +70,11 @@ namespace MagicPodsCore {
             return _deviceInfo->GetProductId();
         }
 
+        uint8_t GetHandsFreeBattery() const {
+            std::lock_guard lock{_propertyMutex};
+            return _deviceInfo->GetHandsFreeBatteryStatus().GetValue();
+        }
+
         Event<bool>& GetConnectedPropertyChangedEvent() {
             return _onConnectedPropertyChangedEvent;
         }
@@ -76,6 +82,11 @@ namespace MagicPodsCore {
         Event<Capability>& GetCapabilityChangedEvent() {
             return _onCapabilityChangedEvent;
         }
+
+        Event<uint8_t>& GetHandsFreeBatteryPropertyChangedEvent() {
+            return _onHandsFreeBatteryPropertyChangedEvent;
+        }
+
 
         void Connect(); // TODO: может полностью перейти на Async?
         void ConnectAsync(std::function<void(const sdbus::Error*)>&& callback);
