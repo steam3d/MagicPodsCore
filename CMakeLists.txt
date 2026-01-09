@@ -14,6 +14,7 @@ add_executable(MagicPodsCore
     src/tests/TestsSgb.cpp
 
     src/client/Client.cpp
+    src/pulseaudio/PulseAudioClient.cpp
 
     src/sdk/aap/AapHelper.cpp
     src/sdk/aap/setters/AapEnableNotifications.cpp
@@ -74,6 +75,7 @@ add_executable(MagicPodsCore
     src/device/capabilities/sgb/GalaxyBudsBatteryCapability.cpp
 
     src/device/capabilities/bhf/BhfBatteryCapability.cpp
+    src/device/capabilities/cmn/CmnBluetoothCodecCapability.cpp
 
     src/device/capabilities/Capability.cpp
     src/device/AapDevice.cpp
@@ -88,9 +90,17 @@ add_executable(MagicPodsCore
     src/DevicesInfoFetcher.cpp
 )
 add_subdirectory(dependencies)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PULSEAUDIO REQUIRED libpulse)
 target_include_directories(MagicPodsCore PRIVATE
     src    
     dependencies/json
     ${PROJECT_BINARY_DIR}/src
+    ${PULSEAUDIO_INCLUDE_DIRS}
 )
-target_link_libraries(MagicPodsCore PRIVATE sdbus-c++ uWebSockets bluetooth)
+target_link_libraries(MagicPodsCore PRIVATE
+    sdbus-c++
+    uWebSockets
+    bluetooth
+    ${PULSEAUDIO_LIBRARIES}
+)

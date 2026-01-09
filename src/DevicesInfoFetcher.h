@@ -7,6 +7,7 @@
 #include "device/Device.h"
 #include "Event.h"
 #include "./dbus/DBusService.h"
+#include "./pulseaudio/PulseAudioClient.h"
 
 #include <string>
 #include <vector>
@@ -30,6 +31,7 @@ namespace MagicPodsCore {
     class DevicesInfoFetcher {
     private:
         DBusService _dbusService{};
+        std::shared_ptr<PulseAudioClient> _audioClient{};
 
         std::map<std::string, std::shared_ptr<Device>> _devicesMap{}; // address -> device
         std::shared_ptr<Device> _activeDevice{};

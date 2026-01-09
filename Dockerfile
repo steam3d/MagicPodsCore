@@ -1,17 +1,22 @@
 FROM ubuntu:22.04 AS system_stage
 
-RUN apt-get update
-RUN apt-get install cmake -y
-RUN apt-get install gcc -y
-RUN apt-get install g++ -y
-RUN apt-get install pkg-config -y
-RUN apt-get install doxygen -y
-RUN apt install graphviz -y
-RUN apt-get install libsystemd-dev -y
-RUN apt-get install git -y
-RUN apt-get install zlib1g-dev -y
-RUN apt-get install bluez -y
-RUN apt-get install libbluetooth-dev -y
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        cmake \
+        gcc \
+        g++ \
+        make \
+        pkg-config \
+        ca-certificates \
+        doxygen \
+        graphviz \
+        libsystemd-dev \
+        git \
+        zlib1g-dev \
+        bluez \
+        libbluetooth-dev \
+        libpulse-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 FROM system_stage AS build_stage
 

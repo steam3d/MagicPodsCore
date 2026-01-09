@@ -4,20 +4,22 @@
 
 #include "BhfDevice.h"
 #include "capabilities/bhf/BhfBatteryCapability.h"
+#include "capabilities/cmn/CmnBluetoothCodecCapability.h"
 
 namespace MagicPodsCore
 {
     void BhfDevice::OnResponseDataReceived(const std::vector<unsigned char> &data){}
 
-    BhfDevice::BhfDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo) : Device(deviceInfo)
+    BhfDevice::BhfDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient) : Device(deviceInfo, audioClient)
     {
     }
 
-    std::unique_ptr<BhfDevice> BhfDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo)
+    std::unique_ptr<BhfDevice> BhfDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient)
     {
-        auto device = std::make_unique<BhfDevice>(deviceInfo);
+        auto device = std::make_unique<BhfDevice>(deviceInfo, audioClient);
 
         device->capabilities.push_back(std::make_unique<BhfBatteryCapability>(*device));
+        device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->Init();
         return device;
     }

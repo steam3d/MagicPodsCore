@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #include "GalaxyBudsDevice.h"
@@ -8,6 +8,7 @@
 #include "sdk/sgb/enums/GalaxyBudsModelIds.h"
 #include "capabilities/sgb/GalaxyBudsAncCapability.h"
 #include "capabilities/sgb/GalaxyBudsBatteryCapability.h"
+#include "capabilities/cmn/CmnBluetoothCodecCapability.h"
 
 namespace MagicPodsCore
 {
@@ -18,8 +19,8 @@ namespace MagicPodsCore
             _ResponseDataRecived.FireEvent(optionalData.value());
     }
 
-    GalaxyBudsDevice::GalaxyBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, unsigned short model)
-        : Device(deviceInfo),
+    GalaxyBudsDevice::GalaxyBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, unsigned short model)
+        : Device(deviceInfo, audioClient),
           _customProductId(model),
           _packet(static_cast<GalaxyBudsModelIds>(model)) {}
 
@@ -28,10 +29,11 @@ namespace MagicPodsCore
         _client->SendData(_packet.Encode(setter.Id, setter.Payload));
     }
 
-    std::unique_ptr<GalaxyBudsDevice> GalaxyBudsDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, unsigned short model)
+    std::unique_ptr<GalaxyBudsDevice> GalaxyBudsDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo,std::shared_ptr<PulseAudioClient> audioClient, unsigned short model)
     {
-        auto device = std::make_unique<GalaxyBudsDevice>(deviceInfo, model);  
+        auto device = std::make_unique<GalaxyBudsDevice>(deviceInfo, audioClient, model);  
 
+        device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<GalaxyBudsBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<GalaxyBudsAncCapability>(*device));
         

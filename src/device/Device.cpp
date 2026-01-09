@@ -30,7 +30,7 @@ namespace MagicPodsCore {
         capabilityEventIds.clear();
     }
 
-    Device::Device(std::shared_ptr<DBusDeviceInfo> deviceInfo) : _deviceInfo{deviceInfo}
+    Device::Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient) : _deviceInfo{deviceInfo}, _audioClient{audioClient} 
     {
     }
 

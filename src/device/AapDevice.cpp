@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #include "AapDevice.h"
@@ -19,6 +19,7 @@
 #include "sdk/aap/setters/AapInit.h"
 #include "sdk/aap/setters/AapInitExt.h"
 #include "sdk/aap/setters/AapEnableNotifications.h"
+#include "capabilities/cmn/CmnBluetoothCodecCapability.h"
 
 namespace MagicPodsCore
 {
@@ -27,7 +28,7 @@ namespace MagicPodsCore
         _onResponseDataRecived.FireEvent(data);
     }
 
-    AapDevice::AapDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo) : Device(deviceInfo)
+    AapDevice::AapDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient) : Device(deviceInfo, audioClient)
     {
     }
 
@@ -36,10 +37,11 @@ namespace MagicPodsCore
         _client->SendData(setter.Request());
     }
 
-    std::unique_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo)
+    std::unique_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient)
     {
-        auto device = std::make_unique<AapDevice>(deviceInfo);
+        auto device = std::make_unique<AapDevice>(deviceInfo, audioClient);
 
+        device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAncCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapConversationAwarenessCapability>(*device));

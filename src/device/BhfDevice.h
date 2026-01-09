@@ -17,7 +17,7 @@ namespace MagicPodsCore
     void OnResponseDataReceived(const std::vector<unsigned char> &data) override;
 
     public:
-        explicit BhfDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo);
-        static std::unique_ptr<BhfDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo);        
+        explicit BhfDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient);
+        static std::unique_ptr<BhfDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient);        
     };
 }

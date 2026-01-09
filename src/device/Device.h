@@ -10,6 +10,7 @@
 #include "StringUtils.h"
 #include "Logger.h"
 #include "dbus/DBusDeviceInfo.h"
+#include "pulseaudio/PulseAudioClient.h"
 
 #include <sdbus-c++/sdbus-c++.h>
 #include <iostream>
@@ -21,6 +22,7 @@ namespace MagicPodsCore {
     class Device {
     private:
         std::shared_ptr<DBusDeviceInfo> _deviceInfo{};
+        std::shared_ptr<PulseAudioClient> _audioClient{};
         bool _connected{};
         Event<bool> _onConnectedPropertyChangedEvent{};
         Event<Capability> _onCapabilityChangedEvent{};
@@ -41,7 +43,7 @@ namespace MagicPodsCore {
         void Init();
 
     public:
-        Device(std::shared_ptr<DBusDeviceInfo> deviceInfo);
+        Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient);
         virtual ~Device(); //wrong
         // TODO: убрать возможность копирования
 
@@ -73,6 +75,11 @@ namespace MagicPodsCore {
         uint8_t GetHandsFreeBattery() const {
             std::lock_guard lock{_propertyMutex};
             return _deviceInfo->GetHandsFreeBatteryStatus().GetValue();
+        }
+
+        std::shared_ptr<PulseAudioClient> GetAudioClient() const {
+            std::lock_guard lock{_propertyMutex};
+            return _audioClient;
         }
 
         Event<bool>& GetConnectedPropertyChangedEvent() {
