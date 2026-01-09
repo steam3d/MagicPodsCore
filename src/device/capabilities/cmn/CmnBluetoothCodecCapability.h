@@ -5,11 +5,6 @@
 #pragma once
 #include "../Capability.h"
 #include "device/Device.h"
-#include <atomic>
-#include <chrono>
-#include <condition_variable>
-#include <mutex>
-#include <thread>
 
 namespace MagicPodsCore
 {
