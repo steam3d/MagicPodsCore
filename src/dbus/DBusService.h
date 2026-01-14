@@ -10,6 +10,7 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <vector>
 #include <regex>
 #include <sdbus-c++/sdbus-c++.h>
 #include <iostream>
@@ -25,6 +26,7 @@ namespace MagicPodsCore {
         std::set<std::shared_ptr<DBusDeviceInfo>> _pairedDevices{};
 
         Event<std::shared_ptr<DBusDeviceInfo>> _onDeviceAddedEvent{};
+        Event<std::shared_ptr<DBusDeviceInfo>> _onAnyDeviceAddedEvent{};
         Event<std::shared_ptr<DBusDeviceInfo>> _onDeviceRemovedEvent{};
 
         ObservableVariable<bool> _isBluetoothAdapterPowered{false};
@@ -33,6 +35,7 @@ namespace MagicPodsCore {
         explicit DBusService();
 
         std::set<std::shared_ptr<DBusDeviceInfo>> GetBtDevices();
+        std::vector<std::shared_ptr<DBusDeviceInfo>> GetAllDevices();
 
         ObservableVariable<bool>& IsBluetoothAdapterPowered() {
             return _isBluetoothAdapterPowered;
@@ -43,9 +46,22 @@ namespace MagicPodsCore {
         void DisableBluetoothAdapter();
         void DisableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback);
 
+        void SetDiscoveryFilter(const std::map<std::string, sdbus::Variant>& filter);
+        void SetDiscoveryFilterAsync(const std::map<std::string, sdbus::Variant>& filter, std::function<void(const sdbus::Error*)>&& callback);
+
+        void StartDiscovery();
+        void StartDiscoveryAsync(std::function<void(const sdbus::Error*)>&& callback);
+        void StopDiscovery();
+        void StopDiscoveryAsync(std::function<void(const sdbus::Error*)>&& callback);
+
         Event<std::shared_ptr<DBusDeviceInfo>>& GetOnDeviceAddedEvent()
         {
             return _onDeviceAddedEvent;
+        }
+
+        Event<std::shared_ptr<DBusDeviceInfo>>& GetOnAnyDeviceAddedEvent()
+        {
+            return _onAnyDeviceAddedEvent;
         }
 
         Event<std::shared_ptr<DBusDeviceInfo>>& GetOnDeviceRemovedEvent()

@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 configure_file(config/Config.h.in src/Config.h)
 
 add_executable(MagicPodsCore 
-    src/main.cpp
+    src/test_main3.cpp
 
     src/tests/TestsSgb.cpp
 
@@ -86,6 +86,9 @@ add_executable(MagicPodsCore
 
     src/dbus/DBusDeviceInfo.cpp
     src/dbus/DBusService.cpp
+
+    src/ble_ads/DBusBasedBleAdvertisingService.cpp
+    src/ble_ads/PassiveHciBasedBleAdvertisingService.cpp
 
     src/DevicesInfoFetcher.cpp
 )

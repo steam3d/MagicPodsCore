@@ -48,6 +48,26 @@ namespace MagicPodsCore {
             _pairedStatus.SetValue(deviceInterface.at("Paired").get<bool>());
         }
 
+        if (deviceInterface.contains("ManufacturerData")) {
+            std::map<uint16_t, std::vector<uint8_t>> manuData;
+            auto manuDataFromVariant = deviceInterface.at("ManufacturerData").get<std::map<uint16_t, sdbus::Variant>>();
+            for (const auto&[id, data] : manuDataFromVariant)
+                manuData[id] = data.get<std::vector<uint8_t>>();
+            _manufacturerData.SetValue(manuData);
+        }
+
+        if (deviceInterface.contains("ServiceData")) {
+            std::map<std::string, std::vector<uint8_t>> servData;
+            auto servDataFromVariant = deviceInterface.at("ServiceData").get<std::map<std::string, sdbus::Variant>>();
+            for (const auto&[uuid, data] : servDataFromVariant)
+                servData[uuid] = data.get<std::vector<uint8_t>>();
+            _serviceData.SetValue(servData);
+        }
+
+        if (deviceInterface.contains("RSSI")) {
+            _rssi.SetValue(deviceInterface.at("RSSI").get<int16_t>());
+        }
+
         if (interfaces.contains("org.bluez.Battery1")){
             auto deviceInterface = interfaces.at("org.bluez.Battery1");
 
@@ -69,6 +89,26 @@ namespace MagicPodsCore {
                 }
                 if (values.contains("Paired")) {
                     _pairedStatus.SetValue(values.at("Paired").get<bool>());
+                }
+
+                if (values.contains("ManufacturerData")) {
+                    std::map<uint16_t, std::vector<uint8_t>> manuData;
+                    auto manuDataFromVariant = values.at("ManufacturerData").get<std::map<uint16_t, sdbus::Variant>>();
+                    for (const auto&[id, data] : manuDataFromVariant)
+                        manuData[id] = data.get<std::vector<uint8_t>>();
+                    _manufacturerData.SetValue(manuData);
+                }
+
+                if (values.contains("ServiceData")) {
+                    std::map<std::string, std::vector<uint8_t>> servData;
+                    auto servDataFromVariant = values.at("ServiceData").get<std::map<std::string, sdbus::Variant>>();
+                    for (const auto&[uuid, data] : servDataFromVariant)
+                        servData[uuid] = data.get<std::vector<uint8_t>>();
+                    _serviceData.SetValue(servData);
+                }
+
+                if (values.contains("RSSI")) {
+                    _rssi.SetValue(values.at("RSSI").get<int16_t>());
                 }
             }
 

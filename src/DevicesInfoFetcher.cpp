@@ -23,8 +23,13 @@ namespace MagicPodsCore {
         _audioClient = std::make_shared<PulseAudioClient>();
         ClearAndFillDevicesMap();
 
+        for (auto& device : _dbusService.GetAllDevices()) {
+            Logger::Info("Device with address (known): %s", device->GetAddress().c_str());
+        }
+
         _dbusService.GetOnDeviceAddedEvent().Subscribe([this](size_t listenerId, const std::shared_ptr<DBusDeviceInfo>& addedDeviceInfo) {
             Logger::Debug("OnDeviceAdded: %s", addedDeviceInfo->GetAddress().c_str());
+            Logger::Info("Device with address (add): %s", addedDeviceInfo->GetAddress().c_str());
             if (!_devicesMap.contains(addedDeviceInfo->GetAddress())) {
                 if (auto device = TryCreateDevice(addedDeviceInfo)) {
                     _devicesMap.emplace(addedDeviceInfo->GetAddress(), device);
