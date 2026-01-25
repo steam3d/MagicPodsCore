@@ -16,6 +16,7 @@ RUN apt-get update \
         bluez \
         libbluetooth-dev \
         libpulse-dev \
+        libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 FROM system_stage AS build_stage

@@ -16,6 +16,7 @@ add_executable(MagicPodsCore
     src/client/Client.cpp
     src/pulseaudio/PulseAudioClient.cpp
 
+    src/sdk/aap/Aes.cpp
     src/sdk/aap/AapHelper.cpp
     src/sdk/aap/setters/AapEnableNotifications.cpp
     src/sdk/aap/setters/AapInit.cpp
@@ -95,6 +96,7 @@ add_executable(MagicPodsCore
 add_subdirectory(dependencies)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PULSEAUDIO REQUIRED libpulse)
+find_package(OpenSSL REQUIRED)
 target_include_directories(MagicPodsCore PRIVATE
     src    
     dependencies/json
@@ -105,5 +107,6 @@ target_link_libraries(MagicPodsCore PRIVATE
     sdbus-c++
     uWebSockets
     bluetooth
+    OpenSSL::Crypto
     ${PULSEAUDIO_LIBRARIES}
 )
