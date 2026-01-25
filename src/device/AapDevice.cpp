@@ -16,9 +16,11 @@
 #include "capabilities/aap/AapMuteMicrophoneEndCallCapability.h"
 #include "capabilities/aap/AapAdaptiveAudioNoiseCapability.h"
 #include "capabilities/aap/AapBatteryCapability.h"
+#include "capabilities/aap/AppAnimationCapability.h"
 #include "sdk/aap/setters/AapInit.h"
 #include "sdk/aap/setters/AapInitExt.h"
 #include "sdk/aap/setters/AapEnableNotifications.h"
+#include "sdk/aap/setters/AapPrivateKeys.h"
 #include "capabilities/cmn/CmnBluetoothCodecCapability.h"
 
 namespace MagicPodsCore
@@ -55,13 +57,16 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapToneVolumeCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapMuteMicrophoneEndCallCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAdaptiveAudioNoiseCapability>(*device));
+        device->capabilities.push_back(std::make_unique<AppAnimationCapability>(*device));
 
         device->_clientStartData.push_back(AapInit{}.Request());
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown2}.Request());
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown1}.Request());
         if (AapInitExt::IsSupported(deviceInfo->GetProductId()))
             device->_clientStartData.push_back(AapInitExt{}.Request());
-
+            
+        device->_clientStartData.push_back(AapPrivateKeys{}.Request());
+        
         //TODO: Add initData to client
         device->_client = Client::CreateL2CAP(deviceInfo->GetAddress(), 0x1001);
 

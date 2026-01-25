@@ -300,7 +300,7 @@ int main(int argc, char** argv) {
     // set logs
     if (!TryToSetLogLevelFromArguments(argc, argv)){
         #ifdef DEBUG
-        Logger::SetLoggingLevelForGlobalLogger(LogLevel::Debug);
+        Logger::SetLoggingLevelForGlobalLogger(LogLevel::Trace);
         #else
         Logger::SetLoggingLevelForGlobalLogger(LogLevel::Info);
         #endif
