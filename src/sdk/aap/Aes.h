@@ -13,5 +13,6 @@ namespace MagicPodsCore
     public:
         static bool VerifyRPA(const std::string &address, const std::string &irk);
         static std::vector<unsigned char> DecryptPayload(const std::string &encPayload, const std::string &enc);
+        static std::vector<unsigned char> DecryptPayload(const std::vector<unsigned char> &encPayload, const std::vector<unsigned char> &enc);
     };
 }

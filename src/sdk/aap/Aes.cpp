@@ -55,18 +55,23 @@ namespace MagicPodsCore{
     
     std::vector<unsigned char> Aes::DecryptPayload(const std::string &encPayload, const std::string &enc)
     {
-        if (encPayload.size() != 32 || enc.size() != 32) return std::vector<unsigned char>();
+        return DecryptPayload(StringUtils::HexStringToBytes(encPayload), StringUtils::HexStringToBytes(enc));
+    }
+
+    std::vector<unsigned char> Aes::DecryptPayload(const std::vector<unsigned char> &encPayload, const std::vector<unsigned char> &enc)
+    {
+        if (encPayload.size() != 16 || enc.size() != 16) return std::vector<unsigned char>();
 
         EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
         if (!ctx) return std::vector<unsigned char>();
 
         uint8_t iv[16] = {0};
         int out_len1 = 0, out_len2 = 0;
-        bool ok = EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, StringUtils::HexStringToBytes(enc).data(), iv) == 1;
+        bool ok = EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, enc.data(), iv) == 1;
         ok = ok && EVP_CIPHER_CTX_set_padding(ctx, 0) == 1;
 
         uint8_t out[16];
-        ok = ok && EVP_DecryptUpdate(ctx, out, &out_len1, StringUtils::HexStringToBytes(encPayload).data(), 16) == 1;
+        ok = ok && EVP_DecryptUpdate(ctx, out, &out_len1, encPayload.data(), 16) == 1;
         ok = ok && EVP_DecryptFinal_ex(ctx, out + out_len1, &out_len2) == 1;
         EVP_CIPHER_CTX_free(ctx);
 
