@@ -19,6 +19,14 @@ namespace MagicPodsCore
 
         DeviceBatteryData(DeviceBatteryType type, DeviceBatteryStatus status, short battery, bool isCharging)
         :Type(type), Status(status), Battery(std::clamp(battery, static_cast<short>(0), static_cast<short>(100))),IsCharging(isCharging) {}
+
+        bool operator==(const DeviceBatteryData& other) const
+        {
+            return Type == other.Type
+                && IsCharging == other.IsCharging
+                && Status == other.Status
+                && Battery == other.Battery;
+        }
     };
 
 }
