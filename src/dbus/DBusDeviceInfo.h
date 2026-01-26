@@ -27,6 +27,9 @@ namespace MagicPodsCore {
         ObservableVariable<bool> _connectionStatus{false};
         ObservableVariable<bool> _pairedStatus{false};
         ObservableVariable<uint8_t> _handsFreeBatteryStatus{100};
+        ObservableVariable<std::map<uint16_t, std::vector<uint8_t>>> _manufacturerData{{}};
+        ObservableVariable<std::map<std::string, std::vector<uint8_t>>> _serviceData{{}};
+        ObservableVariable<int16_t> _rssi{0};
 
     public:
         explicit DBusDeviceInfo(const sdbus::ObjectPath& objectPath, const std::map<std::string, std::map<std::string, sdbus::Variant>>& interfaces);
@@ -70,6 +73,18 @@ namespace MagicPodsCore {
 
         ObservableVariable<uint8_t>& GetHandsFreeBatteryStatus() {
             return _handsFreeBatteryStatus;
+        }
+
+        ObservableVariable<std::map<uint16_t, std::vector<uint8_t>>>& GetManufacturerData() {
+            return _manufacturerData;
+        }
+
+        ObservableVariable<std::map<std::string, std::vector<uint8_t>>>& GetServiceData() {
+            return _serviceData;
+        }
+
+        ObservableVariable<int16_t>& GetRssi() {
+            return _rssi;
         }
 
         void Connect();
