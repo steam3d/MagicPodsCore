@@ -21,7 +21,6 @@ private:
     struct DeviceSubscriptions {
         std::weak_ptr<DBusDeviceInfo> device;
         size_t manufacturerDataSubscriptionId = 0;
-        size_t rssiSubscriptionId = 0;
     };
 
     DBusService& _dbusService;

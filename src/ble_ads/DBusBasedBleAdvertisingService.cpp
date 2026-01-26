@@ -43,9 +43,6 @@ DBusBasedBleAdvertisingService::~DBusBasedBleAdvertisingService()
                 if (subs.manufacturerDataSubscriptionId != 0) {
                     device->GetManufacturerData().GetEvent().Unsubscribe(subs.manufacturerDataSubscriptionId);
                 }
-                if (subs.rssiSubscriptionId != 0) {
-                    device->GetRssi().GetEvent().Unsubscribe(subs.rssiSubscriptionId);
-                }
             }
         }
         _deviceSubscriptions.clear();
@@ -76,11 +73,6 @@ void DBusBasedBleAdvertisingService::OnDeviceAdded(std::shared_ptr<DBusDeviceInf
         deviceInfo->GetManufacturerData().GetEvent().Subscribe(
             [this, deviceInfo](size_t, const std::map<uint16_t, std::vector<uint8_t>>& data) {
                 EmitAd(deviceInfo, data);
-            });
-    subs.rssiSubscriptionId =
-        deviceInfo->GetRssi().GetEvent().Subscribe(
-            [this, deviceInfo](size_t, const int16_t&) {
-                EmitAd(deviceInfo, deviceInfo->GetManufacturerData().GetValue());
             });
 
     {
@@ -173,9 +165,6 @@ void DBusBasedBleAdvertisingService::StopScan()
                 if (subs.manufacturerDataSubscriptionId != 0) {
                     device->GetManufacturerData().GetEvent().Unsubscribe(subs.manufacturerDataSubscriptionId);
                 }
-                if (subs.rssiSubscriptionId != 0) {
-                    device->GetRssi().GetEvent().Unsubscribe(subs.rssiSubscriptionId);
-                }
             }
         }
         _deviceSubscriptions.clear();
@@ -236,9 +225,6 @@ void DBusBasedBleAdvertisingService::RemoveDeviceSubscriptions(const std::string
     if (device) {
         if (it->second.manufacturerDataSubscriptionId != 0) {
             device->GetManufacturerData().GetEvent().Unsubscribe(it->second.manufacturerDataSubscriptionId);
-        }
-        if (it->second.rssiSubscriptionId != 0) {
-            device->GetRssi().GetEvent().Unsubscribe(it->second.rssiSubscriptionId);
         }
     }
     _deviceSubscriptions.erase(it);
