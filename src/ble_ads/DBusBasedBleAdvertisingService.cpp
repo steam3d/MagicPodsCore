@@ -32,6 +32,24 @@ DBusBasedBleAdvertisingService::~DBusBasedBleAdvertisingService()
         _dbusService.GetOnAnyDeviceAddedEvent().Unsubscribe(_onDeviceAddedSubscriptionId);
         _onDeviceAddedSubscriptionId = 0; // Сбрасываем ID после отписки
     }
+    if (_onDeviceRemovedSubscriptionId != 0) {
+        _dbusService.GetOnDeviceRemovedEvent().Unsubscribe(_onDeviceRemovedSubscriptionId);
+        _onDeviceRemovedSubscriptionId = 0;
+    }
+    {
+        std::lock_guard<std::mutex> lock(_deviceSubscriptionsMutex);
+        for (auto& [address, subs] : _deviceSubscriptions) {
+            if (auto device = subs.device.lock()) {
+                if (subs.manufacturerDataSubscriptionId != 0) {
+                    device->GetManufacturerData().GetEvent().Unsubscribe(subs.manufacturerDataSubscriptionId);
+                }
+                if (subs.rssiSubscriptionId != 0) {
+                    device->GetRssi().GetEvent().Unsubscribe(subs.rssiSubscriptionId);
+                }
+            }
+        }
+        _deviceSubscriptions.clear();
+    }
 
     // Вызываем StopDiscovery как меру предосторожности.
     // ВНИМАНИЕ: Это предположение, что _dbusService (экземпляр DBusService)
@@ -47,16 +65,28 @@ DBusBasedBleAdvertisingService::~DBusBasedBleAdvertisingService()
 
 void DBusBasedBleAdvertisingService::OnDeviceAdded(std::shared_ptr<DBusDeviceInfo> deviceInfo)
 {
-    auto manufacturerData = deviceInfo->GetManufacturerData().GetValue();
-    // We are often only interested in devices that have manufacturer data.
-    if (manufacturerData.empty()) {
-        return;
-    }
-
     std::string address = deviceInfo->GetAddress();
-    auto rssi = static_cast<int8_t>(deviceInfo->GetRssi().GetValue());
+    RemoveDeviceSubscriptions(address);
 
-    _onAdReceivedEvent.FireEvent(BleAdertisingData(address, rssi, manufacturerData));
+    EmitAd(deviceInfo, deviceInfo->GetManufacturerData().GetValue());
+
+    DeviceSubscriptions subs{};
+    subs.device = deviceInfo;
+    subs.manufacturerDataSubscriptionId =
+        deviceInfo->GetManufacturerData().GetEvent().Subscribe(
+            [this, deviceInfo](size_t, const std::map<uint16_t, std::vector<uint8_t>>& data) {
+                EmitAd(deviceInfo, data);
+            });
+    subs.rssiSubscriptionId =
+        deviceInfo->GetRssi().GetEvent().Subscribe(
+            [this, deviceInfo](size_t, const int16_t&) {
+                EmitAd(deviceInfo, deviceInfo->GetManufacturerData().GetValue());
+            });
+
+    {
+        std::lock_guard<std::mutex> lock(_deviceSubscriptionsMutex);
+        _deviceSubscriptions[address] = subs;
+    }
 }
 
 void DBusBasedBleAdvertisingService::OnAdapterPowerChanged(size_t listenerId, bool isPowered)
@@ -132,6 +162,24 @@ void DBusBasedBleAdvertisingService::StopScan()
         _dbusService.GetOnAnyDeviceAddedEvent().Unsubscribe(_onDeviceAddedSubscriptionId);
         _onDeviceAddedSubscriptionId = 0;
     }
+    if (_onDeviceRemovedSubscriptionId != 0) {
+        _dbusService.GetOnDeviceRemovedEvent().Unsubscribe(_onDeviceRemovedSubscriptionId);
+        _onDeviceRemovedSubscriptionId = 0;
+    }
+    {
+        std::lock_guard<std::mutex> lock(_deviceSubscriptionsMutex);
+        for (auto& [address, subs] : _deviceSubscriptions) {
+            if (auto device = subs.device.lock()) {
+                if (subs.manufacturerDataSubscriptionId != 0) {
+                    device->GetManufacturerData().GetEvent().Unsubscribe(subs.manufacturerDataSubscriptionId);
+                }
+                if (subs.rssiSubscriptionId != 0) {
+                    device->GetRssi().GetEvent().Unsubscribe(subs.rssiSubscriptionId);
+                }
+            }
+        }
+        _deviceSubscriptions.clear();
+    }
 
     // Используем асинхронный вызов для предотвращения зависания
     // при переподключении адаптера или таймауте DBus
@@ -150,10 +198,50 @@ void DBusBasedBleAdvertisingService::StartListening()
     if (_onDeviceAddedSubscriptionId != 0) {
         _dbusService.GetOnAnyDeviceAddedEvent().Unsubscribe(_onDeviceAddedSubscriptionId);
     }
+    if (_onDeviceRemovedSubscriptionId != 0) {
+        _dbusService.GetOnDeviceRemovedEvent().Unsubscribe(_onDeviceRemovedSubscriptionId);
+    }
     _onDeviceAddedSubscriptionId = _dbusService.GetOnAnyDeviceAddedEvent().Subscribe(
         [this](size_t, std::shared_ptr<DBusDeviceInfo> dev) {
             this->OnDeviceAdded(dev);
         });
+    _onDeviceRemovedSubscriptionId = _dbusService.GetOnDeviceRemovedEvent().Subscribe(
+        [this](size_t, std::shared_ptr<DBusDeviceInfo> dev) {
+            RemoveDeviceSubscriptions(dev->GetAddress());
+        });
+}
+
+void DBusBasedBleAdvertisingService::EmitAd(
+    const std::shared_ptr<DBusDeviceInfo>& deviceInfo,
+    const std::map<uint16_t, std::vector<uint8_t>>& manufacturerData)
+{
+    if (manufacturerData.empty()) {
+        return;
+    }
+
+    std::string address = deviceInfo->GetAddress();
+    auto rssi = static_cast<int8_t>(deviceInfo->GetRssi().GetValue());
+
+    _onAdReceivedEvent.FireEvent(BleAdertisingData(address, rssi, manufacturerData));
+}
+
+void DBusBasedBleAdvertisingService::RemoveDeviceSubscriptions(const std::string& address)
+{
+    std::lock_guard<std::mutex> lock(_deviceSubscriptionsMutex);
+    auto it = _deviceSubscriptions.find(address);
+    if (it == _deviceSubscriptions.end()) {
+        return;
+    }
+    auto device = it->second.device.lock();
+    if (device) {
+        if (it->second.manufacturerDataSubscriptionId != 0) {
+            device->GetManufacturerData().GetEvent().Unsubscribe(it->second.manufacturerDataSubscriptionId);
+        }
+        if (it->second.rssiSubscriptionId != 0) {
+            device->GetRssi().GetEvent().Unsubscribe(it->second.rssiSubscriptionId);
+        }
+    }
+    _deviceSubscriptions.erase(it);
 }
 
 }
