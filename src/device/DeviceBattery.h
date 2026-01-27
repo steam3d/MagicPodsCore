@@ -7,7 +7,7 @@
 #include "Event.h"
 #include "Logger.h"
 #include "device/structs/DeviceBatteryData.h"
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 namespace MagicPodsCore
 {

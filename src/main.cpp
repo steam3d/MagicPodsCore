@@ -3,7 +3,7 @@
 // License: GPL-3.0
 
 #include <iostream>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <App.h>
 
 #include "DevicesInfoFetcher.h"

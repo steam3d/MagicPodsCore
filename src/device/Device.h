@@ -15,7 +15,7 @@
 #include <sdbus-c++/sdbus-c++.h>
 #include <iostream>
 #include <vector>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 namespace MagicPodsCore {
 

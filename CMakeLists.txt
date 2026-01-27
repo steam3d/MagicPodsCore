@@ -93,14 +93,14 @@ add_subdirectory(dependencies)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PULSEAUDIO REQUIRED libpulse)
 target_include_directories(MagicPodsCore PRIVATE
-    src    
-    dependencies/json
+    src
     ${PROJECT_BINARY_DIR}/src
     ${PULSEAUDIO_INCLUDE_DIRS}
 )
 target_link_libraries(MagicPodsCore PRIVATE
     sdbus-c++
     uWebSockets
+    nlohmann_json::nlohmann_json
     bluetooth
     ${PULSEAUDIO_LIBRARIES}
 )
