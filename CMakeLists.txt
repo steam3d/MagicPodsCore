@@ -88,6 +88,9 @@ add_executable(MagicPodsCore
     src/dbus/DBusService.cpp
 
     src/DevicesInfoFetcher.cpp
+
+    src/settings/SettingsService.cpp
+    src/settings/JsonToTomlConverter.cpp
 )
 add_subdirectory(dependencies)
 find_package(PkgConfig REQUIRED)
