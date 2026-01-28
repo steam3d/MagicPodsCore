@@ -101,6 +101,7 @@ target_link_libraries(MagicPodsCore PRIVATE
     sdbus-c++
     uWebSockets
     nlohmann_json::nlohmann_json
+    tomlplusplus::tomlplusplus
     bluetooth
     ${PULSEAUDIO_LIBRARIES}
 )
