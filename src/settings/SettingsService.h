@@ -41,6 +41,8 @@ public:
     Event<UpdatedSettingNotification>& GetOnSettingUpdateEvent() {
         return _onSettingUpdate;
     }
+
+    static std::string GetConfigPath(const std::string &fileName);
 };
 
 template<typename T>

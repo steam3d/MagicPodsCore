@@ -129,4 +129,13 @@ void SettingsService::SaveSetting(const std::string& container, const std::strin
     }
 }
 
+std::string SettingsService::GetConfigPath(const std::string &fileName) {
+    if (const char* xdg = std::getenv("XDG_CONFIG_HOME"))
+        return std::string(xdg) + "/magicpods/" + fileName;
+
+    if (const char* home = std::getenv("HOME"))
+        return std::string(home) + "/.config/magicpods/" + fileName;
+
+    throw std::runtime_error("Cannot determine config path");    
+}
 }
