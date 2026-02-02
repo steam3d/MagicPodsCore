@@ -3,7 +3,7 @@
 // License: GPL-3.0
 
 #include <iostream>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <App.h>
 
 #include "DevicesInfoFetcher.h"
@@ -14,6 +14,8 @@
 #include "tests/TestsAapBle.h"
 #include "Logger.h"
 #include "Config.h"
+#include "settings/SettingsService.h"
+#include "settings/JsonToTomlConverter.h"
 
 using namespace MagicPodsCore;
 
@@ -44,6 +46,30 @@ nlohmann::json MakeGetDefaultBluetoothAdapterResponse(DevicesInfoFetcher& device
     defaultBluetoothJson["enabled"] = devicesInfoFetcher.IsBluetoothAdapterPowered();
     responseJson["defaultbluetooth"] = defaultBluetoothJson;
     return responseJson;
+}
+
+nlohmann::json MakeGetSettingsAllResponse(SettingsService& settingsService) {
+    auto wrappedSettings = settingsService.GetSettingsAllWrapped();
+    return TomlToJson(wrappedSettings);
+}
+
+nlohmann::json MakeGetSettingsResponse(SettingsService& settingsService, const std::string& container) {
+    auto containerSettings = settingsService.GetSettings(container);
+    auto wrappedJson = nlohmann::json::object();
+    wrappedJson["settings"] = nlohmann::json::object();
+    wrappedJson["settings"][container] = TomlToJson(containerSettings);
+    return wrappedJson;
+}
+
+nlohmann::json MakeGetSettingResponse(SettingsService& settingsService, const std::string& container, const std::string& setting) {
+    auto settingValue = settingsService.GetSetting(container, setting);
+
+    auto wrappedJson = nlohmann::json::object();
+    wrappedJson["settings"] = nlohmann::json::object();
+    wrappedJson["settings"][container] = nlohmann::json::object();
+    wrappedJson["settings"][container][setting] = TomlNodeViewToJson(settingValue);
+
+    return wrappedJson;
 }
 
 void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
@@ -135,6 +161,54 @@ void HandleGetActiveDeviceInfoRequest(auto *ws, const nlohmann::json& json, uWS:
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
+void HandleGetSettingsAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, SettingsService& settingsService) {
+    Logger::Info("HandleGetSettingsAllRequest");
+
+    auto response = MakeGetSettingsAllResponse(settingsService).dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
+}
+
+void HandleGetSettingsRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, SettingsService& settingsService) {
+    Logger::Info("HandleGetSettingsRequest");
+
+    auto container = json.at("arguments").at("container").template get<std::string>();
+    auto response = MakeGetSettingsResponse(settingsService, container).dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
+}
+
+void HandleGetSettingRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, SettingsService& settingsService) {
+    Logger::Info("HandleGetSettingRequest");
+
+    auto container = json.at("arguments").at("container").template get<std::string>();
+    auto setting = json.at("arguments").at("setting").template get<std::string>();
+    auto response = MakeGetSettingResponse(settingsService, container, setting).dump();
+    ws->send(response, opCode, response.length() < 16 * 1024);
+}
+
+void HandleSaveSettingRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, SettingsService& settingsService) {
+    Logger::Info("HandleSaveSettingRequest");
+
+    auto container = json.at("arguments").at("container").template get<std::string>();
+    auto setting = json.at("arguments").at("setting").template get<std::string>();
+    auto value = json.at("arguments").at("value");
+
+    if (value.is_boolean()) {
+        settingsService.SaveSetting(container, setting, value.get<bool>());
+    } else if (value.is_number_integer()) {
+        settingsService.SaveSetting(container, setting, value.get<int64_t>());
+    } else if (value.is_number_float()) {
+        settingsService.SaveSetting(container, setting, value.get<double>());
+    } else if (value.is_string()) {
+        settingsService.SaveSetting(container, setting, value.get<std::string>());
+    } else if (value.is_array()) {
+        auto tomlArray = JsonArrayToToml(value);
+        settingsService.SaveSetting(container, setting, tomlArray);
+    } else if (value.is_object()) {
+        auto tomlTable = JsonObjectToToml(value);
+        settingsService.SaveSetting(container, setting, tomlTable);
+    }
+}
+
 void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
     Logger::Info("HandleGetAll");
 
@@ -165,7 +239,7 @@ void HandleIncorrectResponse(auto *ws, uWS::OpCode opCode) {
     ws->send(emptyResponse, opCode, emptyResponse.length() < 16 * 1024);
 }
 
-void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
+void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher, SettingsService& settingsService) {
     try {
         auto json = nlohmann::json::parse(message);
 
@@ -188,6 +262,14 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
                 HandleGetActiveDeviceInfoRequest(ws, json, opCode, devicesInfoFetcher);
             else if (methodName == "GetAll")
                 HandleGetAllRequest(ws, json, opCode, devicesInfoFetcher);
+            else if (methodName == "GetSettingsAll")
+                HandleGetSettingsAllRequest(ws, json, opCode, settingsService);
+            else if (methodName == "GetSettings")
+                HandleGetSettingsRequest(ws, json, opCode, settingsService);
+            else if (methodName == "GetSetting")
+                HandleGetSettingRequest(ws, json, opCode, settingsService);
+            else if (methodName == "SaveSetting")
+                HandleSaveSettingRequest(ws, json, opCode, settingsService);
             else if (methodName == "SetLogLevel")
                 HandleSetLogLevel(ws, json, opCode);
             else
@@ -198,7 +280,7 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
     }
 }
 
-void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher) {
+void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& devicesInfoFetcher, SettingsService& settingsService) {
     auto onCapabilityChangedListener = [&app, &devicesInfoFetcher](std::shared_ptr<Device> device, const Capability& newValues) {
         if (auto activeDevice = devicesInfoFetcher.GetActiveDevice(); activeDevice && activeDevice->GetAddress() == device->GetAddress()) {
             Logger::Info("onCapabilityChanged Broadcast was triggered");
@@ -267,6 +349,22 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
     devicesInfoFetcher.GetOnDefaultAdapterChangeEnabledEvent().Subscribe([onDefaultAdapterChangeEnabled](size_t listenerId, bool newValue) {
         onDefaultAdapterChangeEnabled(newValue);
     });
+
+    auto onSettingUpdate = [&app, &settingsService](const UpdatedSettingNotification& notification) {
+        Logger::Info("OnSettingUpdate Broadcast was triggered");
+
+        std::string container{notification.GetContainerName()};
+        std::string setting{notification.GetSettingName()};
+
+        app.getLoop()->defer([&app, &settingsService, container, setting]() {
+            auto response = MakeGetSettingResponse(settingsService, container, setting).dump();
+            app.publish("OnSettingUpdate", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+        });
+    };
+
+    settingsService.GetOnSettingUpdateEvent().Subscribe([onSettingUpdate](size_t listenerId, const UpdatedSettingNotification& notification) {
+        onSettingUpdate(notification);
+    });
 }
 
 bool TryToParseArguments(int argc, char** argv) {
@@ -331,6 +429,7 @@ int main(int argc, char** argv) {
 
     Logger::Info(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
 
+    SettingsService settingsService{std::string(std::getenv("HOME")) + "/.config/magicpods/config.toml"};
     DevicesInfoFetcher devicesInfoFetcher{};
 
     /* ws->getUserData returns one of these */
@@ -342,7 +441,7 @@ int main(int argc, char** argv) {
      * You may swap to using uWS:App() if you don't need SSL */
     uWS::App app{};
 
-    SubscribeAndHandleBroadcastEvents(app, devicesInfoFetcher);
+    SubscribeAndHandleBroadcastEvents(app, devicesInfoFetcher, settingsService);
 
     app.ws<PerSocketData>("/*", {
         /* Settings */
@@ -363,9 +462,10 @@ int main(int argc, char** argv) {
             ws->subscribe("OnActiveDeviceChanged");
             ws->subscribe("OnDefaultAdapterChangeEnabled");
             ws->subscribe("onAnimationTriggered");
+            ws->subscribe("OnSettingUpdate");
         },
-        .message = [&app, &devicesInfoFetcher](auto *ws, std::string_view message, uWS::OpCode opCode) {
-            HandleRequest(ws, message, opCode, app, devicesInfoFetcher);
+        .message = [&app, &devicesInfoFetcher, &settingsService](auto *ws, std::string_view message, uWS::OpCode opCode) {
+            HandleRequest(ws, message, opCode, app, devicesInfoFetcher, settingsService);
 
             /* This is the opposite of what you probably want; compress if message is LARGER than 16 kb
              * the reason we do the opposite here; compress if SMALLER than 16 kb is to allow for

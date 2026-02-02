@@ -96,6 +96,9 @@ add_executable(MagicPodsCore
     src/ble_ads/PassiveHciBasedBleAdvertisingService.cpp
 
     src/DevicesInfoFetcher.cpp
+
+    src/settings/SettingsService.cpp
+    src/settings/JsonToTomlConverter.cpp
 )
 add_subdirectory(dependencies)
 find_package(PkgConfig REQUIRED)
@@ -110,6 +113,8 @@ target_include_directories(MagicPodsCore PRIVATE
 target_link_libraries(MagicPodsCore PRIVATE
     sdbus-c++
     uWebSockets
+    nlohmann_json::nlohmann_json
+    tomlplusplus::tomlplusplus
     bluetooth
     OpenSSL::Crypto
     ${PULSEAUDIO_LIBRARIES}

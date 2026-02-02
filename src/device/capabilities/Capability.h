@@ -5,7 +5,7 @@
 #pragma once
 
 #include <string>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include "Event.h"
 
 namespace MagicPodsCore
