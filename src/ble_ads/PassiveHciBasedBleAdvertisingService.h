@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #pragma once
@@ -14,12 +14,11 @@
 #include <sys/socket.h>
 #include <poll.h>
 
-// Bluetooth HCI headers
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 
-// Extended advertising report (BT 5.0+) - не определён в старых версиях hci.h
+// BT 5.0+ only
 #ifndef EVT_LE_EXT_ADVERTISING_REPORT
 #define EVT_LE_EXT_ADVERTISING_REPORT 0x0D
 #endif
@@ -44,34 +43,6 @@ typedef struct {
 namespace MagicPodsCore
 {
 
-/**
- * Passive HCI-based BLE Advertising Service
- *
- * БЕЗОПАСНЫЙ ГИБРИДНЫЙ ПОДХОД:
- * - Использует DBus для управления сканированием (кооперативно с другими процессами)
- * - Читает события напрямую через HCI сокет (низкая задержка <10ms)
- * - НЕ вызывает hci_le_set_scan_enable (не конфликтует с bluetoothd)
- *
- * Преимущества:
- * - Работает параллельно с другими Bluetooth приложениями
- * - Низкая задержка получения advertising пакетов (<10ms)
- * - Безопасно для производственного использования
- * - Множественные экземпляры могут работать одновременно
- *
- * Как работает:
- * 1. DBus (bluetoothd) управляет сканированием через StartDiscovery()
- * 2. HCI сокет открывается только для ЧТЕНИЯ событий
- * 3. Ядро Linux дублирует HCI события всем открытым HCI сокетам
- * 4. Каждый сокет получает свою копию событий через HCI_FILTER
- *
- * Требования:
- * - Root права для открытия HCI сокета (один раз при StartScan)
- * - bluetoothd должен быть запущен и работать
- *
- * Сравнение с другими подходами:
- * - vs DBusBasedBleAdvertisingService: Быстрее (~10ms vs ~50-100ms)
- * - vs HciBasedBleAdvertisingService: Безопаснее (не ломает другие процессы)
- */
 class PassiveHciBasedBleAdvertisingService : public BleAdvertisingService
 {
 private:

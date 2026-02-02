@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #include "DBusBasedBleAdvertisingService.h"
@@ -11,7 +11,6 @@ namespace MagicPodsCore
 DBusBasedBleAdvertisingService::DBusBasedBleAdvertisingService(DBusService& dbusService)
     : _dbusService(dbusService)
 {
-    // Подписываемся на изменения состояния Bluetooth адаптера
     _adapterPoweredSubscriptionId = _dbusService.IsBluetoothAdapterPowered().GetEvent().Subscribe(
         [this](size_t listenerId, bool isPowered) {
             this->OnAdapterPowerChanged(listenerId, isPowered);
@@ -21,16 +20,14 @@ DBusBasedBleAdvertisingService::DBusBasedBleAdvertisingService(DBusService& dbus
 
 DBusBasedBleAdvertisingService::~DBusBasedBleAdvertisingService()
 {
-    // Отписываемся от события изменения состояния адаптера
     if (_adapterPoweredSubscriptionId != 0) {
         _dbusService.IsBluetoothAdapterPowered().GetEvent().Unsubscribe(_adapterPoweredSubscriptionId);
         _adapterPoweredSubscriptionId = 0;
     }
 
-    // Сначала отписываемся от событий
     if (_onDeviceAddedSubscriptionId != 0) {
         _dbusService.GetOnAnyDeviceAddedEvent().Unsubscribe(_onDeviceAddedSubscriptionId);
-        _onDeviceAddedSubscriptionId = 0; // Сбрасываем ID после отписки
+        _onDeviceAddedSubscriptionId = 0;
     }
     if (_onDeviceRemovedSubscriptionId != 0) {
         _dbusService.GetOnDeviceRemovedEvent().Unsubscribe(_onDeviceRemovedSubscriptionId);
@@ -48,16 +45,12 @@ DBusBasedBleAdvertisingService::~DBusBasedBleAdvertisingService()
         _deviceSubscriptions.clear();
     }
 
-    // Вызываем StopDiscovery как меру предосторожности.
-    // ВНИМАНИЕ: Это предположение, что _dbusService (экземпляр DBusService)
-    // будет все еще валиден и жив на момент вызова этого деструктора.
-    // Если _dbusService уничтожается раньше этого объекта, этот вызов
-    // может привести к неопределенному поведению (use-after-free).
+    // NOTE: This assumes that _dbusService is still valid and alive
+    // at the time this destructor is called. If _dbusService is destroyed
+    // earlier, this call may result in undefined behavior (e.g. use-after-free).
     try {
         _dbusService.StopDiscovery();
-    } catch (const sdbus::Error& e) {
-        // Игнорируем ошибки в деструкторе
-    }
+    } catch (const sdbus::Error& e) {}
 }
 
 void DBusBasedBleAdvertisingService::OnDeviceAdded(std::shared_ptr<DBusDeviceInfo> deviceInfo)
@@ -85,25 +78,18 @@ void DBusBasedBleAdvertisingService::OnAdapterPowerChanged(size_t listenerId, bo
 {
     if (!isPowered) {
         std::cout << "[DBus] Bluetooth adapter powered OFF, scanning stopped" << std::endl;
-        // Сканирование остановится автоматически (DBus events прекратятся)
-        // Флаг _scanDesired остается true для последующего восстановления
     } else if (_scanDesired) {
         std::cout << "[DBus] Bluetooth adapter powered ON, restarting scan..." << std::endl;
 
-        // ВАЖНО: Запускаем перезапуск в отдельном потоке, чтобы не блокировать
-        // DBus event loop синхронными вызовами StartDiscovery()
+        // Start new thread to avoid blocking
         std::thread([this]() {
             try {
-                // Небольшая задержка для стабилизации адаптера
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-                // Перезапускаем сканирование
                 StartListening();
                 StartScan(false);
                 std::cout << "[DBus] Scan successfully restarted" << std::endl;
             } catch (const std::exception& e) {
                 std::cerr << "[DBus] Failed to restart scan: " << e.what() << std::endl;
-                // Следующее включение адаптера вызовет новую попытку восстановления
             }
         }).detach();
     }
@@ -114,10 +100,6 @@ void DBusBasedBleAdvertisingService::StartScan(bool isPassive)
     std::map<std::string, sdbus::Variant> filter;
     filter.emplace("Transport", sdbus::Variant("le"));
     filter.emplace("DuplicateData", sdbus::Variant(true)); // Add this line to receive duplicate data
-    // The isPassive flag is not directly supported by the SetDiscoveryFilter method.
-    // The bluetoothd daemon manages the scanning mode automatically based on the needs of all clients.
-
-    // Пытаемся установить фильтр (игнорируем ошибки, фильтр может быть уже установлен)
     try {
         _dbusService.SetDiscoveryFilter(filter);
     } catch (const sdbus::Error& e) {
@@ -125,7 +107,6 @@ void DBusBasedBleAdvertisingService::StartScan(bool isPassive)
                   << e.getMessage() << std::endl;
     }
 
-    // Пытаемся запустить discovery (игнорируем ошибки "InProgress" и "NotReady")
     try {
         _dbusService.StartDiscovery();
     } catch (const sdbus::Error& e) {
@@ -133,22 +114,20 @@ void DBusBasedBleAdvertisingService::StartScan(bool isPassive)
         if (errorName.find("InProgress") != std::string::npos) {
             std::cout << "Note: Discovery already in progress (joining existing scan)" << std::endl;
         } else if (errorName.find("NotReady") != std::string::npos) {
-            // Bluetooth адаптер выключен - не запускаем сканирование
-            // Когда адаптер включится, OnAdapterPowerChanged() автоматически перезапустит сканирование
             std::cerr << "Warning: Bluetooth adapter is powered OFF. Waiting for adapter to be enabled..." << std::endl;
-            _scanDesired = true;  // Устанавливаем флаг, чтобы OnAdapterPowerChanged() перезапустил сканирование
+            _scanDesired = true;
             return;
         } else {
-            throw;  // Пробрасываем другие неожиданные ошибки
+            throw;
         }
     }
 
-    _scanDesired = true;  // Запоминаем что сканирование должно быть активно
+    _scanDesired = true;
 }
 
 void DBusBasedBleAdvertisingService::StopScan()
 {
-    _scanDesired = false;  // Сбрасываем флаг, чтобы не восстанавливать при повторном включении
+    _scanDesired = false;
 
     if (_onDeviceAddedSubscriptionId != 0) {
         _dbusService.GetOnAnyDeviceAddedEvent().Unsubscribe(_onDeviceAddedSubscriptionId);
@@ -170,8 +149,7 @@ void DBusBasedBleAdvertisingService::StopScan()
         _deviceSubscriptions.clear();
     }
 
-    // Используем асинхронный вызов для предотвращения зависания
-    // при переподключении адаптера или таймауте DBus
+    // Use async to avoid stuck
     _dbusService.StopDiscoveryAsync(
         [](const sdbus::Error* error) {
             if (error) {

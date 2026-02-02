@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #include "PassiveHciBasedBleAdvertisingService.h"
@@ -11,7 +11,6 @@ namespace MagicPodsCore
 PassiveHciBasedBleAdvertisingService::PassiveHciBasedBleAdvertisingService(DBusService& dbusService, int deviceId)
     : _dbusService(dbusService), _deviceId(deviceId)
 {
-    // Подписываемся на изменения состояния Bluetooth адаптера
     _adapterPoweredSubscriptionId = _dbusService.IsBluetoothAdapterPowered().GetEvent().Subscribe(
         [this](size_t listenerId, bool isPowered) {
             this->OnAdapterPowerChanged(listenerId, isPowered);
@@ -21,7 +20,6 @@ PassiveHciBasedBleAdvertisingService::PassiveHciBasedBleAdvertisingService(DBusS
 
 PassiveHciBasedBleAdvertisingService::~PassiveHciBasedBleAdvertisingService()
 {
-    // Отписываемся от события изменения состояния адаптера
     if (_adapterPoweredSubscriptionId != 0) {
         _dbusService.IsBluetoothAdapterPowered().GetEvent().Unsubscribe(_adapterPoweredSubscriptionId);
         _adapterPoweredSubscriptionId = 0;
@@ -67,27 +65,22 @@ void PassiveHciBasedBleAdvertisingService::ParseExtendedAdvertisingReport(const 
     {
         le_ext_advertising_info* info = (le_ext_advertising_info*)ptr;
 
-        // Извлекаем MAC адрес
         char addr[18];
         ba2str(&info->bdaddr, addr);
         std::string address(addr);
 
-        // RSSI
         int8_t rssi = info->rssi;
 
-        // Длина advertising данных
         uint8_t adv_len = info->length;
 
-        // Парсим manufacturer data
         auto manufacturerData = ParseManufacturerData(info->data, adv_len);
 
-        // Отправляем событие только если есть manufacturer data
         if (!manufacturerData.empty())
         {
             _onAdReceivedEvent.FireEvent(BleAdertisingData(address, rssi, manufacturerData));
         }
 
-        // Переходим к следующему отчету
+        // Go to next data
         ptr += sizeof(le_ext_advertising_info) + adv_len;
     }
 }
@@ -101,27 +94,22 @@ void PassiveHciBasedBleAdvertisingService::ParseAdvertisingReport(const uint8_t*
     {
         le_advertising_info* info = (le_advertising_info*)ptr;
 
-        // Извлекаем MAC адрес
         char addr[18];
         ba2str(&info->bdaddr, addr);
         std::string address(addr);
 
-        // Длина advertising данных
         uint8_t adv_len = info->length;
 
-        // RSSI находится после advertising данных
         int8_t rssi = (int8_t)info->data[adv_len];
 
-        // Парсим manufacturer data
         auto manufacturerData = ParseManufacturerData(info->data, adv_len);
 
-        // Отправляем событие только если есть manufacturer data
         if (!manufacturerData.empty())
         {
             _onAdReceivedEvent.FireEvent(BleAdertisingData(address, rssi, manufacturerData));
         }
 
-        // Переходим к следующему отчету
+        // Go to next data
         ptr += sizeof(le_advertising_info) + adv_len + 1;
     }
 }
@@ -138,7 +126,6 @@ void PassiveHciBasedBleAdvertisingService::ProcessEvent(const unsigned char* buf
 
     evt_le_meta_event* meta = (evt_le_meta_event*)(buf + 1 + HCI_EVENT_HDR_SIZE);
 
-    // Поддерживаем как обычные, так и расширенные advertising reports (BT 5.0+)
     if (meta->subevent == EVT_LE_ADVERTISING_REPORT)
     {
         ParseAdvertisingReport((uint8_t*)meta->data);
@@ -155,8 +142,7 @@ void PassiveHciBasedBleAdvertisingService::ListenLoop()
 
     while (_isRunning)
     {
-        // Используем poll() с таймаутом вместо блокирующего read()
-        // Это позволяет периодически проверять _isRunning и корректно завершаться
+        // Use poll() with a timeout instead of a blocking read().
         struct pollfd pfd;
         pfd.fd = _hciSocket;
         pfd.events = POLLIN;
@@ -172,11 +158,9 @@ void PassiveHciBasedBleAdvertisingService::ListenLoop()
 
         if (ret == 0)
         {
-            // Timeout - проверяем _isRunning и продолжаем
             continue;
         }
 
-        // Данные доступны для чтения
         ssize_t len = read(_hciSocket, buf, sizeof(buf));
 
         if (len < 0)
@@ -184,13 +168,11 @@ void PassiveHciBasedBleAdvertisingService::ListenLoop()
             if (errno == EINTR || errno == EAGAIN)
                 continue;
 
-            // Ошибка чтения - выходим из цикла
             break;
         }
 
         if (len == 0)
         {
-            // EOF - сокет закрыт
             break;
         }
 
@@ -207,7 +189,6 @@ bool PassiveHciBasedBleAdvertisingService::OpenHciDevice()
     if (_hciSocket < 0)
         return false;
 
-    // Сохраняем старый фильтр
     socklen_t olen = sizeof(_oldFilter);
     if (getsockopt(_hciSocket, SOL_HCI, HCI_FILTER, &_oldFilter, &olen) < 0)
     {
@@ -215,7 +196,7 @@ bool PassiveHciBasedBleAdvertisingService::OpenHciDevice()
         return false;
     }
 
-    // Устанавливаем фильтр для получения только LE events
+    // Listen only LE events
     struct hci_filter nf;
     hci_filter_clear(&nf);
     hci_filter_set_ptype(HCI_EVENT_PKT, &nf);
@@ -234,12 +215,8 @@ void PassiveHciBasedBleAdvertisingService::CloseHciDevice()
 {
     if (_hciSocket >= 0)
     {
-        // Восстанавливаем старый фильтр
         setsockopt(_hciSocket, SOL_HCI, HCI_FILTER, &_oldFilter, sizeof(_oldFilter));
-
-        // Отключаем сокет для чтения, чтобы разблокировать read() в другом потоке
         shutdown(_hciSocket, SHUT_RDWR);
-
         hci_close_dev(_hciSocket);
         _hciSocket = -1;
     }
@@ -250,27 +227,18 @@ void PassiveHciBasedBleAdvertisingService::OnAdapterPowerChanged(size_t listener
     if (!isPowered)
     {
         std::cout << "[PassiveHCI] Bluetooth adapter powered OFF, scanning stopped" << std::endl;
-        // Сканирование остановится автоматически (HCI сокет закроется)
-        // Флаг _scanDesired остается true для последующего восстановления
     }
     else if (_scanDesired)
     {
         std::cout << "[PassiveHCI] Bluetooth adapter powered ON, restarting scan..." << std::endl;
-
-        // ВАЖНО: Запускаем перезапуск в отдельном потоке, чтобы не блокировать
-        // DBus event loop синхронными вызовами StartDiscovery()
         std::thread([this]() {
             try {
-                // Небольшая задержка для стабилизации адаптера
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-                // Перезапускаем сканирование
                 StartScan(false);
                 StartListening();
                 std::cout << "[PassiveHCI] Scan successfully restarted" << std::endl;
             } catch (const std::exception& e) {
                 std::cerr << "[PassiveHCI] Failed to restart scan: " << e.what() << std::endl;
-                // Следующее включение адаптера вызовет новую попытку восстановления
             }
         }).detach();
     }
@@ -278,76 +246,58 @@ void PassiveHciBasedBleAdvertisingService::OnAdapterPowerChanged(size_t listener
 
 void PassiveHciBasedBleAdvertisingService::StartScan(bool isPassive)
 {
-    // 1. Используем DBus для БЕЗОПАСНОГО управления сканированием
-    //    Это кооперативно с другими процессами (bluetoothd, другие приложения)
     std::map<std::string, sdbus::Variant> filter;
     filter.emplace("Transport", sdbus::Variant("le"));
     filter.emplace("DuplicateData", sdbus::Variant(true));
 
-    // Пытаемся установить фильтр (игнорируем ошибки, фильтр может быть уже установлен)
     try {
         _dbusService.SetDiscoveryFilter(filter);
     } catch (const sdbus::Error& e) {
-        // Игнорируем - фильтр может быть уже установлен другим процессом
         std::cout << "Note: Could not set discovery filter (may already be set): "
                   << e.getMessage() << std::endl;
     }
 
-    // Пытаемся запустить discovery (игнорируем ошибки "InProgress" и "NotReady")
     try {
-        _dbusService.StartDiscovery();  // Кооперативное управление
+        _dbusService.StartDiscovery();
     } catch (const sdbus::Error& e) {
         std::string errorName = e.getName();
         if (errorName.find("InProgress") != std::string::npos) {
-            // Это нормально! Другой процесс уже запустил сканирование
-            // Мы просто присоединимся к нему через HCI сокет
             std::cout << "Note: Discovery already in progress (joining existing scan)" << std::endl;
         } else if (errorName.find("NotReady") != std::string::npos) {
-            // Bluetooth адаптер выключен - не запускаем сканирование
-            // Когда адаптер включится, OnAdapterPowerChanged() автоматически перезапустит сканирование
             std::cerr << "Warning: Bluetooth adapter is powered OFF. Waiting for adapter to be enabled..." << std::endl;
             _scanStartedSuccessfully = false;
-            _scanDesired = true;  // Устанавливаем флаг, чтобы OnAdapterPowerChanged() перезапустил сканирование
+            _scanDesired = true;
             return;
         } else {
-            // Другая неожиданная ошибка - пробрасываем дальше
             throw;
         }
     }
 
-    // 2. Ждем пока bluetoothd активирует сканирование на адаптере
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    // 3. Открываем HCI сокет для ПАССИВНОГО чтения событий
-    //    ВАЖНО: Мы НЕ вызываем hci_le_set_scan_enable!
-    //    Просто читаем события, которые генерирует bluetoothd
+    //Do not call hci_le_set_scan_enable!
     if (!OpenHciDevice())
     {
-        // Пытаемся остановить discovery (если мы его запустили)
         try {
             _dbusService.StopDiscovery();
-        } catch (...) {
-            // Игнорируем ошибки при остановке
-        }
+        } catch (...) {}
         _scanStartedSuccessfully = false;
         return;
     }
 
-    // Готово! bluetoothd управляет сканированием, мы только читаем события
     _scanStartedSuccessfully = true;
-    _scanDesired = true;  // Запоминаем что сканирование должно быть активно
+    _scanDesired = true;
 }
 
 void PassiveHciBasedBleAdvertisingService::StopScan()
 {
-    _scanDesired = false;  // Сбрасываем флаг, чтобы не восстанавливать при повторном включении
+    _scanDesired = false;
 
-    // Останавливаем поток прослушивания
     if (_isRunning)
     {
         _isRunning = false;
 
-        // КРИТИЧЕСКИ ВАЖНО: Закрываем сокет ДО join(), чтобы разблокировать poll()/read()
+        //Close socket before join() to avoid blocking
         CloseHciDevice();
 
         if (_listenThread.joinable())
@@ -355,20 +305,15 @@ void PassiveHciBasedBleAdvertisingService::StopScan()
     }
     else
     {
-        // Если поток не запущен, всё равно закрываем сокет (если открыт)
         CloseHciDevice();
     }
 
-    // Останавливаем DBus discovery только если сканирование было успешно запущено
-    // Это предотвращает блокировку при попытке остановить незапущенное сканирование
     if (_scanStartedSuccessfully)
     {
-        // Используем асинхронный вызов для предотвращения зависания
-        // при переподключении адаптера или таймауте DBus
+        // Use async to avoid stuck
         _dbusService.StopDiscoveryAsync(
             [](const sdbus::Error* error) {
                 if (error) {
-                    // Игнорируем - другие процессы могут продолжать использовать сканирование
                     std::cout << "Note: Could not stop discovery (may be used by other processes): "
                               << error->getMessage() << std::endl;
                 }

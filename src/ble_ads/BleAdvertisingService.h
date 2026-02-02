@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #pragma once
@@ -24,9 +24,9 @@ namespace MagicPodsCore
             return _onAdReceivedEvent;
         }
 
-        virtual void StartScan(bool isPassive) = 0; // метод перевода в режим дискавери и установки сканирования в режим le
-        virtual void StopScan() = 0; // метод для остановки режима дискавери
-        virtual void StartListening() = 0; // метод для начала прослушивания
+        virtual void StartScan(bool isPassive) = 0;
+        virtual void StopScan() = 0;
+        virtual void StartListening() = 0;
     };
 
 }
