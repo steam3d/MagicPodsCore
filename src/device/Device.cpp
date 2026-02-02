@@ -30,7 +30,14 @@ namespace MagicPodsCore {
         capabilityEventIds.clear();
     }
 
-    Device::Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient) : _deviceInfo{deviceInfo}, _audioClient{audioClient} 
+    std::string Device::GetContainerName()
+    {
+        std::string name = GetAddress();
+        std::replace(name.begin(), name.end(), ':', '_');
+        return name;
+    }
+
+    Device::Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService) : _deviceInfo{deviceInfo}, _audioClient{audioClient}, _settingsService{settingsService} 
     {
     }
 
@@ -124,6 +131,20 @@ namespace MagicPodsCore {
         {
             capability->SetFromJson(json);
         }
+    }
+
+    void Device::SaveSettingString(const std::string &settingName, const std::string &value)
+    {        
+        _settingsService->SaveSetting(GetContainerName(), settingName, value);
+    }
+
+    std::optional<std::string> Device::LoadSettingString(const std::string &settingName)
+    {
+        toml::node_view<toml::node> value = _settingsService->GetSetting(GetContainerName(), settingName);
+        if (auto v = value.as_string())
+            return v->get();
+
+        return std::nullopt;
     }
 
     nlohmann::json Device::GetAsJson()

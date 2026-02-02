@@ -11,11 +11,13 @@
 #include "Logger.h"
 #include "dbus/DBusDeviceInfo.h"
 #include "pulseaudio/PulseAudioClient.h"
+#include "settings/SettingsService.h"
 
 #include <sdbus-c++/sdbus-c++.h>
 #include <iostream>
 #include <vector>
 #include <nlohmann/json.hpp>
+#include <optional>
 
 namespace MagicPodsCore {
 
@@ -23,6 +25,7 @@ namespace MagicPodsCore {
     private:
         std::shared_ptr<DBusDeviceInfo> _deviceInfo{};
         std::shared_ptr<PulseAudioClient> _audioClient{};
+        std::shared_ptr<SettingsService> _settingsService{};
         bool _connected{};
         Event<bool> _onConnectedPropertyChangedEvent{};
         Event<Capability> _onCapabilityChangedEvent{};
@@ -33,6 +36,7 @@ namespace MagicPodsCore {
         virtual void OnResponseDataReceived(const std::vector<unsigned char> &data) = 0;
         void SubscribeCapabilitiesChanges();
         void UnsubscribeCapabilitiesChanges();
+        std::string GetContainerName();
 
     protected:
         mutable std::mutex _propertyMutex{};
@@ -43,7 +47,7 @@ namespace MagicPodsCore {
         void Init();
 
     public:
-        Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient);
+        Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService);
         virtual ~Device(); //wrong
         // TODO: убрать возможность копирования
 
@@ -102,6 +106,9 @@ namespace MagicPodsCore {
         void DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback);
 
         void SetCapabilities(const nlohmann::json &json);
+
+        void SaveSettingString(const std::string &settingName, const std::string &value);
+        std::optional<std::string> LoadSettingString(const std::string &settingName);
 
         nlohmann::json GetAsJson();
     };

@@ -429,8 +429,8 @@ int main(int argc, char** argv) {
 
     Logger::Info(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
 
-    SettingsService settingsService{std::string(std::getenv("HOME")) + "/.config/magicpods/config.toml"};
-    DevicesInfoFetcher devicesInfoFetcher{};
+    std::shared_ptr<SettingsService> settingsService =  std::make_shared<SettingsService>(SettingsService::GetConfigPath("config.toml"));  
+    DevicesInfoFetcher devicesInfoFetcher{settingsService};
 
     /* ws->getUserData returns one of these */
     struct PerSocketData {
@@ -441,7 +441,7 @@ int main(int argc, char** argv) {
      * You may swap to using uWS:App() if you don't need SSL */
     uWS::App app{};
 
-    SubscribeAndHandleBroadcastEvents(app, devicesInfoFetcher, settingsService);
+    SubscribeAndHandleBroadcastEvents(app, devicesInfoFetcher, *settingsService);
 
     app.ws<PerSocketData>("/*", {
         /* Settings */
@@ -465,7 +465,7 @@ int main(int argc, char** argv) {
             ws->subscribe("OnSettingUpdate");
         },
         .message = [&app, &devicesInfoFetcher, &settingsService](auto *ws, std::string_view message, uWS::OpCode opCode) {
-            HandleRequest(ws, message, opCode, app, devicesInfoFetcher, settingsService);
+            HandleRequest(ws, message, opCode, app, devicesInfoFetcher, *settingsService);
 
             /* This is the opposite of what you probably want; compress if message is LARGER than 16 kb
              * the reason we do the opposite here; compress if SMALLER than 16 kb is to allow for

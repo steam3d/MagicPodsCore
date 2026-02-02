@@ -19,6 +19,7 @@
 #include <array>
 #include <sdbus-c++/sdbus-c++.h>
 #include <nlohmann/json.hpp>
+#include "settings/SettingsService.h"
 
 namespace MagicPodsCore {
 
@@ -34,6 +35,7 @@ namespace MagicPodsCore {
         DBusService _dbusService{};
         std::shared_ptr<PulseAudioClient> _audioClient{};
         std::shared_ptr<DBusBasedBleAdvertisingService> _bleService{};
+        std::shared_ptr<SettingsService> _settingsService{};
 
         std::map<std::string, std::shared_ptr<Device>> _devicesMap{}; // address -> device
         std::shared_ptr<Device> _activeDevice{};
@@ -44,7 +46,7 @@ namespace MagicPodsCore {
         Event<bool> _onDefaultAdapterChangeEnabled{};
 
     public:
-        DevicesInfoFetcher();
+        DevicesInfoFetcher(const std::shared_ptr<SettingsService> &settingsService);
         // TODO: запретить копирование и перенос
 
         std::set<std::shared_ptr<Device>, DeviceComparator> GetDevices() const;

@@ -8,6 +8,7 @@
 #include "Device.h"
 #include "sdk/aap/setters/AapRequest.h"
 #include "ble_ads/DBusBasedBleAdvertisingService.h"
+#include "settings/SettingsService.h"
 
 namespace MagicPodsCore
 {
@@ -22,7 +23,7 @@ namespace MagicPodsCore
         void OnResponseDataReceived(const std::vector<unsigned char> &data) override;
 
     public:
-        explicit AapDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<DBusBasedBleAdvertisingService> bleService);
+        explicit AapDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<DBusBasedBleAdvertisingService> bleService);
         ~AapDevice() override;
         Event<const std::vector<unsigned char>> &GetResponseDataRecived()
         {
@@ -41,6 +42,6 @@ namespace MagicPodsCore
 
         void SendData(const AapRequest &setter);
         void FireAnimation(const nlohmann::json &json);
-        static std::unique_ptr<AapDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<DBusBasedBleAdvertisingService> bleService);
+        static std::unique_ptr<AapDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<DBusBasedBleAdvertisingService> bleService);
     };
 }

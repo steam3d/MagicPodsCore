@@ -9,6 +9,7 @@
 #include "sdk/sgb/setters/GalaxyBudsSetAnc.h"
 #include "sdk/sgb/structs/GalaxyBudsResponseData.h"
 #include "sdk/sgb/GalaxyBudsPacket.h"
+#include "settings/SettingsService.h"
 
 namespace MagicPodsCore
 {
@@ -20,7 +21,7 @@ namespace MagicPodsCore
         GalaxyBudsPacket _packet;
         void OnResponseDataReceived(const std::vector<unsigned char> &data) override;
     public:
-        explicit GalaxyBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, unsigned short model);
+        explicit GalaxyBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model);
 
         unsigned short GetProductId() const override
         {
@@ -35,6 +36,6 @@ namespace MagicPodsCore
 
         void SendData(const GalaxyBudsSetAnc &setter);
 
-        static std::unique_ptr<GalaxyBudsDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo,std::shared_ptr<PulseAudioClient> audioClient, unsigned short model);        
+        static std::unique_ptr<GalaxyBudsDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo,std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model);        
     };
 }

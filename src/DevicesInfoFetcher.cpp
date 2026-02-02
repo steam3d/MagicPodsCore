@@ -19,7 +19,7 @@
 
 namespace MagicPodsCore {
 
-    DevicesInfoFetcher::DevicesInfoFetcher() {
+    DevicesInfoFetcher::DevicesInfoFetcher(const std::shared_ptr<SettingsService> &settingsService): _settingsService{settingsService} {
         _audioClient = std::make_shared<PulseAudioClient>();
         _bleService = std::make_shared<DBusBasedBleAdvertisingService>(_dbusService);
         
@@ -147,7 +147,7 @@ namespace MagicPodsCore {
         }
 
         if (AapHelper::IsAapDevice(deviceInfo->GetVendorId(), deviceInfo->GetProductId())){
-            auto newDevice = AapDevice::Create(deviceInfo, _audioClient, _bleService);
+            auto newDevice = AapDevice::Create(deviceInfo, _audioClient, _settingsService, _bleService);
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
@@ -158,7 +158,7 @@ namespace MagicPodsCore {
                  GalaxyBudsHelper::IsGalaxyBudsDevice(deviceInfo->GetUuids()) &&
                  ((keyPair = GalaxyBudsHelper::SearchModelColor(deviceInfo->GetUuids(), deviceInfo->GetName())).first != GalaxyBudsModelIds::Unknown))
         {
-            auto newDevice = GalaxyBudsDevice::Create(deviceInfo,_audioClient, static_cast<unsigned short>(keyPair.first));
+            auto newDevice = GalaxyBudsDevice::Create(deviceInfo,_audioClient, _settingsService, static_cast<unsigned short>(keyPair.first));
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
@@ -168,7 +168,7 @@ namespace MagicPodsCore {
         else if (auto uuids = deviceInfo->GetUuids();
                 std::find(uuids.begin(), uuids.end(), "0000111e-0000-1000-8000-00805f9b34fb") != uuids.end()) {
 
-                auto newDevice = BhfDevice::Create(deviceInfo,_audioClient);
+                auto newDevice = BhfDevice::Create(deviceInfo,_audioClient, _settingsService);
                 newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });

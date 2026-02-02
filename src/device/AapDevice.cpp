@@ -32,7 +32,8 @@ namespace MagicPodsCore
 
     AapDevice::AapDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo,
         std::shared_ptr<PulseAudioClient> audioClient,
-        std::shared_ptr<DBusBasedBleAdvertisingService> bleService) : Device(deviceInfo, audioClient), _bleService{bleService}
+        std::shared_ptr<SettingsService> settingsService,
+        std::shared_ptr<DBusBasedBleAdvertisingService> bleService) : Device(deviceInfo, audioClient, settingsService), _bleService{bleService}
     {
         _getOnAdReceivedEventId = _bleService->GetOnAdReceivedEvent().Subscribe([this](size_t id,  const MagicPodsCore::BleAdertisingData& adData){
             _onLeDataReceived.FireEvent(adData);
@@ -55,9 +56,9 @@ namespace MagicPodsCore
         _onAnimationTriggered.FireEvent(json);
     }
 
-    std::unique_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<DBusBasedBleAdvertisingService> bleService)
+    std::unique_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<DBusBasedBleAdvertisingService> bleService)
     {
-        auto device = std::make_unique<AapDevice>(deviceInfo, audioClient, bleService);
+        auto device = std::make_unique<AapDevice>(deviceInfo, audioClient, settingsService, bleService);
 
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapBatteryCapability>(*device));

@@ -19,8 +19,8 @@ namespace MagicPodsCore
             _ResponseDataRecived.FireEvent(optionalData.value());
     }
 
-    GalaxyBudsDevice::GalaxyBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, unsigned short model)
-        : Device(deviceInfo, audioClient),
+    GalaxyBudsDevice::GalaxyBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model)
+        : Device(deviceInfo, audioClient, settingsService),
           _customProductId(model),
           _packet(static_cast<GalaxyBudsModelIds>(model)) {}
 
@@ -29,9 +29,9 @@ namespace MagicPodsCore
         _client->SendData(_packet.Encode(setter.Id, setter.Payload));
     }
 
-    std::unique_ptr<GalaxyBudsDevice> GalaxyBudsDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo,std::shared_ptr<PulseAudioClient> audioClient, unsigned short model)
+    std::unique_ptr<GalaxyBudsDevice> GalaxyBudsDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo,std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model)
     {
-        auto device = std::make_unique<GalaxyBudsDevice>(deviceInfo, audioClient, model);  
+        auto device = std::make_unique<GalaxyBudsDevice>(deviceInfo, audioClient, settingsService, model);  
 
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<GalaxyBudsBatteryCapability>(*device));
