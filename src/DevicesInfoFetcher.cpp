@@ -21,6 +21,12 @@ namespace MagicPodsCore {
 
     DevicesInfoFetcher::DevicesInfoFetcher() {
         _audioClient = std::make_shared<PulseAudioClient>();
+        _bleService = std::make_shared<DBusBasedBleAdvertisingService>(_dbusService);
+        
+        //Add read setting here
+        _bleService->StartListening();
+        _bleService->StartScan(true);
+        
         ClearAndFillDevicesMap();
 
         for (auto& device : _dbusService.GetAllDevices()) {
@@ -141,7 +147,7 @@ namespace MagicPodsCore {
         }
 
         if (AapHelper::IsAapDevice(deviceInfo->GetVendorId(), deviceInfo->GetProductId())){
-            auto newDevice = AapDevice::Create(deviceInfo, _audioClient);
+            auto newDevice = AapDevice::Create(deviceInfo, _audioClient, _bleService);
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });

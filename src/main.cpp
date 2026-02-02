@@ -8,8 +8,10 @@
 
 #include "DevicesInfoFetcher.h"
 #include "device/DeviceBattery.h"
+#include "device/AapDevice.h"
 #include "device/enums/DeviceAncModes.h"
 #include "tests/TestsSgb.h"
+#include "tests/TestsAapBle.h"
 #include "Logger.h"
 #include "Config.h"
 
@@ -35,7 +37,6 @@ nlohmann::json MakeGetActiveDeviceInfoResponse(DevicesInfoFetcher& devicesInfoFe
 
     return nlohmann::json{{"info", nlohmann::json::object()}};
 }
-
 
 nlohmann::json MakeGetDefaultBluetoothAdapterResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto responseJson = nlohmann::json::object();
@@ -230,6 +231,14 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
         });
     };
 
+    auto onAnimationTriggered = [&app](nlohmann::json newValue) {
+        Logger::Info("onAnimationTriggered Broadcast was triggered");
+        app.getLoop()->defer([&app, newValue]() {
+            auto response = newValue.dump();
+            app.publish("onAnimationTriggered", response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
+        });
+    };
+
     for (auto& device : devicesInfoFetcher.GetDevices()) {
         device->GetCapabilityChangedEvent().Subscribe([onCapabilityChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto& newValues) {
             onCapabilityChangedListener(weakDevice.lock(), newValues);
@@ -237,6 +246,12 @@ void SubscribeAndHandleBroadcastEvents(uWS::App& app, DevicesInfoFetcher& device
         device->GetConnectedPropertyChangedEvent().Subscribe([onConnectedChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto newValue) {
             onConnectedChangedListener(weakDevice.lock(), newValue);
         });
+
+        if (auto aap = std::dynamic_pointer_cast<AapDevice>(device)){
+            aap->GetAnimationTriggered().Subscribe([onAnimationTriggered](size_t listenerId, const nlohmann::json &newValue){
+                onAnimationTriggered(newValue);
+            });
+        }
     }
     devicesInfoFetcher.GetOnDeviceAddEvent().Subscribe([onCapabilityChangedListener, onConnectedChangedListener](size_t listenerId, auto device) {
         device->GetCapabilityChangedEvent().Subscribe([onCapabilityChangedListener, weakDevice = std::weak_ptr(device)](size_t listenerId, auto& newValues) {
@@ -300,7 +315,7 @@ int main(int argc, char** argv) {
     // set logs
     if (!TryToSetLogLevelFromArguments(argc, argv)){
         #ifdef DEBUG
-        Logger::SetLoggingLevelForGlobalLogger(LogLevel::Trace);
+        Logger::SetLoggingLevelForGlobalLogger(LogLevel::Debug);
         #else
         Logger::SetLoggingLevelForGlobalLogger(LogLevel::Info);
         #endif
@@ -308,6 +323,7 @@ int main(int argc, char** argv) {
 
     #ifdef DEBUG
     TestsSgb sgb;
+    TestsAapBle aapBle;
     #endif
 
     // fix stdout buffering issue, when python does not receive output
@@ -346,6 +362,7 @@ int main(int argc, char** argv) {
             ws->subscribe("OnConnectedChanged");
             ws->subscribe("OnActiveDeviceChanged");
             ws->subscribe("OnDefaultAdapterChangeEnabled");
+            ws->subscribe("onAnimationTriggered");
         },
         .message = [&app, &devicesInfoFetcher](auto *ws, std::string_view message, uWS::OpCode opCode) {
             HandleRequest(ws, message, opCode, app, devicesInfoFetcher);

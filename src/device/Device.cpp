@@ -134,6 +134,9 @@ namespace MagicPodsCore {
         deviceJson["name"] = GetName();
         deviceJson["address"] = GetAddress();
         deviceJson["connected"] = GetConnected();
+        deviceJson["model"] = GetProductId();
+        deviceJson["vendor"] = GetVendorId();
+        deviceJson["color"] = 0;
 
         for (auto& capability : capabilities)
         {

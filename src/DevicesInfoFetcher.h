@@ -8,6 +8,7 @@
 #include "Event.h"
 #include "./dbus/DBusService.h"
 #include "./pulseaudio/PulseAudioClient.h"
+#include "./ble_ads/DBusBasedBleAdvertisingService.h"
 
 #include <string>
 #include <vector>
@@ -32,6 +33,7 @@ namespace MagicPodsCore {
     private:
         DBusService _dbusService{};
         std::shared_ptr<PulseAudioClient> _audioClient{};
+        std::shared_ptr<DBusBasedBleAdvertisingService> _bleService{};
 
         std::map<std::string, std::shared_ptr<Device>> _devicesMap{}; // address -> device
         std::shared_ptr<Device> _activeDevice{};

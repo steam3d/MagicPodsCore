@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-project(MagicPodsCore VERSION 2.0.5 LANGUAGES C CXX)
+project(MagicPodsCore VERSION 2.0.6 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
@@ -8,10 +8,11 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 configure_file(config/Config.h.in src/Config.h)
 
-add_executable(MagicPodsCore 
-    src/test_main3.cpp
+add_executable(MagicPodsCore
+    src/main.cpp
 
     src/tests/TestsSgb.cpp
+    src/tests/TestsAapBle.cpp
 
     src/client/Client.cpp
     src/pulseaudio/PulseAudioClient.cpp
@@ -32,8 +33,8 @@ add_executable(MagicPodsCore
     src/sdk/aap/setters/AapSetPersonalizedVolume.cpp
     src/sdk/aap/setters/AapSetToneVolume.cpp
     src/sdk/aap/setters/AapSetMuteMicrophoneEndCall.cpp
-    src/sdk/aap/setters/AapSetAdaptiveAudioNoise.cpp    
-    src/sdk/aap/setters/AapPrivateKeys.cpp    
+    src/sdk/aap/setters/AapSetAdaptiveAudioNoise.cpp
+    src/sdk/aap/setters/AapPrivateKeys.cpp
 
     src/sdk/aap/watchers/AapAncWatcher.cpp
     src/sdk/aap/watchers/AapBatteryWatcher.cpp
@@ -73,7 +74,7 @@ add_executable(MagicPodsCore
     src/device/capabilities/aap/AapMuteMicrophoneEndCallCapability.cpp
     src/device/capabilities/aap/AapAdaptiveAudioNoiseCapability.cpp
     src/device/capabilities/aap/AppAnimationCapability.cpp
-    
+
     src/device/capabilities/sgb/GalaxyBudsCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsBatteryCapability.cpp
@@ -85,7 +86,7 @@ add_executable(MagicPodsCore
     src/device/AapDevice.cpp
     src/device/GalaxyBudsDevice.cpp
     src/device/BhfDevice.cpp
-    src/device/DeviceBattery.cpp    
+    src/device/DeviceBattery.cpp
     src/device/Device.cpp
 
     src/dbus/DBusDeviceInfo.cpp
@@ -101,7 +102,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(PULSEAUDIO REQUIRED libpulse)
 find_package(OpenSSL REQUIRED)
 target_include_directories(MagicPodsCore PRIVATE
-    src    
+    src
     dependencies/json
     ${PROJECT_BINARY_DIR}/src
     ${PULSEAUDIO_INCLUDE_DIRS}
