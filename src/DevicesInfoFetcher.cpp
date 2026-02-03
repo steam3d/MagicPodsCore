@@ -19,13 +19,35 @@
 
 namespace MagicPodsCore {
 
+    void DevicesInfoFetcher::UpdateBleState()
+    {
+        toml::v3::node_view<toml::v3::node> settingValue = _settingsService->GetSetting("magicpods", "animation");        
+        bool value = true; // default setting
+
+        if (settingValue.is_boolean())
+            value = settingValue.as_boolean()->get();        
+        
+        if (value){
+            _bleService->StartListening();
+            _bleService->StartScan(true);
+            Logger::Debug("Ble service started");
+        }
+        else
+        {
+            _bleService->StopScan();
+            Logger::Debug("Ble service stopped");
+        }
+    }
+
     DevicesInfoFetcher::DevicesInfoFetcher(const std::shared_ptr<SettingsService> &settingsService): _settingsService{settingsService} {
         _audioClient = std::make_shared<PulseAudioClient>();
         _bleService = std::make_shared<DBusBasedBleAdvertisingService>(_dbusService);
-        
-        //Add read setting here
-        _bleService->StartListening();
-        _bleService->StartScan(true);
+        _onSettingsChangeId = _settingsService->GetOnSettingUpdateEvent().Subscribe([this](size_t id, const UpdatedSettingNotification& notification){
+        if (notification.GetContainerName() == "core" && notification.GetSettingName() == "animation")
+                UpdateBleState();            
+        });
+                
+        UpdateBleState();
         
         ClearAndFillDevicesMap();
 
@@ -60,6 +82,12 @@ namespace MagicPodsCore {
             _onDefaultAdapterChangeEnabled.FireEvent(newPoweredValue);
         });
     }
+
+DevicesInfoFetcher::~DevicesInfoFetcher()
+{
+    _bleService->StopScan(); //wrong we must check if it is running
+    _settingsService->GetOnSettingUpdateEvent().Unsubscribe(_onSettingsChangeId);
+}
 
     std::set<std::shared_ptr<Device>, DeviceComparator> DevicesInfoFetcher::GetDevices() const {
         std::set<std::shared_ptr<Device>, DeviceComparator> devices{};

@@ -36,6 +36,8 @@ namespace MagicPodsCore {
         std::shared_ptr<PulseAudioClient> _audioClient{};
         std::shared_ptr<DBusBasedBleAdvertisingService> _bleService{};
         std::shared_ptr<SettingsService> _settingsService{};
+        size_t _onSettingsChangeId = 0;
+        void UpdateBleState();
 
         std::map<std::string, std::shared_ptr<Device>> _devicesMap{}; // address -> device
         std::shared_ptr<Device> _activeDevice{};
@@ -47,6 +49,7 @@ namespace MagicPodsCore {
 
     public:
         DevicesInfoFetcher(const std::shared_ptr<SettingsService> &settingsService);
+        ~DevicesInfoFetcher();
         // TODO: запретить копирование и перенос
 
         std::set<std::shared_ptr<Device>, DeviceComparator> GetDevices() const;
