@@ -147,6 +147,20 @@ namespace MagicPodsCore {
         return std::nullopt;
     }
 
+    void Device::SaveSettingInt(const std::string &settingName, const int64_t value)
+    {
+        _settingsService->SaveSetting(GetContainerName(), settingName, value);
+    }
+
+    std::optional<int64_t> Device::LoadSettingInt(const std::string &settingName)
+    {
+        toml::node_view<toml::node> value = _settingsService->GetSetting(GetContainerName(), settingName);
+        if (auto v = value.as_integer())
+            return v->get();
+
+        return std::nullopt;        
+    }
+
     nlohmann::json Device::GetAsJson()
     {
         auto capabilitiesJson = nlohmann::json::object();
@@ -157,7 +171,9 @@ namespace MagicPodsCore {
         deviceJson["connected"] = GetConnected();
         deviceJson["model"] = GetProductId();
         deviceJson["vendor"] = GetVendorId();
-        deviceJson["color"] = 0;
+        
+        std::optional<int64_t> settingColor = LoadSettingInt("color");        
+        deviceJson["color"] = settingColor.has_value()? settingColor.value() : 0;
 
         for (auto& capability : capabilities)
         {

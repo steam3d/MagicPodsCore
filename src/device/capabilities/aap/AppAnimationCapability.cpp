@@ -23,23 +23,35 @@ namespace MagicPodsCore
 
     AppAnimationCapability::AppAnimationCapability(AapDevice &device) : AapCapability("animation", false, device)
     {
+        std::optional<std::string> settingEnc = this->device.LoadSettingString("enc");
+        if (settingEnc.has_value())
+            enc = settingEnc.value();
+
+        std::optional<std::string> settingIrk = this->device.LoadSettingString("irk");
+        if (settingIrk.has_value())
+            irk = settingIrk.value();
+
+        std::optional<int64_t> settingColor = this->device.LoadSettingInt("color");
+        if (settingColor.has_value())
+            hasColor = true;
+
         leEventId = this->device.GetLeDataReceived().Subscribe([this](size_t id, const BleAdertisingData& adData){
-            
+
             if (irk.size() == 0 || enc.size() == 0)
             return;
-            
+
             auto data = adData.GetManufacturerData();
-            
+
             if (data.size() == 0)
-            return;            
-            
+            return;
+
             for (const auto& [company_id, bytes] : data)
             {
                 if (company_id == this->device.GetVendorId() && bytes.size() >= 27 && bytes[0] == 0x07){
                     if (!Aes::VerifyRPA(adData.GetAddress(), irk))
                         continue;
-                    
-                    std::optional<bleData> toFire{};                    
+
+                    std::optional<bleData> toFire{};
                     {
                         std::lock_guard<std::mutex> lock(locker);
                         auto parsedData = AppAnimationCapability::ParseBle(bytes, this->device.GetProductId(), enc);
@@ -48,7 +60,12 @@ namespace MagicPodsCore
                             if (parsedData->animation == true && mac == ""){
                                 mac = adData.GetAddress();
                                 cachedData = parsedData.value();
-                                //if (this->device.GetColor().size() == 0) this->device.SaveSettings("color", cachedData.value().color);
+                                
+                                if (!hasColor){
+                                    this->device.SaveSettingInt("color", cachedData.value().color);
+                                    hasColor = true;
+                                }
+                                
                                 toFire = parsedData.value();
                                 Logger::Critical("%s\n%s", adData.GetAddress().c_str(), cachedData.value().ToString().c_str());
                             }
@@ -65,9 +82,9 @@ namespace MagicPodsCore
                                 Logger::Critical("Updating animation");
                             }
                         }
-                    } 
+                    }
                     if (toFire.has_value())
-                        FireAnimation(toFire.value());                                           
+                        FireAnimation(toFire.value());
                 }
             }
         });
@@ -83,12 +100,16 @@ namespace MagicPodsCore
                 }
             }
             if (toFire.has_value())
-                FireAnimation(toFire.value());             
+                FireAnimation(toFire.value());
         });
 
         watcherEventId = watcher.GetEvent().Subscribe([this](size_t id, AapPrivateKeysArgs mode)
                                                     {
                                                         // Save to headphones settings
+                                                        this->irk = StringUtils::BytesToHexString(mode.IRK);
+                                                        this->device.SaveSettingString("irk", this->irk);
+                                                        this->enc = StringUtils::BytesToHexString(mode.ENC);
+                                                        this->device.SaveSettingString("enc", this->enc);
                                                     });
     }
 

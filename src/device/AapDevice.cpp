@@ -81,8 +81,9 @@ namespace MagicPodsCore
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown1}.Request());
         if (AapInitExt::IsSupported(deviceInfo->GetProductId()))
             device->_clientStartData.push_back(AapInitExt{}.Request());
-            
-        device->_clientStartData.push_back(AapPrivateKeys{}.Request());
+        
+        if (!device->LoadSettingString("irk").has_value() || !device->LoadSettingString("enc").has_value())
+            device->_clientStartData.push_back(AapPrivateKeys{}.Request());
         
         //TODO: Add initData to client
         device->_client = Client::CreateL2CAP(deviceInfo->GetAddress(), 0x1001);

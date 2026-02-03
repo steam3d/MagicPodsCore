@@ -109,6 +109,9 @@ namespace MagicPodsCore {
 
         void SaveSettingString(const std::string &settingName, const std::string &value);
         std::optional<std::string> LoadSettingString(const std::string &settingName);
+        
+        void SaveSettingInt(const std::string &settingName, const int64_t value);
+        std::optional<int64_t> LoadSettingInt(const std::string &settingName);
 
         nlohmann::json GetAsJson();
     };

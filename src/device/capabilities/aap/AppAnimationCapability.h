@@ -85,6 +85,7 @@ namespace MagicPodsCore
     {
     private:
         bool option;
+        bool hasColor = false;
         AapPrivateKeysWatcher watcher{};
         size_t watcherEventId;
         size_t connectionEventId;
@@ -96,7 +97,7 @@ namespace MagicPodsCore
 
         std::string irk; 
         std::string enc; 
-        
+
         void FireAnimation(const bleData &bleData);
         static bool IsAnimationSupport(unsigned short productId);
         static uint8_t ClampBattery(uint8_t value);
