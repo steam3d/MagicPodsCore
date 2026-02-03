@@ -268,7 +268,7 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
                 HandleGetSettingsRequest(ws, json, opCode, settingsService);
             else if (methodName == "GetSetting")
                 HandleGetSettingRequest(ws, json, opCode, settingsService);
-            else if (methodName == "SaveSetting")
+            else if (methodName == "SetSetting")
                 HandleSaveSettingRequest(ws, json, opCode, settingsService);
             else if (methodName == "SetLogLevel")
                 HandleSetLogLevel(ws, json, opCode);
