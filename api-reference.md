@@ -12,7 +12,7 @@ Connect to the WebSocket at the following address:
 ws://172.0.1.0:2020/
 ```
 
-After connecting to the WebSocket, MagicPodsCore starts sending notifications about changes in `info`, `headphone` and `defaultbluetooth` states.  
+After connecting to the WebSocket, MagicPodsCore starts sending notifications about changes in `info`, `headphone` and `defaultbluetooth` states.
 
 Clients should request the initial state using the `GetAll` method after connection.
 
@@ -274,7 +274,7 @@ Response:
 
 ### SetCapabilities
 
-If a `capabilities` property is not marked as `readonly: true`, it can be modified.  
+If a `capabilities` property is not marked as `readonly: true`, it can be modified.
 
 Send one of the available values listed in `options` (if present) or the value specified in `selected` for each `capabilities` property, as described in this documentation.
 
@@ -296,7 +296,7 @@ Invalid or unsupported capability values are ignored.
 
 ### Capabilities structure
 
-Each capability is returned as an object with the following structure, except for the battery level.  
+Each capability is returned as an object with the following structure, except for the battery level.
 
 See `List of capabilities` for details on available features and values.
 
@@ -386,7 +386,7 @@ Controls switching between noise control modes.
 | Bit 0 (1)  | Off               |
 | Bit 1 (2)  | Transparency      |
 | Bit 2 (4)  | Adaptive          |
-| Bit 3 (8)  | WindCancellation  | 
+| Bit 3 (8)  | WindCancellation  |
 | Bit 4 (16) | NoiseCancellation |
 
 ##### Bluetooth codec
@@ -442,7 +442,7 @@ Adjust the volume by swiping up or down on the sensor located on the AirPods Pro
 | selected |         |
 | -------- | ------- |
 | `true`   | Enable  |
-| `false`  | Disable | 
+| `false`  | Disable |
 
 ##### Volume swipe length
 
@@ -533,7 +533,7 @@ Adjusts the volume of sound effects played by AirPods when no audio is playing.
 
 | selected |                     |
 | -------- | ------------------- |
-| `15-125` | Volume from 15-125% | 
+| `15-125` | Volume from 15-125% |
 
 ##### Adaptive audio noise
 
@@ -550,7 +550,7 @@ Adaptive audio dynamically responds to your environment and cancels or allows ex
 
 | selected |                                  |
 | -------- | -------------------------------- |
-| `0-100`  | 0 - more noise, 100 - less noise | 
+| `0-100`  | 0 - more noise, 100 - less noise |
 
 ##### Personalized volume
 
@@ -573,7 +573,7 @@ Adjust the volume of media in response to your environment.
 | selected |         |
 | -------- | ------- |
 | `true`   | Enable  |
-| `false`  | Disable | 
+| `false`  | Disable |
 
 ##### Conversation awareness
 
@@ -591,7 +591,7 @@ Lowers media volume and reduces background noise when you start speaking to othe
 | selected |         |
 | -------- | ------- |
 | `true`   | Enable  |
-| `false`  | Disable | 
+| `false`  | Disable |
 
 ##### Conversation awareness speaking (read-only)
 
@@ -618,7 +618,7 @@ Notifies when a conversation starts or ends.
 
 ##### Noise cancellation with one AirPod
 
-Allow AirPods to be put in noise cancellation mode when only one AirPod is in your ear. 
+Allow AirPods to be put in noise cancellation mode when only one AirPod is in your ear.
 
 ```json
 {
@@ -632,7 +632,7 @@ Allow AirPods to be put in noise cancellation mode when only one AirPod is in yo
 | selected |         |
 | -------- | ------- |
 | `true`   | Enable  |
-| `false`  | Disable | 
+| `false`  | Disable |
 
 ##### End call
 
@@ -656,3 +656,102 @@ Specifies how a call is ended. If ending a call is assigned to a single press, m
 | -------- | ----------- |
 | `2`      | DoublePress |
 | `3`      | SinglePress |
+
+
+## Settings
+
+A general settings storage. Settings are stored in containers in TOML format. Container names must use only Latin characters; the names must not include magicpods or MAC addresses. Allowed separators are _, -, or camelCase. Supported types are bool, string, int, and float.
+
+Location:
+
+```
+~/.config/magicpods/config.toml
+```
+
+### GetSetting
+
+Retrieves a setting value by container name and setting name.
+
+Request:
+
+```json
+{
+  "method": "GetSetting",
+  "arguments": {
+    "container": "myappname",
+    "setting": "settingname"
+  }
+}
+```
+
+Response:
+
+```json
+{
+  "settings": {
+    "myappname": {
+      "settingname": "value"
+    }
+  }
+}
+
+Returns an empty `settings` object if no setting is found:
+
+```json
+{
+  "settings": {}
+}
+```
+
+### SetSetting
+
+Saves a setting value to the specified container.
+
+Request:
+
+```json
+{
+  "method": "SetSetting",
+  "arguments": {
+    "container": "myappname",
+    "setting": "settingname",
+    "value": "value"
+  }
+}
+```
+
+Response:
+
+```json
+{
+  "settings": {
+    "myappname": {
+      "settingname": "value"
+    }
+  }
+}
+
+Returns an empty `settings` object if no setting is found:
+
+```json
+{
+  "settings": {}
+}
+
+### Broadcast (Notification)
+
+If any setting changes:
+
+```json
+{
+  "settings":{
+    "myappname":{
+      "settingname": "value"
+    }
+  }
+}
+```
+
+
+
+

@@ -43,7 +43,7 @@ namespace MagicPodsCore {
         _audioClient = std::make_shared<PulseAudioClient>();
         _bleService = std::make_shared<DBusBasedBleAdvertisingService>(_dbusService);
         _onSettingsChangeId = _settingsService->GetOnSettingUpdateEvent().Subscribe([this](size_t id, const UpdatedSettingNotification& notification){
-        if (notification.GetContainerName() == "core" && notification.GetSettingName() == "animation")
+        if (notification.GetContainerName() == "magicpods" && notification.GetSettingName() == "animation")
                 UpdateBleState();            
         });
                 
