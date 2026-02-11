@@ -3,4 +3,4 @@
 build/
 
 # Docker builder
-MagicPodsCore
+docker_build/
