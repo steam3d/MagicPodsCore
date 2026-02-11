@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-project(MagicPodsCore VERSION 2.0.6 LANGUAGES C CXX)
+project(magicpodscore VERSION 2.0.7 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 configure_file(config/Config.h.in src/Config.h)
 
-add_executable(MagicPodsCore
+add_executable(magicpodscore
     src/main.cpp
 
     src/tests/TestsSgb.cpp
@@ -104,13 +104,13 @@ add_subdirectory(dependencies)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PULSEAUDIO REQUIRED libpulse)
 find_package(OpenSSL REQUIRED)
-target_include_directories(MagicPodsCore PRIVATE
+target_include_directories(magicpodscore PRIVATE
     src
     dependencies/json
     ${PROJECT_BINARY_DIR}/src
     ${PULSEAUDIO_INCLUDE_DIRS}
 )
-target_link_libraries(MagicPodsCore PRIVATE
+target_link_libraries(magicpodscore PRIVATE
     sdbus-c++
     uWebSockets
     nlohmann_json::nlohmann_json

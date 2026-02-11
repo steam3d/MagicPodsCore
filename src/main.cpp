@@ -371,7 +371,7 @@ bool TryToParseArguments(int argc, char** argv) {
     for (int i = 0; i < argc; ++i) {
         std::string argument{argv[i]};
         if (argument == "--version" || argument == "-version" || argument == "-v") {
-            Logger::Info(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
+            Logger::Info(CMAKE_PROJECT_NAME " " CMAKE_PROJECT_VERSION);
             return true;
         }
         else if (argument == "--help" || argument == "-help" || argument == "-h") {
@@ -427,7 +427,7 @@ int main(int argc, char** argv) {
     // fix stdout buffering issue, when python does not receive output
     setvbuf(stdout, NULL, _IONBF, 0);
 
-    Logger::Info(CMAKE_PROJECT_NAME " " MagicPodsCore_VERSION);
+    Logger::Info(CMAKE_PROJECT_NAME " " CMAKE_PROJECT_VERSION);
 
     std::shared_ptr<SettingsService> settingsService =  std::make_shared<SettingsService>(SettingsService::GetConfigPath("config.toml"));  
     DevicesInfoFetcher devicesInfoFetcher{settingsService};

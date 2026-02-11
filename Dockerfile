@@ -33,7 +33,4 @@ RUN cmake --build ./
 
 FROM scratch AS copy_results_stage
 
-COPY --from=build_stage /app/build/MagicPodsCore /
-
-
-ENTRYPOINT ["./MagicPodsCore"]
+COPY --from=build_stage /app/build/magicpodscore /
