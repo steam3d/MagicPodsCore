@@ -3,6 +3,7 @@
 // License: GPL-3.0
 
 #include <iostream>
+#include <atomic>
 #include <nlohmann/json.hpp>
 #include <App.h>
 
@@ -432,18 +433,15 @@ int main(int argc, char** argv) {
         #endif
     }
 
-    #ifdef DEBUG
-    TestsSgb sgb;
-    TestsAapBle aapBle;
-    #endif
-
     // fix stdout buffering issue, when python does not receive output
     setvbuf(stdout, NULL, _IONBF, 0);
 
     Logger::Info(CMAKE_PROJECT_NAME " " CMAKE_PROJECT_VERSION);
 
-    std::shared_ptr<SettingsService> settingsService =  std::make_shared<SettingsService>(SettingsService::GetConfigPath("config.toml"));
-    DevicesInfoFetcher devicesInfoFetcher{settingsService};
+    std::atomic<bool> initialized{false};
+
+    std::shared_ptr<SettingsService> settingsService;
+    std::unique_ptr<DevicesInfoFetcher> devicesInfoFetcher;
 
     /* ws->getUserData returns one of these */
     struct PerSocketData {
@@ -453,8 +451,6 @@ int main(int argc, char** argv) {
     /* Keep in mind that uWS::SSLApp({options}) is the same as uWS::App() when compiled without SSL support.
      * You may swap to using uWS:App() if you don't need SSL */
     uWS::App app{};
-
-    SubscribeAndHandleBroadcastEvents(app, devicesInfoFetcher, *settingsService);
 
     app.ws<PerSocketData>("/*", {
         /* Settings */
@@ -467,8 +463,12 @@ int main(int argc, char** argv) {
         .sendPingsAutomatically = true,
         /* Handlers */
         .upgrade = nullptr,
-        .open = [](auto* ws) {
-            /* Open event here, you may access ws->getUserData() which points to a PerSocketData struct */
+        .open = [&initialized](auto* ws) {
+            if (!initialized.load()) {
+                Logger::Info("Connection attempted before initialization complete, closing");
+                ws->close();
+                return;
+            }
             Logger::Info("On open websocket connected");
             ws->subscribe("onCapabilityChanged");
             ws->subscribe("OnConnectedChanged");
@@ -479,7 +479,7 @@ int main(int argc, char** argv) {
             InitHandshake(ws);
         },
         .message = [&app, &devicesInfoFetcher, &settingsService](auto *ws, std::string_view message, uWS::OpCode opCode) {
-            HandleRequest(ws, message, opCode, app, devicesInfoFetcher, *settingsService);
+            HandleRequest(ws, message, opCode, app, *devicesInfoFetcher, *settingsService);
 
             /* This is the opposite of what you probably want; compress if message is LARGER than 16 kb
              * the reason we do the opposite here; compress if SMALLER than 16 kb is to allow for
@@ -502,9 +502,24 @@ int main(int argc, char** argv) {
             /* You may access ws->getUserData() here */
             Logger::Info("On open websocket closed");
         }
-    }).listen(WEBSOCKET_PORT, LIBUS_LISTEN_EXCLUSIVE_PORT, [](auto *listen_socket) {
+    }).listen(WEBSOCKET_PORT, LIBUS_LISTEN_EXCLUSIVE_PORT, [&](auto *listen_socket) {
         if (listen_socket) {
             Logger::Info("Listening on port %d", WEBSOCKET_PORT);
+
+            Logger::Info("Starting initialization...");
+
+            #ifdef DEBUG
+            TestsSgb sgb;
+            TestsAapBle aapBle;
+            #endif
+
+            settingsService = std::make_shared<SettingsService>(SettingsService::GetConfigPath("config.toml"));
+            devicesInfoFetcher = std::make_unique<DevicesInfoFetcher>(settingsService);
+
+            SubscribeAndHandleBroadcastEvents(app, *devicesInfoFetcher, *settingsService);
+
+            Logger::Info("Initialization complete, ready to accept connections");
+            initialized.store(true);
         } else {
             Logger::Error("Failed to listen on port %d", WEBSOCKET_PORT);
             exit(1);
