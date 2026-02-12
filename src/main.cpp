@@ -21,6 +21,7 @@ using namespace MagicPodsCore;
 
 //Do not forget to change version when API changes
 constexpr int API_VERSION = 0;
+constexpr int WEBSOCKET_PORT = 2020;
 
 nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto rootObject = nlohmann::json::object();
@@ -501,9 +502,12 @@ int main(int argc, char** argv) {
             /* You may access ws->getUserData() here */
             Logger::Info("On open websocket closed");
         }
-    }).listen(2020, [](auto *listen_socket) {
+    }).listen(WEBSOCKET_PORT, LIBUS_LISTEN_EXCLUSIVE_PORT, [](auto *listen_socket) {
         if (listen_socket) {
-            Logger::Info("Listening on port %d", 2020);
+            Logger::Info("Listening on port %d", WEBSOCKET_PORT);
+        } else {
+            Logger::Error("Failed to listen on port %d", WEBSOCKET_PORT);
+            exit(1);
         }
     }).run();
 }
