@@ -19,6 +19,9 @@
 
 using namespace MagicPodsCore;
 
+//Do not forget to change version when API changes
+constexpr int API_VERSION = 0;
+
 nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto rootObject = nlohmann::json::object();
     auto jsonArray = nlohmann::json::array();
@@ -70,6 +73,15 @@ nlohmann::json MakeGetSettingResponse(SettingsService& settingsService, const st
     wrappedJson["settings"][container][setting] = TomlNodeViewToJson(settingValue);
 
     return wrappedJson;
+}
+
+void InitHandshake(auto *ws) {
+    Logger::Info("InitHandshake");
+    auto wrappedJson = nlohmann::json::object();
+    wrappedJson["init"]["api"] = API_VERSION;
+    wrappedJson["init"]["version"] = CMAKE_PROJECT_VERSION;
+    auto response = wrappedJson.dump();
+    ws->send(response, uWS::OpCode::TEXT, response.length() < 16 * 1024);
 }
 
 void HandleGetDevicesRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCode, DevicesInfoFetcher& devicesInfoFetcher) {
@@ -429,7 +441,7 @@ int main(int argc, char** argv) {
 
     Logger::Info(CMAKE_PROJECT_NAME " " CMAKE_PROJECT_VERSION);
 
-    std::shared_ptr<SettingsService> settingsService =  std::make_shared<SettingsService>(SettingsService::GetConfigPath("config.toml"));  
+    std::shared_ptr<SettingsService> settingsService =  std::make_shared<SettingsService>(SettingsService::GetConfigPath("config.toml"));
     DevicesInfoFetcher devicesInfoFetcher{settingsService};
 
     /* ws->getUserData returns one of these */
@@ -463,6 +475,7 @@ int main(int argc, char** argv) {
             ws->subscribe("OnDefaultAdapterChangeEnabled");
             ws->subscribe("onAnimationTriggered");
             ws->subscribe("OnSettingUpdate");
+            InitHandshake(ws);
         },
         .message = [&app, &devicesInfoFetcher, &settingsService](auto *ws, std::string_view message, uWS::OpCode opCode) {
             HandleRequest(ws, message, opCode, app, devicesInfoFetcher, *settingsService);

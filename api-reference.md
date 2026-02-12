@@ -12,7 +12,16 @@ Connect to the WebSocket at the following address:
 ws://172.0.1.0:2020/
 ```
 
-After connecting to the WebSocket, MagicPodsCore starts sending notifications about changes in `info`, `headphone` and `defaultbluetooth` states.
+After connecting to the WebSocket, MagicPodsCore sends an `init` message and then starts sending notifications about changes in `info`, `headphone`, and `defaultbluetooth` states.
+
+```json
+{
+  "init": {
+    "api": 0,
+    "version": "2.0.7"
+  }
+}
+```
 
 Clients should request the initial state using the `GetAll` method after connection.
 
