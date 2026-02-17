@@ -43,8 +43,6 @@ namespace MagicPodsCore {
     }
 
     std::vector<std::shared_ptr<DBusDeviceInfo>> DBusService::GetAllDevices() {
-        GetBtDevices();
-        
         std::vector<std::shared_ptr<DBusDeviceInfo>> devices;
         for (const auto& [path, device] : _knownDevices) {
             devices.push_back(device);
