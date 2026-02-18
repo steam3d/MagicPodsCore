@@ -34,8 +34,8 @@ namespace MagicPodsCore {
     public:
         explicit DBusService();
 
-        std::set<std::shared_ptr<DBusDeviceInfo>> GetBtDevices();
-        std::vector<std::shared_ptr<DBusDeviceInfo>> GetAllDevices();
+        std::set<std::shared_ptr<DBusDeviceInfo>> GetAllDevices();
+        std::set<std::shared_ptr<DBusDeviceInfo>> GetPairedDevices();
 
         ObservableVariable<bool>& IsBluetoothAdapterPowered() {
             return _isBluetoothAdapterPowered;
@@ -70,6 +70,8 @@ namespace MagicPodsCore {
         }
 
     private:
+        void FetchDevices();
+
         std::shared_ptr<DBusDeviceInfo> TryCreateDevice(sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces);
         bool TryRemoveDevice(sdbus::ObjectPath objectPath);
 

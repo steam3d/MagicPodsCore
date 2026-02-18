@@ -209,7 +209,7 @@ DevicesInfoFetcher::~DevicesInfoFetcher()
         _devicesMap.clear();
         _activeDevice = nullptr;
 
-        for (const auto& deviceInfo : _dbusService.GetBtDevices()) {
+        for (const auto& deviceInfo : _dbusService.GetPairedDevices()) {
             if (auto device = TryCreateDevice(deviceInfo)) {
                 _devicesMap.emplace(deviceInfo->GetAddress(), device);
                 _onDeviceAddEvent.FireEvent(device);

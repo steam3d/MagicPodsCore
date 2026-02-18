@@ -27,27 +27,20 @@ namespace MagicPodsCore {
         _defaultBluetoothAdapterProxy->finishRegistration();
 
         _isBluetoothAdapterPowered.SetValue(_defaultBluetoothAdapterProxy->getProperty("Powered").onInterface("org.bluez.Adapter1").get<bool>());
+
+        FetchDevices();
     }
 
-    std::set<std::shared_ptr<DBusDeviceInfo>> DBusService::GetBtDevices() {
-        std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>> managedObjects{};
-        _rootProxy->callMethod("GetManagedObjects").onInterface("org.freedesktop.DBus.ObjectManager").storeResultsTo<std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>>>(managedObjects);
-
-        _knownDevices.clear();
-
-        for (const auto& [objectPath, interfaces] : managedObjects) {
-            TryCreateDevice(objectPath, interfaces);
-        }
-
-        return _pairedDevices;
-    }
-
-    std::vector<std::shared_ptr<DBusDeviceInfo>> DBusService::GetAllDevices() {
-        std::vector<std::shared_ptr<DBusDeviceInfo>> devices;
+    std::set<std::shared_ptr<DBusDeviceInfo>> DBusService::GetAllDevices() {
+        std::set<std::shared_ptr<DBusDeviceInfo>> devices;
         for (const auto& [path, device] : _knownDevices) {
-            devices.push_back(device);
+            devices.emplace(device);
         }
         return devices;
+    }
+
+    std::set<std::shared_ptr<DBusDeviceInfo>> DBusService::GetPairedDevices() {
+        return _pairedDevices;
     }
 
     void DBusService::EnableBluetoothAdapter() {
@@ -100,6 +93,17 @@ namespace MagicPodsCore {
 
     void DBusService::StopDiscoveryAsync(std::function<void(const sdbus::Error*)>&& callback) {
         _defaultBluetoothAdapterProxy->callMethodAsync("StopDiscovery").onInterface("org.bluez.Adapter1").uponReplyInvoke(callback);
+    }
+
+    void DBusService::FetchDevices() {
+        std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>> managedObjects{};
+        _rootProxy->callMethod("GetManagedObjects").onInterface("org.freedesktop.DBus.ObjectManager").storeResultsTo<std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>>>(managedObjects);
+
+        _knownDevices.clear();
+
+        for (const auto& [objectPath, interfaces] : managedObjects) {
+            TryCreateDevice(objectPath, interfaces);
+        }
     }
 
     std::shared_ptr<DBusDeviceInfo> DBusService::TryCreateDevice(sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces) {
