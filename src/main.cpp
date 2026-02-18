@@ -398,40 +398,36 @@ bool TryToParseArguments(int argc, char** argv) {
     return false;
 }
 
+void StartListeningLogSettings(SettingsService &settingsService) {
+    #ifdef DEBUG
+    const auto defaultLogLevel = LogLevel::Debug;
+    #else
+    const auto defaultLogLevel = LogLevel::Info;
+    #endif
 
-bool TryToSetLogLevelFromArguments(int argc, char** argv) {
-    for (int i = 0; i < argc; ++i) {
-        std::string argument{argv[i]};
-        if (argument == "--loglevel" || argument == "-loglevel" || argument == "-l") {
-            if (i + 1 < argc) {
-                int level = std::stoi(argv[++i]);
+    const auto currentSettingsLogLevel = settingsService.GetSetting("magicpods", "logLevel");
+    if (currentSettingsLogLevel.is_integer()) {
+        Logger::SetLoggingLevelForGlobalLogger(currentSettingsLogLevel.as_integer()->get());
+    }
+    else {
+        Logger::SetLoggingLevelForGlobalLogger(defaultLogLevel);
+    }
 
-                if (level > 50)
-                    level = 50;
-
-                if (level < 0)
-                    level = 0;
-
-                Logger::SetLoggingLevelForGlobalLogger(static_cast<LogLevel>(level));
-                return true;
+    settingsService.GetOnSettingUpdateEvent().Subscribe([](size_t listenerId, const UpdatedSettingNotification& notification) {
+        if (notification.GetContainerName() == "magicpods" && notification.GetSettingName() == "logLevel") {
+            if (notification.GetValue().is_integer()) {
+                Logger::SetLoggingLevelForGlobalLogger(notification.GetValue().as_integer()->get());
             }
         }
-    }
-    return false;
+    });
 }
 
 int main(int argc, char** argv) {
     if (TryToParseArguments(argc, argv))
         return 0;
 
-    // set logs
-    if (!TryToSetLogLevelFromArguments(argc, argv)){
-        #ifdef DEBUG
-        Logger::SetLoggingLevelForGlobalLogger(LogLevel::Debug);
-        #else
-        Logger::SetLoggingLevelForGlobalLogger(LogLevel::Info);
-        #endif
-    }
+    std::shared_ptr<SettingsService> settingsService = std::make_shared<SettingsService>(SettingsService::GetConfigPath("config.toml"));
+    StartListeningLogSettings(*settingsService);
 
     // fix stdout buffering issue, when python does not receive output
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -440,7 +436,6 @@ int main(int argc, char** argv) {
 
     std::atomic<bool> initialized{false};
 
-    std::shared_ptr<SettingsService> settingsService;
     std::unique_ptr<DevicesInfoFetcher> devicesInfoFetcher;
 
     /* ws->getUserData returns one of these */
@@ -513,7 +508,6 @@ int main(int argc, char** argv) {
             TestsAapBle aapBle;
             #endif
 
-            settingsService = std::make_shared<SettingsService>(SettingsService::GetConfigPath("config.toml"));
             devicesInfoFetcher = std::make_unique<DevicesInfoFetcher>(settingsService);
 
             SubscribeAndHandleBroadcastEvents(app, *devicesInfoFetcher, *settingsService);
