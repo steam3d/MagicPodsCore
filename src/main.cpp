@@ -238,15 +238,6 @@ void HandleGetAllRequest(auto *ws, const nlohmann::json& json, uWS::OpCode opCod
     ws->send(response, opCode, response.length() < 16 * 1024);
 }
 
-void HandleSetLogLevel(auto *ws,const nlohmann::json& json, uWS::OpCode opCode) {
-    Logger::Info("HandleSetLogLevel");
-
-    auto selected = json.at("arguments").at("selected").template get<int>();
-    Logger::SetLoggingLevelForGlobalLogger(selected);
-    //std::string emptyResponse{};
-    //ws->send(emptyResponse, opCode, emptyResponse.length() < 16 * 1024);
-}
-
 
 void HandleIncorrectResponse(auto *ws, uWS::OpCode opCode) {
     std::string emptyResponse{};
@@ -284,8 +275,6 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
                 HandleGetSettingRequest(ws, json, opCode, settingsService);
             else if (methodName == "SetSetting")
                 HandleSaveSettingRequest(ws, json, opCode, settingsService);
-            else if (methodName == "SetLogLevel")
-                HandleSetLogLevel(ws, json, opCode);
             else
                 HandleIncorrectResponse(ws, opCode);
     }
