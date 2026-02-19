@@ -21,21 +21,23 @@ namespace MagicPodsCore {
 
     void DevicesInfoFetcher::UpdateBleState()
     {
-        toml::v3::node_view<toml::v3::node> settingValue = _settingsService->GetSetting("magicpods", "animation");        
-        bool value = true; // default setting
+        toml::v3::node_view<toml::v3::node> settingValue = _settingsService->GetSetting("magicpods", "animation");
 
-        if (settingValue.is_boolean())
-            value = settingValue.as_boolean()->get();        
-        
-        if (value){
-            _bleService->StartListening();
-            _bleService->StartScan(true);
-            Logger::Debug("Ble service started");
+        if (settingValue.is_boolean()){
+            bool value = settingValue.as_boolean()->get();
+            if (value){
+                _bleService->StartListening();
+                _bleService->StartScan(true);
+                Logger::Debug("Ble service started");
+            }
+            else
+            {
+                _bleService->StopScan();
+                Logger::Debug("Ble service stopped");
+            }
         }
-        else
-        {
-            _bleService->StopScan();
-            Logger::Debug("Ble service stopped");
+        else{
+            Logger::Error("Failed to read animation setting");
         }
     }
 
@@ -44,11 +46,11 @@ namespace MagicPodsCore {
         _bleService = std::make_shared<DBusBasedBleAdvertisingService>(_dbusService);
         _onSettingsChangeId = _settingsService->GetOnSettingUpdateEvent().Subscribe([this](size_t id, const UpdatedSettingNotification& notification){
         if (notification.GetContainerName() == "magicpods" && notification.GetSettingName() == "animation")
-                UpdateBleState();            
+                UpdateBleState();
         });
-                
+
         UpdateBleState();
-        
+
         ClearAndFillDevicesMap();
 
         for (auto& device : _dbusService.GetAllDevices()) {
