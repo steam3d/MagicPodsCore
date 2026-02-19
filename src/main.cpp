@@ -400,17 +400,13 @@ bool TryToParseArguments(int argc, char** argv) {
 
 void StartListeningLogSettings(SettingsService &settingsService) {
     #ifdef DEBUG
-    const auto defaultLogLevel = LogLevel::Debug;
-    #else
-    const auto defaultLogLevel = LogLevel::Info;
+    Logger::SetLoggingLevelForGlobalLogger(LogLevel::Debug);
+    return;
     #endif
 
     const auto currentSettingsLogLevel = settingsService.GetSetting("magicpods", "logLevel");
     if (currentSettingsLogLevel.is_integer()) {
         Logger::SetLoggingLevelForGlobalLogger(currentSettingsLogLevel.as_integer()->get());
-    }
-    else {
-        Logger::SetLoggingLevelForGlobalLogger(defaultLogLevel);
     }
 
     settingsService.GetOnSettingUpdateEvent().Subscribe([](size_t listenerId, const UpdatedSettingNotification& notification) {

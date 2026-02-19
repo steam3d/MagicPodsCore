@@ -3,14 +3,19 @@
 // License: GPL-3.0
 
 #include "SettingsService.h"
+
 #include <stdexcept>
 #include <fstream>
 #include <filesystem>
+
+#include "Logger.h"
 
 namespace MagicPodsCore {
 
 SettingsService::SettingsService(const std::string& filePath) : _filePath(filePath), _onSettingUpdate{} {
     LoadFromFile();
+    MergeDefaults(_settings, GetDefaults());
+    WriteToFile();
 }
 
 void SettingsService::LoadFromFile() {
@@ -39,6 +44,16 @@ void SettingsService::WriteToFile() {
     if (!file.good()) {
         throw std::runtime_error("Failed to write to file: " + _filePath);
     }
+}
+
+toml::table SettingsService::GetDefaults() {
+    toml::table magicpods{};
+    magicpods.insert_or_assign("animation", true);
+    magicpods.insert_or_assign("logLevel", static_cast<int>(LogLevel::Info));
+
+    toml::table defaults{};
+    defaults.insert_or_assign("magicpods", std::move(magicpods));
+    return defaults;
 }
 
 const toml::table& SettingsService::GetSettingsAll() {

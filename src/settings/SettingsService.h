@@ -22,6 +22,25 @@ private:
 
     void LoadFromFile();
     void WriteToFile();
+    static toml::table GetDefaults();
+
+    static void MergeDefaults(toml::table& settings, const toml::table& defaults) {
+        for (const auto& [containerName, containerData] : defaults) {
+            auto* defaultContainer = containerData.as_table();
+            if (!defaultContainer) continue;
+
+            if (!settings[containerName].as_table()) {
+                settings.insert_or_assign(containerName, toml::table{});
+            }
+            auto* settingsContainer = settings[containerName].as_table();
+
+            for (const auto& [key, value] : *defaultContainer) {
+                if (!(*settingsContainer)[key]) {
+                    settingsContainer->insert_or_assign(key, value);
+                }
+            }
+        }
+    }
 
 public:
     SettingsService(const std::string& filePath);
