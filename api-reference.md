@@ -113,8 +113,22 @@ Response:
 ```json
 {
   "headphones": [
-    { "name": "AirPods Pro", "address": "AA:BB:CC:DD:EE:FF", "connected": false },
-    { "name": "Galaxy Buds", "address": "11:22:33:44:55:66", "connected": false }
+    {
+      "name": "AirPods",
+      "address": "AA:BB:CC:DD:EE:FF",
+      "vendor": 76,
+      "model": 8207,
+      "color": 0,
+      "connected": false
+    },
+    {
+      "name": "Galaxy Buds 3",
+      "address": "11:22:33:44:55:66",
+      "vendor": 117,
+      "model": 9,
+      "color": 0,
+      "connected": false
+    }
   ]
 }
 ```
@@ -145,8 +159,22 @@ Response:
 ```json
 {
   "headphones": [
-    { "name": "AirPods Pro", "address": "AA:BB:CC:DD:EE:FF", "connected": true },
-    { "name": "Galaxy Buds", "address": "11:22:33:44:55:66", "connected": false }
+    {
+      "name": "AirPods",
+      "address": "AA:BB:CC:DD:EE:FF",
+      "vendor": 76,
+      "model": 8207,
+      "color": 0,
+      "connected": true
+    },
+    {
+      "name": "Galaxy Buds 3",
+      "address": "11:22:33:44:55:66",
+      "vendor": 117,
+      "model": 9,
+      "color": 0,
+      "connected": false
+    }
   ]
 }
 ```
@@ -169,8 +197,22 @@ Response:
 ```json
 {
   "headphones": [
-    { "name": "AirPods Pro", "address": "AA:BB:CC:DD:EE:FF", "connected": false },
-    { "name": "Galaxy Buds", "address": "11:22:33:44:55:66", "connected": false }
+    {
+      "name": "AirPods",
+      "address": "AA:BB:CC:DD:EE:FF",
+      "vendor": 76,
+      "model": 8207,
+      "color": 0,
+      "connected": false
+    },
+    {
+      "name": "Galaxy Buds 3",
+      "address": "11:22:33:44:55:66",
+      "vendor": 117,
+      "model": 9,
+      "color": 0,
+      "connected": false
+    }
   ]
 }
 ```
@@ -182,8 +224,22 @@ When the connection status of any headphone changes:
 ```json
 {
   "headphones": [
-    { "name": "AirPods Pro", "address": "AA:BB:CC:DD:EE:FF", "connected": true },
-    { "name": "Galaxy Buds", "address": "11:22:33:44:55:66", "connected": false }
+    {
+      "name": "AirPods",
+      "address": "AA:BB:CC:DD:EE:FF",
+      "vendor": 76,
+      "model": 8207,
+      "color": 0,
+      "connected": true
+    },
+    {
+      "name": "Galaxy Buds 3",
+      "address": "11:22:33:44:55:66",
+      "vendor": 117,
+      "model": 9,
+      "color": 0,
+      "connected": false
+    }
   ]
 }
 ```
@@ -206,8 +262,11 @@ Response:
 ```json
 {
   "info": {
-    "name": "AirPods Pro",
+    "name": "AirPods",
     "address": "AA:BB:CC:DD:EE:FF",
+    "vendor": 117,
+    "model": 9,
+    "color": 0,
     "connected": true,
     "capabilities": {
       "battery": {...},
@@ -223,8 +282,11 @@ Returns empty `capabilities` if no features are available:
 ```json
 {
   "info": {
-    "name": "AirPods Pro",
+    "name": "AirPods",
     "address": "AA:BB:CC:DD:EE:FF",
+    "vendor": 117,
+    "model": 9,
+    "color": 0,
     "connected": true,
     "capabilities": { }
   }
@@ -248,6 +310,9 @@ On any property change:
   "info": {
     "name": "AirPods Pro",
     "address": "AA:BB:CC:DD:EE:FF",
+    "vendor": 117,
+    "model": 9,
+    "color": 0,
     "connected": true,
     "capabilities": {
       "battery": {...},
