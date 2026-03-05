@@ -47,12 +47,12 @@ Build
 git clone https://github.com/steam3d/MagicPodsCore.git && \
 cd MagicPodsCore && \
 docker build -o . . && \
-chmod +x MagicPodsCore
+chmod +x magicpodscore
 ```
 
 Run
 ```
-./MagicPodsCore
+./magicpodscore
 ```
 
 Connect to 172.0.1.0:2020 WebSocket and use the API reference below to communicate with MagicPodsCore.
