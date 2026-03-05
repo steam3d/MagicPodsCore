@@ -4,3 +4,4 @@ build/
 
 # Docker builder
 docker_build/
+magicpodscore
