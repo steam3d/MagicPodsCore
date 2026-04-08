@@ -160,6 +160,8 @@ namespace MagicPodsCore
         case AapModelIds::airpods4anc:
         case AapModelIds::airpods4:
         case AapModelIds::powerbeatspro2:
+        case AapModelIds::powerbeatsfit:
+        case AapModelIds::airpodsmax2:
             return true;
         default:
             return false;

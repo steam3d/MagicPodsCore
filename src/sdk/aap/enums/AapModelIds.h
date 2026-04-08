@@ -31,7 +31,9 @@ enum class AapModelIds : unsigned short {
     beatsstudiopro = 0x2017,
     powerbeatspro2 = 0x201d,
     beatssolobuds = 0x2026,
-    beatssolo4 = 0x2025
+    beatssolo4 = 0x2025,
+    powerbeatsfit = 0x202f,
+    airpodsmax2 = 0x202d
 };
 
 static const AapModelIds AllAapModelsIds[] = {
@@ -61,4 +63,6 @@ static const AapModelIds AllAapModelsIds[] = {
     AapModelIds::powerbeatspro2,
     AapModelIds::beatssolobuds,
     AapModelIds::beatssolo4,
+    AapModelIds::powerbeatsfit,
+    AapModelIds::airpodsmax2,
 };
