@@ -31,10 +31,11 @@ Backend service exposing a WebSocket API for managing AirPods, Beats, and Galaxy
 | AirPods Pro 3    | Beats Studio Pro       | Galaxy Buds 3     |
 | AirPods Max      | Beats Solo 3           | Galaxy Buds 3 Pro |
 | AirPods Max 2024 | Beats Solo Pro         |                   |
-|                  | Beats Studio 3         |                   |
+| AirPods Max 2    | Beats Studio 3         |                   |
 |                  | Beats X                |                   |
 |                  | Beats Flex             |                   |
 |                  | Beats Solo Buds        |                   |
+|                  | Powerbeats Fit         |                   |
 
 Some of the headphones in the table do not have or do not support the noise control feature.
 
