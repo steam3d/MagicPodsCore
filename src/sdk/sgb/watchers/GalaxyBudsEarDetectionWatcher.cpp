@@ -46,7 +46,11 @@ namespace MagicPodsCore
                  model == GalaxyBudsModelIds::GalaxyBuds2Pro ||
                  model == GalaxyBudsModelIds::GalaxyBudsFe ||
                  model == GalaxyBudsModelIds::GalaxyBuds3 ||
-                 model == GalaxyBudsModelIds::GalaxyBuds3Pro)
+                 model == GalaxyBudsModelIds::GalaxyBuds3Pro ||
+                 model == GalaxyBudsModelIds::GalaxyBuds3Fe ||
+                 //model == GalaxyBudsModelIds::GalaxyBudsCore || Need feedback
+                 model == GalaxyBudsModelIds::GalaxyBuds4 ||
+                 model == GalaxyBudsModelIds::GalaxyBuds4Pro)
         {
             unsigned char left = (b & 0b11110000) >> 4;
             if (isValidGalaxyBudsEarDetectionStateType(left))

@@ -53,6 +53,10 @@ namespace MagicPodsCore {
         GalaxyBuds2Grey = 321,
         GalaxyBuds2Unknown = 14337, // NOTE: Unknown device id mentioned by Samsung's device API
 
+        //BudsCore
+        GalaxyBudsCoreOnyx = 322,
+        GalaxyBudsCoreWhite = 323,
+
         //Buds2Pro
         GalaxyBuds2ProGrey = 326,
         GalaxyBuds2ProWhite = 327,
@@ -68,10 +72,23 @@ namespace MagicPodsCore {
 
         //Buds3Pro
         GalaxyBuds3ProSilver = 340,
-        GalaxyBuds3ProWhite = 341
+        GalaxyBuds3ProWhite = 341,
+
+        //BudsFE
+        GalaxyBuds3FeSilver = 347,
+        GalaxyBuds3FeWhite = 348,
+
+        //Buds4
+        GalaxyBuds4Black = 355,
+        GalaxyBuds4White = 356,
+
+        //Buds4Pro
+        GalaxyBuds4ProBlack = 359,
+        GalaxyBuds4ProWhite = 360,
+        GalaxyBuds4ProApricot = 361
     };
 
-    inline constexpr static std::array<unsigned short, 41> GalaxyBudsModelIdsArray = {
+    inline constexpr static std::array<unsigned short, 50> GalaxyBudsModelIdsArray = {
         static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds),
         static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsUnknown),
 
@@ -108,6 +125,9 @@ namespace MagicPodsCore {
         static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2AbsoluteBlack),
         static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2Grey),
         static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2Unknown),
+        
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsCoreOnyx),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBudsCoreWhite),
 
         static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2ProGrey),
         static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds2ProWhite),
@@ -120,6 +140,16 @@ namespace MagicPodsCore {
         static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3White),
 
         static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3ProSilver),
-        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3ProWhite)
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3ProWhite),
+
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3FeSilver),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds3FeWhite),
+
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds4Black),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds4White),
+
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds4ProBlack),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds4ProWhite),
+        static_cast<unsigned short>(GalaxyBudsColoredModelIds::GalaxyBuds4ProApricot),
     };
 }

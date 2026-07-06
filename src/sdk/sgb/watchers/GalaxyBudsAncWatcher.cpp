@@ -18,10 +18,14 @@ namespace MagicPodsCore
         //else
         if (model == GalaxyBudsModelIds::GalaxyBudsPro ||
                  model == GalaxyBudsModelIds::GalaxyBuds2 ||
+                 model == GalaxyBudsModelIds::GalaxyBudsCore ||
                  model == GalaxyBudsModelIds::GalaxyBuds2Pro ||
                  model == GalaxyBudsModelIds::GalaxyBudsFe ||
                  model == GalaxyBudsModelIds::GalaxyBuds3 ||
-                 model == GalaxyBudsModelIds::GalaxyBuds3Pro)
+                 model == GalaxyBudsModelIds::GalaxyBuds3Pro ||
+                 model == GalaxyBudsModelIds::GalaxyBuds3Fe || 
+                 model == GalaxyBudsModelIds::GalaxyBuds4 || 
+                 model == GalaxyBudsModelIds::GalaxyBuds4Pro)
         {
             if (isValidGalaxyBudsAncType(b))
             {
@@ -102,10 +106,14 @@ namespace MagicPodsCore
         //return (model == GalaxyBudsModelIds::GalaxyBudsLive ||
         return (model == GalaxyBudsModelIds::GalaxyBudsPro ||
                 model == GalaxyBudsModelIds::GalaxyBuds2 ||
+                model == GalaxyBudsModelIds::GalaxyBudsCore ||
                 model == GalaxyBudsModelIds::GalaxyBuds2Pro ||
                 model == GalaxyBudsModelIds::GalaxyBudsFe ||
                 model == GalaxyBudsModelIds::GalaxyBuds3 ||
-                model == GalaxyBudsModelIds::GalaxyBuds3Pro);
+                model == GalaxyBudsModelIds::GalaxyBuds3Fe ||
+                model == GalaxyBudsModelIds::GalaxyBuds3Pro ||
+                model == GalaxyBudsModelIds::GalaxyBuds4 ||
+                model == GalaxyBudsModelIds::GalaxyBuds4Pro);
     }
 
     std::vector<GalaxyBudsAnc> GalaxyBudsAncWatcher::GetAncModesFor(GalaxyBudsModelIds model)
@@ -121,7 +129,9 @@ namespace MagicPodsCore
         else if (model == GalaxyBudsModelIds::GalaxyBudsPro ||
                  model == GalaxyBudsModelIds::GalaxyBuds2 ||
                  model == GalaxyBudsModelIds::GalaxyBuds2Pro ||
-                 model == GalaxyBudsModelIds::GalaxyBudsFe)
+                 model == GalaxyBudsModelIds::GalaxyBudsFe ||
+                 model == GalaxyBudsModelIds::GalaxyBudsCore ||
+                 model == GalaxyBudsModelIds::GalaxyBuds3Fe)
         {
             return std::vector<GalaxyBudsAnc>{
                 GalaxyBudsAnc::Off,
@@ -129,7 +139,9 @@ namespace MagicPodsCore
                 GalaxyBudsAnc::NoiseReduction,
             };
         }
-        else if (model == GalaxyBudsModelIds::GalaxyBuds3Pro)
+        else if (model == GalaxyBudsModelIds::GalaxyBuds3Pro ||
+                 model == GalaxyBudsModelIds::GalaxyBuds4 ||
+                 model == GalaxyBudsModelIds::GalaxyBuds4Pro)
         {
             return std::vector<GalaxyBudsAnc>{
                 GalaxyBudsAnc::Off,

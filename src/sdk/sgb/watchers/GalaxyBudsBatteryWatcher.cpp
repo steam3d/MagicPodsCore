@@ -100,6 +100,13 @@ namespace MagicPodsCore
             if (data.Payload.size() > 43)
                 chargingStatus = data.Payload[43];
         }
+        else if (model == GalaxyBudsModelIds::GalaxyBudsCore)
+        {
+            if (data.Payload.size() > 7)
+                batteryC = data.Payload[7];
+            if (data.Payload.size() > 43)
+                chargingStatus = data.Payload[43];
+        }
         else if (model == GalaxyBudsModelIds::GalaxyBuds3)
         {
             if (data.Payload.size() > 7)
@@ -108,6 +115,27 @@ namespace MagicPodsCore
                 chargingStatus = data.Payload[42];
         }
         else if (model == GalaxyBudsModelIds::GalaxyBuds3Pro)
+        {
+            if (data.Payload.size() > 7)
+                batteryC = data.Payload[7];
+            if (data.Payload.size() > 42)
+                chargingStatus = data.Payload[42];
+        }
+        else if (model == GalaxyBudsModelIds::GalaxyBuds3Fe)
+        {
+            if (data.Payload.size() > 7)
+                batteryC = data.Payload[7];
+            if (data.Payload.size() > 42)
+                chargingStatus = data.Payload[42];
+        }
+        else if (model == GalaxyBudsModelIds::GalaxyBuds4)
+        {
+            if (data.Payload.size() > 7)
+                batteryC = data.Payload[7];
+            if (data.Payload.size() > 42)
+                chargingStatus = data.Payload[42];
+        }
+        else if (model == GalaxyBudsModelIds::GalaxyBuds4Pro)
         {
             if (data.Payload.size() > 7)
                 batteryC = data.Payload[7];
@@ -175,6 +203,13 @@ namespace MagicPodsCore
             if (data.Payload.size() > 7)
                 chargingStatus = data.Payload[7];
         }
+        else if (model == GalaxyBudsModelIds::GalaxyBudsCore)
+        {
+            if (data.Payload.size() > 6)
+                batteryC = data.Payload[6];
+            if (data.Payload.size() > 7)
+                chargingStatus = data.Payload[7];
+        }
         else if (model == GalaxyBudsModelIds::GalaxyBuds3)
         {
             if (data.Payload.size() > 6)
@@ -183,6 +218,27 @@ namespace MagicPodsCore
                 chargingStatus = data.Payload[7];
         }
         else if (model == GalaxyBudsModelIds::GalaxyBuds3Pro)
+        {
+            if (data.Payload.size() > 6)
+                batteryC = data.Payload[6];
+            if (data.Payload.size() > 7)
+                chargingStatus = data.Payload[7];
+        }
+        else if (model == GalaxyBudsModelIds::GalaxyBuds3Fe)
+        {
+            if (data.Payload.size() > 6)
+                batteryC = data.Payload[6];
+            if (data.Payload.size() > 7)
+                chargingStatus = data.Payload[7];
+        }
+        else if (model == GalaxyBudsModelIds::GalaxyBuds4)
+        {
+            if (data.Payload.size() > 6)
+                batteryC = data.Payload[6];
+            if (data.Payload.size() > 7)
+                chargingStatus = data.Payload[7];
+        }
+        else if (model == GalaxyBudsModelIds::GalaxyBuds4Pro)
         {
             if (data.Payload.size() > 6)
                 batteryC = data.Payload[6];

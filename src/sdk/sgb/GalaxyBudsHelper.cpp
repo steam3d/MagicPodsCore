@@ -58,14 +58,17 @@ namespace MagicPodsCore
         {
             return GalaxyBudsModelIds::GalaxyBuds2;
         }
-
+        else if (coloredModel == GalaxyBudsColoredModelIds::GalaxyBudsCoreOnyx ||
+                 coloredModel == GalaxyBudsColoredModelIds::GalaxyBudsCoreWhite)
+        {
+            return GalaxyBudsModelIds::GalaxyBudsCore;
+        }
         else if (coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds2ProGrey ||
                  coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds2ProWhite ||
                  coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds2ProViolet)
         {
             return GalaxyBudsModelIds::GalaxyBuds2Pro;
         }
-
         else if (coloredModel == GalaxyBudsColoredModelIds::GalaxyBudsFeGraphite ||
                  coloredModel == GalaxyBudsColoredModelIds::GalaxyBudsFeWhite)
         {
@@ -80,6 +83,22 @@ namespace MagicPodsCore
                  coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds3ProWhite)
         {
             return GalaxyBudsModelIds::GalaxyBuds3Pro;
+        }
+        else if (coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds3FeSilver ||
+                 coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds3FeWhite)
+        {
+            return GalaxyBudsModelIds::GalaxyBuds3Fe;
+        }
+        else if (coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds4Black ||
+                 coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds4White)
+        {
+            return GalaxyBudsModelIds::GalaxyBuds4;
+        }
+        else if (coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds4ProBlack ||
+                 coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds4ProWhite ||
+                 coloredModel == GalaxyBudsColoredModelIds::GalaxyBuds4ProApricot)
+        {
+            return GalaxyBudsModelIds::GalaxyBuds4Pro;
         }
         else
         {
@@ -126,9 +145,25 @@ namespace MagicPodsCore
         {
             return GalaxyBudsModelIds::GalaxyBuds3Pro;
         }
+        else if (_name.find("buds3 fe") != std::string::npos)
+        {
+            return GalaxyBudsModelIds::GalaxyBuds3Fe;
+        }
         else if (_name.find("buds3") != std::string::npos)
         {
             return GalaxyBudsModelIds::GalaxyBuds3;
+        }
+        else if (_name.find("buds core") != std::string::npos)
+        {
+            return GalaxyBudsModelIds::GalaxyBudsCore;
+        }
+        else if (_name.find("buds4 pro") != std::string::npos)
+        {
+            return GalaxyBudsModelIds::GalaxyBuds4Pro;
+        }
+        else if (_name.find("buds4") != std::string::npos)
+        {
+            return GalaxyBudsModelIds::GalaxyBuds4;
         }
         else
         {
@@ -237,6 +272,10 @@ namespace MagicPodsCore
         {
             return std::string(GALAXYBUDSNEW);
         }
+        else if (model == GalaxyBudsModelIds::GalaxyBudsCore)
+        {
+            return std::string(GALAXYBUDSNEW);
+        }
         else if (model == GalaxyBudsModelIds::GalaxyBuds2Pro)
         {
             return std::string(GALAXYBUDSNEW);
@@ -250,6 +289,18 @@ namespace MagicPodsCore
             return std::string(GALAXYBUDSNEW);
         }
         else if (model == GalaxyBudsModelIds::GalaxyBuds3Pro)
+        {
+            return std::string(GALAXYBUDSNEW);
+        }
+        else if (model == GalaxyBudsModelIds::GalaxyBuds3Fe)
+        {
+            return std::string(GALAXYBUDSNEW);
+        }
+        else if (model == GalaxyBudsModelIds::GalaxyBuds4)
+        {
+            return std::string(GALAXYBUDSNEW);
+        }
+        else if (model == GalaxyBudsModelIds::GalaxyBuds4Pro)
         {
             return std::string(GALAXYBUDSNEW);
         }

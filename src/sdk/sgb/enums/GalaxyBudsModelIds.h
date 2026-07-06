@@ -17,7 +17,11 @@ namespace MagicPodsCore
         GalaxyBuds2 = 5,
         GalaxyBuds2Pro = 6,
         GalaxyBudsFe = 7,
-        GalaxyBuds3 = 8,
-        GalaxyBuds3Pro = 9
+        GalaxyBudsCore = 8,
+        GalaxyBuds3 = 9, //8->9
+        GalaxyBuds3Pro = 10, //9->10
+        GalaxyBuds3Fe = 11,
+        GalaxyBuds4 = 12,
+        GalaxyBuds4Pro = 13
     };
 }
