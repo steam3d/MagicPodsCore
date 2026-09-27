@@ -123,6 +123,15 @@ namespace MagicPodsCore {
         _deviceProxy->finishRegistration();
     }
 
+    DBusDeviceInfo::~DBusDeviceInfo() {
+        StopListening();
+    }
+
+    void DBusDeviceInfo::StopListening() {
+        // Resetting the proxy stops its signal callback thread.
+        _deviceProxy.reset();
+    }
+
     void DBusDeviceInfo::Connect() {
         _deviceProxy->callMethod("Connect").onInterface("org.bluez.Device1").dontExpectReply();
     }
@@ -168,4 +177,3 @@ namespace MagicPodsCore {
         }
     }
 }
-

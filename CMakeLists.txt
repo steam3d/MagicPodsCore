@@ -107,6 +107,7 @@ add_executable(magicpodscore
     src/device/Device.cpp
 
     src/dbus/DBusDeviceInfo.cpp
+    src/dbus/DBusBtAdapter.cpp
     src/dbus/DBusService.cpp
 
     src/ble_ads/DBusBasedBleAdvertisingService.cpp
