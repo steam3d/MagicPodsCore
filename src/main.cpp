@@ -49,6 +49,7 @@ nlohmann::json MakeGetActiveDeviceInfoResponse(DevicesInfoFetcher& devicesInfoFe
 nlohmann::json MakeGetDefaultBluetoothAdapterResponse(DevicesInfoFetcher& devicesInfoFetcher) {
     auto responseJson = nlohmann::json::object();
     auto defaultBluetoothJson = nlohmann::json::object();
+    // If no Bluetooth adapter is available, the UI still receives "enabled: false".
     defaultBluetoothJson["enabled"] = devicesInfoFetcher.IsBluetoothAdapterPowered();
     responseJson["defaultbluetooth"] = defaultBluetoothJson;
     return responseJson;

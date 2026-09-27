@@ -33,6 +33,7 @@ namespace MagicPodsCore {
 
     public:
         explicit DBusDeviceInfo(const sdbus::ObjectPath& objectPath, const std::map<std::string, std::map<std::string, sdbus::Variant>>& interfaces);
+        ~DBusDeviceInfo();
 
         DBusDeviceInfo(const DBusDeviceInfo& info) = delete;
         DBusDeviceInfo(DBusDeviceInfo&& info) noexcept = delete;
@@ -99,7 +100,12 @@ namespace MagicPodsCore {
         }
 
     private:
+        void StopListening();
         static std::array<unsigned short, 2> ParseVidPid(const std::string& modalias);
+
+        // DBusService stops device signals before notifying listeners that the
+        // device was removed.
+        friend class DBusService;
     };
 
 }

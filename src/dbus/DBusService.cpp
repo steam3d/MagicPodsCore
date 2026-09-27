@@ -3,32 +3,63 @@
 // License: GPL-3.0
 
 #include "./dbus/DBusService.h"
+#include "Logger.h"
+
+#include <algorithm>
+#include <regex>
+#include <utility>
 
 namespace MagicPodsCore {
 
-    DBusService::DBusService() : _rootProxy{sdbus::createProxy("org.bluez", "/")},  _defaultBluetoothAdapterProxy{sdbus::createProxy("org.bluez", "/org/bluez/hci0")} {
+    namespace {
+        constexpr auto BLUEZ_ADAPTER_INTERFACE = "org.bluez.Adapter1";
+        constexpr auto BLUEZ_DEVICE_INTERFACE = "org.bluez.Device1";
+        constexpr auto DBUS_OBJECT_MANAGER_INTERFACE = "org.freedesktop.DBus.ObjectManager";
+    }
+
+    DBusService::DBusService() : _rootProxy{sdbus::createProxy("org.bluez", "/")} {
         //TODO: See comment DeviceFetcher.cpp
-        _rootProxy->uponSignal("InterfacesAdded").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces) {
-            TryCreateDevice(objectPath, interfaces);
-            TryUpdateInterfaceAddedForDevice(objectPath, interfaces);
+        _rootProxy->uponSignal("InterfacesAdded").onInterface(DBUS_OBJECT_MANAGER_INTERFACE).call([this](sdbus::ObjectPath objectPath, InterfaceMap interfaces) {
+            HandleInterfacesAdded(objectPath, interfaces);
         });
-        _rootProxy->uponSignal("InterfacesRemoved").onInterface("org.freedesktop.DBus.ObjectManager").call([this](sdbus::ObjectPath objectPath, std::vector<std::string> array) {
-            if (std::find(array.begin(), array.end(), "org.bluez.Device1") != array.end()) {
-                TryRemoveDevice(objectPath);
-            }
+        _rootProxy->uponSignal("InterfacesRemoved").onInterface(DBUS_OBJECT_MANAGER_INTERFACE).call([this](sdbus::ObjectPath objectPath, std::vector<std::string> interfaces) {
+            HandleInterfacesRemoved(objectPath, interfaces);
         });
         _rootProxy->finishRegistration();
 
-        _defaultBluetoothAdapterProxy->uponSignal("PropertiesChanged").onInterface("org.freedesktop.DBus.Properties").call([this](std::string interfaceName, std::map<std::string, sdbus::Variant> values, std::vector<std::string> stringArray) {
-            if (values.contains("Powered")) {
-                _isBluetoothAdapterPowered.SetValue(values["Powered"].get<bool>());
-            }
-        });
-        _defaultBluetoothAdapterProxy->finishRegistration();
-
-        _isBluetoothAdapterPowered.SetValue(_defaultBluetoothAdapterProxy->getProperty("Powered").onInterface("org.bluez.Adapter1").get<bool>());
-
         FetchDevices();
+    }
+
+    DBusService::~DBusService() {
+        // Stop ObjectManager callbacks before the objects used by them are destroyed.
+        _rootProxy.reset();
+    }
+
+    void DBusService::HandleInterfacesAdded(const sdbus::ObjectPath& objectPath, const InterfaceMap& interfaces) {
+        try {
+            if (interfaces.contains(BLUEZ_ADAPTER_INTERFACE)) {
+                _bluetoothAdapter.AddAdapter(objectPath);
+            }
+            TryCreateDevice(objectPath, interfaces);
+            TryUpdateInterfaceAddedForDevice(objectPath, interfaces);
+        }
+        catch (const std::exception& error) {
+            Logger::Error("Failed to handle BlueZ InterfacesAdded for %s: %s", objectPath.c_str(), error.what());
+        }
+    }
+
+    void DBusService::HandleInterfacesRemoved(const sdbus::ObjectPath& objectPath, const std::vector<std::string>& interfaces) {
+        try {
+            if (std::find(interfaces.begin(), interfaces.end(), BLUEZ_DEVICE_INTERFACE) != interfaces.end()) {
+                TryRemoveDevice(objectPath);
+            }
+            if (std::find(interfaces.begin(), interfaces.end(), BLUEZ_ADAPTER_INTERFACE) != interfaces.end()) {
+                _bluetoothAdapter.RemoveAdapter(objectPath);
+            }
+        }
+        catch (const std::exception& error) {
+            Logger::Error("Failed to handle BlueZ InterfacesRemoved for %s: %s", objectPath.c_str(), error.what());
+        }
     }
 
     std::set<std::shared_ptr<DBusDeviceInfo>> DBusService::GetAllDevices() {
@@ -44,70 +75,74 @@ namespace MagicPodsCore {
     }
 
     void DBusService::EnableBluetoothAdapter() {
-        _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke([this](const sdbus::Error* err) {});
+        _bluetoothAdapter.SetPowered(true);
     }
 
     void DBusService::EnableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback) {
-        _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(true).uponReplyInvoke(callback);
+        _bluetoothAdapter.SetPoweredAsync(true, std::move(callback));
     }
 
     void DBusService::DisableBluetoothAdapter() {
-        _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke([this](const sdbus::Error* err) {});
+        _bluetoothAdapter.SetPowered(false);
     }
 
     void DBusService::DisableBluetoothAdapterAsync(std::function<void(const sdbus::Error*)>&& callback) {
-        _defaultBluetoothAdapterProxy->setPropertyAsync("Powered").onInterface("org.bluez.Adapter1").toValue(false).uponReplyInvoke(callback);
+        _bluetoothAdapter.SetPoweredAsync(false, std::move(callback));
     }
 
     void DBusService::SetDiscoveryFilter(const std::map<std::string, sdbus::Variant> &filter) {
-        if (!_defaultBluetoothAdapterProxy) {
-            return;
-        }
-        _defaultBluetoothAdapterProxy->callMethod("SetDiscoveryFilter").onInterface("org.bluez.Adapter1").withArguments(filter);
+        _bluetoothAdapter.SetDiscoveryFilter(filter);
     }
 
     void DBusService::SetDiscoveryFilterAsync(const std::map<std::string, sdbus::Variant> &filter, std::function<void(const sdbus::Error *)> &&callback) {
-        if (!_defaultBluetoothAdapterProxy) {
-            if (callback) {
-                callback(nullptr);
-            }
-            return;
-        }
-        _defaultBluetoothAdapterProxy->callMethodAsync("SetDiscoveryFilter").onInterface("org.bluez.Adapter1").withArguments(filter).uponReplyInvoke(callback);
+        _bluetoothAdapter.SetDiscoveryFilterAsync(filter, std::move(callback));
     }
 
     void DBusService::StartDiscovery() {
-        if (!_defaultBluetoothAdapterProxy) {
-            return;
-        }
-        _defaultBluetoothAdapterProxy->callMethod("StartDiscovery").onInterface("org.bluez.Adapter1");
+        _bluetoothAdapter.StartDiscovery();
     }
 
     void DBusService::StartDiscoveryAsync(std::function<void(const sdbus::Error*)>&& callback) {
-        _defaultBluetoothAdapterProxy->callMethodAsync("StartDiscovery").onInterface("org.bluez.Adapter1").uponReplyInvoke(callback);
+        _bluetoothAdapter.StartDiscoveryAsync(std::move(callback));
     }
 
     void DBusService::StopDiscovery() {
-        _defaultBluetoothAdapterProxy->callMethod("StopDiscovery").onInterface("org.bluez.Adapter1").dontExpectReply();
+        _bluetoothAdapter.StopDiscovery();
     }
 
     void DBusService::StopDiscoveryAsync(std::function<void(const sdbus::Error*)>&& callback) {
-        _defaultBluetoothAdapterProxy->callMethodAsync("StopDiscovery").onInterface("org.bluez.Adapter1").uponReplyInvoke(callback);
+        _bluetoothAdapter.StopDiscoveryAsync(std::move(callback));
     }
 
     void DBusService::FetchDevices() {
-        std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>> managedObjects{};
-        _rootProxy->callMethod("GetManagedObjects").onInterface("org.freedesktop.DBus.ObjectManager").storeResultsTo<std::map<sdbus::ObjectPath, std::map<std::string, std::map<std::string, sdbus::Variant>>>>(managedObjects);
+        std::map<sdbus::ObjectPath, InterfaceMap> managedObjects{};
+        try {
+            _rootProxy->callMethod("GetManagedObjects").onInterface(DBUS_OBJECT_MANAGER_INTERFACE).storeResultsTo<std::map<sdbus::ObjectPath, InterfaceMap>>(managedObjects);
+        }
+        catch (const sdbus::Error& error) {
+            Logger::Error("Failed to enumerate BlueZ objects: %s", error.what());
+            return;
+        }
 
         _knownDevices.clear();
+        _pairedDevices.clear();
+
+        // Discover adapters first so device operations immediately have a target.
+        for (const auto& [objectPath, interfaces] : managedObjects) {
+            if (interfaces.contains(BLUEZ_ADAPTER_INTERFACE)) {
+                _bluetoothAdapter.AddAdapter(objectPath);
+            }
+        }
 
         for (const auto& [objectPath, interfaces] : managedObjects) {
             TryCreateDevice(objectPath, interfaces);
         }
     }
 
-    std::shared_ptr<DBusDeviceInfo> DBusService::TryCreateDevice(sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces) {
-        const std::regex DEVICE_INSTANCE_RE{"^/org/bluez/hci[0-9]/dev(_[0-9A-F]{2}){6}$"};
+    std::shared_ptr<DBusDeviceInfo> DBusService::TryCreateDevice(
+        const sdbus::ObjectPath& objectPath,
+        const InterfaceMap& interfaces) {
+        const std::regex DEVICE_INSTANCE_RE{"^/org/bluez/hci[0-9]+/dev(_[0-9A-F]{2}){6}$"};
         std::smatch match;
         
         if (std::regex_match(objectPath, match, DEVICE_INSTANCE_RE)) {
@@ -142,9 +177,13 @@ namespace MagicPodsCore {
         return nullptr;
     }
 
-    bool DBusService::TryRemoveDevice(sdbus::ObjectPath objectPath) {
+    bool DBusService::TryRemoveDevice(const sdbus::ObjectPath& objectPath) {
         if (_knownDevices.contains(objectPath)) {
-            const auto& deviceInfo = _knownDevices.at(objectPath);
+            const auto deviceInfo = _knownDevices.at(objectPath);
+
+            // Device removal tears down subscribers which may otherwise race a
+            // PropertiesChanged callback. Join the proxy event loop first.
+            deviceInfo->StopListening();
 
             _onDeviceRemovedEvent.FireEvent(deviceInfo);
 
@@ -158,9 +197,11 @@ namespace MagicPodsCore {
         return false;
     }
 
-    bool DBusService::TryUpdateInterfaceAddedForDevice(sdbus::ObjectPath objectPath, std::map<std::string, std::map<std::string, sdbus::Variant>> interfaces)
+    bool DBusService::TryUpdateInterfaceAddedForDevice(
+        const sdbus::ObjectPath& objectPath,
+        const InterfaceMap& interfaces)
     {
-        const std::regex DEVICE_INSTANCE_RE{"^/org/bluez/hci[0-9]/dev(_[0-9A-F]{2}){6}$"};
+        const std::regex DEVICE_INSTANCE_RE{"^/org/bluez/hci[0-9]+/dev(_[0-9A-F]{2}){6}$"};
         std::smatch match;
         
         if (std::regex_match(objectPath, match, DEVICE_INSTANCE_RE)) {
@@ -173,7 +214,7 @@ namespace MagicPodsCore {
         return false;
     }
     
-    bool DBusService::TryUpdateInterfaceRemovedForDevice(sdbus::ObjectPath objectPath)
+    bool DBusService::TryUpdateInterfaceRemovedForDevice(const sdbus::ObjectPath& objectPath)
     {
         return false;
     }
