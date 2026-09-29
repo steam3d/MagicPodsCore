@@ -56,9 +56,10 @@ namespace MagicPodsCore
         _onAnimationTriggered.FireEvent(json);
     }
 
-    std::unique_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<DBusBasedBleAdvertisingService> bleService)
+    std::shared_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<DBusBasedBleAdvertisingService> bleService)
     {
-        auto device = std::make_unique<AapDevice>(deviceInfo, audioClient, settingsService, bleService);
+        // Shared from the start, so Init() can already hand a weak reference to the deferred client restart.
+        auto device = std::make_shared<AapDevice>(deviceInfo, audioClient, settingsService, bleService);
 
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapBatteryCapability>(*device));

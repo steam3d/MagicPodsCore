@@ -14,9 +14,10 @@ namespace MagicPodsCore
     {
     }
 
-    std::unique_ptr<BhfDevice> BhfDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService)
+    std::shared_ptr<BhfDevice> BhfDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService)
     {
-        auto device = std::make_unique<BhfDevice>(deviceInfo, audioClient, settingsService);
+        // Shared from the start, so Init() can already hand a weak reference to the deferred client restart.
+        auto device = std::make_shared<BhfDevice>(deviceInfo, audioClient, settingsService);
 
         device->capabilities.push_back(std::make_unique<BhfBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));

@@ -41,6 +41,12 @@ namespace MagicPodsCore {
     {
     }
 
+    void Device::SetClientState(ClientState state)
+    {
+        if (_clientState.exchange(state) != state)
+            _onClientStateChangedEvent.FireEvent(state);
+    }
+
     void Device::Init()
     {
         Logger::Info("%s: Init", GetName().c_str());
@@ -48,7 +54,18 @@ namespace MagicPodsCore {
 
         if (_client){
             clientReceivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe([this](size_t id, const std::vector<unsigned char> &data)
-            { OnResponseDataReceived(data); });
+            {
+                // The link carries data, so whatever it took to get here worked
+                _clientReconnectAttempts = 0;
+                SetClientState(ClientState::Connected);
+                OnResponseDataReceived(data);
+            });
+
+            clientConnectionLostEventId = _client->GetOnConnectionLostEvent().Subscribe([this](size_t id, const std::string &address)
+            {
+                Logger::Info("%s: client connection lost while still reported as connected", GetName().c_str());
+                RestartClientAfterConnectionLost();
+            });
         }
 
         _deviceHandsFreeBatteryStatusChangedEvent = _deviceInfo->GetHandsFreeBatteryStatus().GetEvent().Subscribe([this](size_t listener_id, uint8_t newBatteryValue) {
@@ -64,16 +81,14 @@ namespace MagicPodsCore {
             }
             if (_client){
                 if (_connected){
-                    _client->Start([this](Client& _client) {
-                        for (auto& data: this->_clientStartData){
-                            _client.SendData(data);
-                            std::this_thread::sleep_for(std::chrono::milliseconds(300));
-                        }
-                    });
+                    // Attempts spent on the previous connection are not held against the new one
+                    _clientReconnectAttempts = 0;
+                    StartClient();
                     Logger::Info("%s _client started from PropertiesChanged", GetName().c_str());
                 }
                 else{
                     _client->Stop();
+                    SetClientState(ClientState::Disconnected);
                     Logger::Info("%s _client stopped from PropertiesChanged", GetName().c_str());
                 }
             }
@@ -82,14 +97,83 @@ namespace MagicPodsCore {
         _connected = _deviceInfo->GetConnectionStatus().GetValue();
         Logger::Debug("%s: Init:Connected %s",GetName().c_str(), _connected ? "true" : "false");
         if (_connected && _client){
-            _client->Start([this](Client& _client) {
-                for (auto& data: this->_clientStartData){
-                    _client.SendData(data);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(300));
-                }
-            });
+            StartClient();
             Logger::Info("%s _client started from Init", GetName().c_str());
         }
+    }
+
+    // Called on the reading thread of a dead connection or after a start which did not get through, both leave the device reported as connected with nothing talking to it
+    void Device::RestartClientAfterConnectionLost()
+    {
+        // A disconnect is already on its way and will start the client again by itself.
+        if (!_connected) {
+            SetClientState(ClientState::Disconnected);
+            return;
+        }
+
+        SetClientState(ClientState::Reconnecting);
+
+        if (_clientReconnectAttempts >= MAX_CLIENT_RECONNECT_ATTEMPTS){
+            Logger::Info("%s: client did not stay connected, dropping client capabilities", GetName().c_str());
+            SetClientState(ClientState::Disconnected);
+            return;
+        }
+
+        // One restart at a time. The link dying and a failed start can both ask for one while a retry is already waiting, the waiting one covers them.
+        if (_clientRestartPending.exchange(true))
+            return;
+
+        int attempt = ++_clientReconnectAttempts;
+        Logger::Info("%s: restarting the client, attempt %d of %d", GetName().c_str(), attempt, MAX_CLIENT_RECONNECT_ATTEMPTS);
+
+        // The wait and the retry run on a thread of their own which holds the device only weakly: the caller is the reader of the dead socket or the DBus dispatcher, neither may block for the second the peer needs,
+        // and the device may be gone by the time it has passed. Locking the reference keeps the device alive for the attempt, an expired one means there is nothing left to restart.
+        std::thread([weakDevice = weak_from_this()]() {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+
+            auto device = weakDevice.lock();
+            if (!device)
+                return;
+
+            device->_clientRestartPending = false;
+            if (!device->_connected)
+                return;
+
+            device->StartClient();
+        }).detach();
+    }
+
+    bool Device::TryStartClient()
+    {
+        _client->Start([this](Client& client) {
+            for (auto& data: this->_clientStartData){
+                // Some devices send the start data to discover something and have no use for the rest of it once answered
+                if (ShouldStopSendingStartData()){
+                    Logger::Debug("%s: start data is no longer needed, skipping the rest", GetName().c_str());
+                    break;
+                }
+
+                client.SendData(data);
+                std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            }
+        });
+
+        return _client->IsStarted();
+    }
+
+    void Device::StartClient()
+    {
+        if (_client->IsStarted()) {
+            SetClientState(ClientState::Connected);
+            return;
+        }
+
+        // The adapter reports the device connected before its RFCOMM service accepts anything, so a start right after a reconnect can fail outright.
+        // The calling thread makes one attempt, as it always did, and the retries with their waits are handed off so the DBus dispatcher is never held up by them.
+        if (TryStartClient())
+            SetClientState(ClientState::Connected);
+        else
+            RestartClientAfterConnectionLost();
     }
 
     Device::~Device()
@@ -103,6 +187,7 @@ namespace MagicPodsCore {
         if (_client) {
             _client->Stop();
             _client->GetOnReceivedDataEvent().Unsubscribe(clientReceivedDataEventId);
+            _client->GetOnConnectionLostEvent().Unsubscribe(clientConnectionLostEventId);
         }
         Logger::Debug("Device::~Device");
 

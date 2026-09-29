@@ -16,7 +16,7 @@ namespace MagicPodsCore
     {
     private:
         size_t responseDataRecivedId;
-        size_t onConnectedPropertyChangedId;
+        size_t onClientStateChangedId;
     
     protected:
         GalaxyBudsDevice& device;

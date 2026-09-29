@@ -13,6 +13,7 @@ add_executable(magicpodscore
 
     src/tests/TestsSgb.cpp
     src/tests/TestsAapBle.cpp
+    src/tests/TestsPbp.cpp
 
     src/client/Client.cpp
     src/pulseaudio/PulseAudioClient.cpp
@@ -59,6 +60,17 @@ add_executable(magicpodscore
     src/sdk/sgb/GalaxyBudsHelper.cpp
     src/sdk/sgb/GalaxyBudsPacket.cpp
 
+    src/sdk/pbp/watchers/PixelBudsAncWatcher.cpp
+    src/sdk/pbp/watchers/PixelBudsBatteryWatcher.cpp
+    src/sdk/pbp/setters/PixelBudsSetAnc.cpp
+    src/sdk/pbp/Crc32.cpp
+    src/sdk/pbp/Hdlc.cpp
+    src/sdk/pbp/MaestroAddress.cpp
+    src/sdk/pbp/PixelBudsHelper.cpp
+    src/sdk/pbp/ProtoWire.cpp
+    src/sdk/pbp/PwRpcPacket.cpp
+    src/sdk/pbp/PwVarint.cpp
+
     src/device/capabilities/aap/AapCapability.cpp
     src/device/capabilities/aap/AapAncCapability.cpp
     src/device/capabilities/aap/AapBatteryCapability.cpp
@@ -79,12 +91,17 @@ add_executable(magicpodscore
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsBatteryCapability.cpp
 
+    src/device/capabilities/pbp/PixelBudsCapability.cpp
+    src/device/capabilities/pbp/PixelBudsAncCapability.cpp
+    src/device/capabilities/pbp/PixelBudsBatteryCapability.cpp
+
     src/device/capabilities/bhf/BhfBatteryCapability.cpp
     src/device/capabilities/cmn/CmnBluetoothCodecCapability.cpp
 
     src/device/capabilities/Capability.cpp
     src/device/AapDevice.cpp
     src/device/GalaxyBudsDevice.cpp
+    src/device/PixelBudsDevice.cpp
     src/device/BhfDevice.cpp
     src/device/DeviceBattery.cpp
     src/device/Device.cpp

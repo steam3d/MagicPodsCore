@@ -28,10 +28,12 @@ namespace MagicPodsCore
                 OnReceivedData(data);
             });
 
-        onConnectedPropertyChangedId = this->device.GetConnectedPropertyChangedEvent().Subscribe([this](size_t id, bool isConnected)
+        onClientStateChangedId = this->device.GetClientStateChangedEvent().Subscribe([this](size_t id, ClientState state)
             {
-                if (!isConnected)
+                if (state == ClientState::Disconnected) {
                     Reset();
+                    _onChanged.FireEvent(*this);
+                }
             });
     }
 

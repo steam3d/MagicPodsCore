@@ -1,6 +1,6 @@
 # MagicPodsCore for Linux
 
-Backend service exposing a WebSocket API for managing AirPods, Beats, and Galaxy Buds.
+Backend service exposing a WebSocket API for managing AirPods, Beats, Galaxy Buds, and Pixel Buds.
 
 ## 🎨 Features
 
@@ -19,23 +19,23 @@ Backend service exposing a WebSocket API for managing AirPods, Beats, and Galaxy
 
 ## 🎧 Headphones supported
 
-| Apple            | Beats                  | Samsung           |
-| ---------------- | ---------------------- | ----------------- |
-| AirPods 1        | PowerBeats Pro         | Galaxy Buds       |
-| AirPods 2        | PowerBeats Pro 2       | Galaxy Buds Plus  |
-| AirPods 3        | PowerBeats 3           | Galaxy Buds Live  |
-| AirPods 4        | PowerBeats 4           | Galaxy Buds Pro   |
-| AirPods 4 (ANC)  | Beats Fit Pro          | Galaxy Buds 2     |
-| AirPods Pro      | Beats Studio Buds      | Galaxy Buds 2 Pro |
-| AirPods Pro 2    | Beats Studio Buds Plus | Galaxy Buds Fe    |
-| AirPods Pro 3    | Beats Studio Pro       | Galaxy Buds 3     |
-| AirPods Max      | Beats Solo 3           | Galaxy Buds 3 Pro |
-| AirPods Max 2024 | Beats Solo Pro         |                   |
-| AirPods Max 2    | Beats Studio 3         |                   |
-|                  | Beats X                |                   |
-|                  | Beats Flex             |                   |
-|                  | Beats Solo Buds        |                   |
-|                  | Powerbeats Fit         |                   |
+| Apple            | Beats                  | Samsung           | Google           |
+| ---------------- | ---------------------- | ----------------- | ---------------- |
+| AirPods 1        | PowerBeats Pro         | Galaxy Buds       | Pixel Buds Pro   |
+| AirPods 2        | PowerBeats Pro 2       | Galaxy Buds Plus  | Pixel Buds Pro 2 |
+| AirPods 3        | PowerBeats 3           | Galaxy Buds Live  |                  |
+| AirPods 4        | PowerBeats 4           | Galaxy Buds Pro   |                  |
+| AirPods 4 (ANC)  | Beats Fit Pro          | Galaxy Buds 2     |                  |
+| AirPods Pro      | Beats Studio Buds      | Galaxy Buds 2 Pro |                  |
+| AirPods Pro 2    | Beats Studio Buds Plus | Galaxy Buds Fe    |                  |
+| AirPods Pro 3    | Beats Studio Pro       | Galaxy Buds 3     |                  |
+| AirPods Max      | Beats Solo 3           | Galaxy Buds 3 Pro |                  |
+| AirPods Max 2024 | Beats Solo Pro         |                   |                  |
+| AirPods Max 2    | Beats Studio 3         |                   |                  |
+|                  | Beats X                |                   |                  |
+|                  | Beats Flex             |                   |                  |
+|                  | Beats Solo Buds        |                   |                  |
+|                  | Powerbeats Fit         |                   |                  |
 
 Some of the headphones in the table do not have or do not support the noise control feature.
 

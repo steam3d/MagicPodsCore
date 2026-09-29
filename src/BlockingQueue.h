@@ -20,17 +20,17 @@ namespace MagicPodsCore {
         std::queue<TDataType> _queue{};
         std::mutex _putTakeMutex{};
         std::condition_variable _conditionNotEmptyQueue{};
-        bool _isDestructed{false};
+        bool _isClosed{false};
 
     public:
         void Put(const TDataType& newValue);
+        // Blocks until a value is available or the queue is closed, which returns nothing.
         std::optional<TDataType> Take();
+        // Wakes every blocked Take() and makes it return nothing until Open() is called. The queued values are kept.
+        void Close();
+        void Open();
         ~BlockingQueue(){
-            {
-                std::unique_lock<std::mutex> lock{_putTakeMutex};
-                _isDestructed = true;
-            }
-            _conditionNotEmptyQueue.notify_all();
+            Close();
             Logger::Debug("~BlockingQueue");
         }
     };
@@ -46,14 +46,29 @@ namespace MagicPodsCore {
     std::optional<TDataType> BlockingQueue<TDataType>::Take() {
         std::unique_lock<std::mutex> lock{_putTakeMutex};
         _conditionNotEmptyQueue.wait(lock, [this]() {
-            return !_queue.empty() || _isDestructed;
+            return !_queue.empty() || _isClosed;
         });
-        if (_isDestructed)
+        if (_isClosed)
             return std::nullopt;
 
         const auto value = _queue.front();
         _queue.pop();
         return value;
+    }
+
+    template<typename TDataType>
+    void BlockingQueue<TDataType>::Close() {
+        {
+            std::unique_lock<std::mutex> lock{_putTakeMutex};
+            _isClosed = true;
+        }
+        _conditionNotEmptyQueue.notify_all();
+    }
+
+    template<typename TDataType>
+    void BlockingQueue<TDataType>::Open() {
+        std::unique_lock<std::mutex> lock{_putTakeMutex};
+        _isClosed = false;
     }
 
 }

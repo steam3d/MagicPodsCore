@@ -29,9 +29,10 @@ namespace MagicPodsCore
         _client->SendData(_packet.Encode(setter.Id, setter.Payload));
     }
 
-    std::unique_ptr<GalaxyBudsDevice> GalaxyBudsDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo,std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model)
+    std::shared_ptr<GalaxyBudsDevice> GalaxyBudsDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo,std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model)
     {
-        auto device = std::make_unique<GalaxyBudsDevice>(deviceInfo, audioClient, settingsService, model);  
+        // Shared from the start, so Init() can already hand a weak reference to the deferred client restart.
+        auto device = std::make_shared<GalaxyBudsDevice>(deviceInfo, audioClient, settingsService, model);  
 
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<GalaxyBudsBatteryCapability>(*device));

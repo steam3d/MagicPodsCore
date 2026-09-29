@@ -13,6 +13,7 @@
 #include "device/enums/DeviceAncModes.h"
 #include "tests/TestsSgb.h"
 #include "tests/TestsAapBle.h"
+#include "tests/TestsPbp.h"
 #include "Logger.h"
 #include "Config.h"
 #include "settings/SettingsService.h"
@@ -490,6 +491,7 @@ int main(int argc, char** argv) {
 
             #ifdef DEBUG
             TestsSgb sgb;
+            TestsPbp pbp;
             TestsAapBle aapBle;
             #endif
 

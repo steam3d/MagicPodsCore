@@ -7,9 +7,11 @@
 #include "BtVendorIds.h"
 #include "sdk/aap/AapHelper.h"
 #include "sdk/sgb/GalaxyBudsHelper.h"
+#include "sdk/pbp/PixelBudsHelper.h"
 #include "StringUtils.h"
 #include "Logger.h"
 #include "device/GalaxyBudsDevice.h"
+#include "device/PixelBudsDevice.h"
 #include "device/AapDevice.h"
 #include "device/BhfDevice.h"
 
@@ -189,6 +191,15 @@ DevicesInfoFetcher::~DevicesInfoFetcher()
                  ((keyPair = GalaxyBudsHelper::SearchModelColor(deviceInfo->GetUuids(), deviceInfo->GetName())).first != GalaxyBudsModelIds::Unknown))
         {
             auto newDevice = GalaxyBudsDevice::Create(deviceInfo,_audioClient, _settingsService, static_cast<unsigned short>(keyPair.first));
+            newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
+                TrySelectNewActiveDevice();
+            });
+            return newDevice;
+        }
+        else if (PixelBudsModelIds model = PixelBudsHelper::SearchModel(deviceInfo->GetUuids(), deviceInfo->GetClass(), deviceInfo->GetName());
+                 model != PixelBudsModelIds::Unknown)
+        {
+            auto newDevice = PixelBudsDevice::Create(deviceInfo, _audioClient, _settingsService, static_cast<unsigned short>(model));
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
