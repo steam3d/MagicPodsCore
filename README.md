@@ -26,14 +26,14 @@ Backend service exposing a WebSocket API for managing AirPods, Beats, Galaxy Bud
 | AirPods 3        | PowerBeats 3           | Galaxy Buds Live  |                  |
 | AirPods 4        | PowerBeats 4           | Galaxy Buds Pro   |                  |
 | AirPods 4 (ANC)  | Beats Fit Pro          | Galaxy Buds 2     |                  |
-| AirPods Pro      | Beats Studio Buds      | Galaxy Buds 2 Pro |                  |
-| AirPods Pro 2    | Beats Studio Buds Plus | Galaxy Buds Fe    |                  |
-| AirPods Pro 3    | Beats Studio Pro       | Galaxy Buds 3     |                  |
-| AirPods Max      | Beats Solo 3           | Galaxy Buds 3 Pro |                  |
-| AirPods Max 2024 | Beats Solo Pro         |                   |                  |
-| AirPods Max 2    | Beats Studio 3         |                   |                  |
-|                  | Beats X                |                   |                  |
-|                  | Beats Flex             |                   |                  |
+| AirPods 5        | Beats Studio Buds      | Galaxy Buds 2 Pro |                  |
+| AirPods 5 (WCC)  | Beats Studio Buds Plus | Galaxy Buds FE    |                  |
+| AirPods Pro      | Beats Studio Pro       | Galaxy Buds 3     |                  |
+| AirPods Pro 2    | Beats Solo 3           | Galaxy Buds 3 Pro |                  |
+| AirPods Pro 3    | Beats Solo Pro         |                   |                  |
+| AirPods Max      | Beats Studio 3         |                   |                  |
+| AirPods Max 2024 | Beats X                |                   |                  |
+| AirPods Max 2    | Beats Flex             |                   |                  |
 |                  | Beats Solo Buds        |                   |                  |
 |                  | Powerbeats Fit         |                   |                  |
 
