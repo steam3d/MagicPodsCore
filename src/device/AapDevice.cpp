@@ -17,6 +17,7 @@
 #include "capabilities/aap/AapAdaptiveAudioNoiseCapability.h"
 #include "capabilities/aap/AapBatteryCapability.h"
 #include "capabilities/aap/AppAnimationCapability.h"
+#include "capabilities/aap/AapEarDetectionCapability.h"
 #include "capabilities/aap/AapHighResolutionMicrophoneCapability.h"
 #include "sdk/aap/setters/AapInit.h"
 #include "sdk/aap/setters/AapInitExt.h"
@@ -34,13 +35,14 @@ namespace MagicPodsCore
     AapDevice::AapDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo,
         std::shared_ptr<PulseAudioClient> audioClient,
         std::shared_ptr<SettingsService> settingsService,
-        std::shared_ptr<DBusBasedBleAdvertisingService> bleService) : Device(deviceInfo, audioClient, settingsService), _bleService{bleService}
+        std::shared_ptr<MediaController> mediaController,
+        std::shared_ptr<DBusBasedBleAdvertisingService> bleService) : Device(deviceInfo, audioClient, settingsService, mediaController), _bleService{bleService}
     {
         _getOnAdReceivedEventId = _bleService->GetOnAdReceivedEvent().Subscribe([this](size_t id,  const MagicPodsCore::BleAdertisingData& adData){
             _onLeDataReceived.FireEvent(adData);
         });
     }
-    
+
     AapDevice::~AapDevice()
     {
         if (_bleService && _getOnAdReceivedEventId != 0)
@@ -57,10 +59,10 @@ namespace MagicPodsCore
         _onAnimationTriggered.FireEvent(json);
     }
 
-    std::shared_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<DBusBasedBleAdvertisingService> bleService)
+    std::shared_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController, std::shared_ptr<DBusBasedBleAdvertisingService> bleService)
     {
         // Shared from the start, so Init() can already hand a weak reference to the deferred client restart.
-        auto device = std::make_shared<AapDevice>(deviceInfo, audioClient, settingsService, bleService);
+        auto device = std::make_shared<AapDevice>(deviceInfo, audioClient, settingsService, mediaController, bleService);
 
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapBatteryCapability>(*device));
@@ -77,6 +79,7 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapMuteMicrophoneEndCallCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAdaptiveAudioNoiseCapability>(*device));
         device->capabilities.push_back(std::make_unique<AppAnimationCapability>(*device));
+        device->capabilities.push_back(std::make_unique<AapEarDetectionCapability>(*device));
         if (AapHighResolutionMicrophoneCapability::IsSupported(deviceInfo->GetProductId()))
             device->capabilities.push_back(std::make_unique<AapHighResolutionMicrophoneCapability>(*device));
 
@@ -85,10 +88,10 @@ namespace MagicPodsCore
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown1}.Request());
         if (AapInitExt::IsSupported(deviceInfo->GetProductId()))
             device->_clientStartData.push_back(AapInitExt{}.Request());
-        
+
         if (!device->LoadSettingString("irk").has_value() || !device->LoadSettingString("enc").has_value())
             device->_clientStartData.push_back(AapPrivateKeys{}.Request());
-        
+
         //TODO: Add initData to client
         device->_client = Client::CreateL2CAP(deviceInfo->GetAddress(), 0x1001);
 

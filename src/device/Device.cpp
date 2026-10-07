@@ -37,7 +37,7 @@ namespace MagicPodsCore {
         return name;
     }
 
-    Device::Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService) : _deviceInfo{deviceInfo}, _audioClient{audioClient}, _settingsService{settingsService} 
+    Device::Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController) : _deviceInfo{deviceInfo}, _audioClient{audioClient}, _settingsService{settingsService}, _mediaController{mediaController}
     {
     }
 
@@ -244,6 +244,20 @@ namespace MagicPodsCore {
             return v->get();
 
         return std::nullopt;        
+    }
+
+    void Device::SaveSettingBool(const std::string &settingName, const bool value)
+    {
+        _settingsService->SaveSetting(GetContainerName(), settingName, value);
+    }
+
+    std::optional<bool> Device::LoadSettingBool(const std::string &settingName)
+    {
+        toml::node_view<toml::node> value = _settingsService->GetSetting(GetContainerName(), settingName);
+        if (auto v = value.as_boolean())
+            return v->get();
+
+        return std::nullopt;
     }
 
     nlohmann::json Device::GetAsJson()

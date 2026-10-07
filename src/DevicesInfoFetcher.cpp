@@ -45,6 +45,7 @@ namespace MagicPodsCore {
 
     DevicesInfoFetcher::DevicesInfoFetcher(const std::shared_ptr<SettingsService> &settingsService): _settingsService{settingsService} {
         _audioClient = std::make_shared<PulseAudioClient>();
+        _mediaController = std::make_shared<MediaController>();
         _bleService = std::make_shared<DBusBasedBleAdvertisingService>(_dbusService);
         _onSettingsChangeId = _settingsService->GetOnSettingUpdateEvent().Subscribe([this](size_t id, const UpdatedSettingNotification& notification){
         if (notification.GetContainerName() == "magicpods" && notification.GetSettingName() == "animation")
@@ -179,7 +180,7 @@ DevicesInfoFetcher::~DevicesInfoFetcher()
         }
 
         if (AapHelper::IsAapDevice(deviceInfo->GetVendorId(), deviceInfo->GetProductId())){
-            auto newDevice = AapDevice::Create(deviceInfo, _audioClient, _settingsService, _bleService);
+            auto newDevice = AapDevice::Create(deviceInfo, _audioClient, _settingsService, _mediaController, _bleService);
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
@@ -190,7 +191,7 @@ DevicesInfoFetcher::~DevicesInfoFetcher()
                  GalaxyBudsHelper::IsGalaxyBudsDevice(deviceInfo->GetUuids()) &&
                  ((keyPair = GalaxyBudsHelper::SearchModelColor(deviceInfo->GetUuids(), deviceInfo->GetName())).first != GalaxyBudsModelIds::Unknown))
         {
-            auto newDevice = GalaxyBudsDevice::Create(deviceInfo,_audioClient, _settingsService, static_cast<unsigned short>(keyPair.first));
+            auto newDevice = GalaxyBudsDevice::Create(deviceInfo, _audioClient, _settingsService, _mediaController, static_cast<unsigned short>(keyPair.first));
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
@@ -199,7 +200,7 @@ DevicesInfoFetcher::~DevicesInfoFetcher()
         else if (PixelBudsModelIds model = PixelBudsHelper::SearchModel(deviceInfo->GetUuids(), deviceInfo->GetClass(), deviceInfo->GetName());
                  model != PixelBudsModelIds::Unknown)
         {
-            auto newDevice = PixelBudsDevice::Create(deviceInfo, _audioClient, _settingsService, static_cast<unsigned short>(model));
+            auto newDevice = PixelBudsDevice::Create(deviceInfo, _audioClient, _settingsService, _mediaController, static_cast<unsigned short>(model));
             newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });
@@ -209,7 +210,7 @@ DevicesInfoFetcher::~DevicesInfoFetcher()
         else if (auto uuids = deviceInfo->GetUuids();
                 std::find(uuids.begin(), uuids.end(), "0000111e-0000-1000-8000-00805f9b34fb") != uuids.end()) {
 
-                auto newDevice = BhfDevice::Create(deviceInfo,_audioClient, _settingsService);
+                auto newDevice = BhfDevice::Create(deviceInfo, _audioClient, _settingsService, _mediaController);
                 newDevice->GetConnectedPropertyChangedEvent().Subscribe([this](size_t listenerId, bool newValue) {
                 TrySelectNewActiveDevice();
             });

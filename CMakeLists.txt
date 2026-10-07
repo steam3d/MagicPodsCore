@@ -17,6 +17,7 @@ add_executable(magicpodscore
 
     src/client/Client.cpp
     src/pulseaudio/PulseAudioClient.cpp
+    src/media/MediaController.cpp
     src/audio/AacEldDecoder.cpp
     src/audio/AutomaticGainControl.cpp
     src/audio/VirtualMicrophone.cpp
@@ -58,6 +59,7 @@ add_executable(magicpodscore
     src/sdk/aap/watchers/AapMicrophoneWatcher.cpp
     src/sdk/aap/watchers/AapAdaptiveAudioNoiseWatcher.cpp
     src/sdk/aap/watchers/AapPrivateKeysWatcher.cpp
+    src/sdk/aap/watchers/AapEarDetectionWatcher.cpp
 
     src/sdk/sgb/watchers/GalaxyBudsAncWatcher.cpp
     src/sdk/sgb/watchers/GalaxyBudsBatteryWatcher.cpp
@@ -92,11 +94,13 @@ add_executable(magicpodscore
     src/device/capabilities/aap/AapMuteMicrophoneEndCallCapability.cpp
     src/device/capabilities/aap/AapAdaptiveAudioNoiseCapability.cpp
     src/device/capabilities/aap/AppAnimationCapability.cpp
+    src/device/capabilities/aap/AapEarDetectionCapability.cpp
     src/device/capabilities/aap/AapHighResolutionMicrophoneCapability.cpp
 
     src/device/capabilities/sgb/GalaxyBudsCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsBatteryCapability.cpp
+    src/device/capabilities/sgb/GalaxyBudsEarDetectionCapability.cpp
 
     src/device/capabilities/pbp/PixelBudsCapability.cpp
     src/device/capabilities/pbp/PixelBudsAncCapability.cpp

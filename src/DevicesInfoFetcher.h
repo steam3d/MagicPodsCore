@@ -8,6 +8,7 @@
 #include "Event.h"
 #include "./dbus/DBusService.h"
 #include "./pulseaudio/PulseAudioClient.h"
+#include "./media/MediaController.h"
 #include "./ble_ads/DBusBasedBleAdvertisingService.h"
 
 #include <string>
@@ -34,6 +35,7 @@ namespace MagicPodsCore {
     private:
         DBusService _dbusService{};
         std::shared_ptr<PulseAudioClient> _audioClient{};
+        std::shared_ptr<MediaController> _mediaController{};
         std::shared_ptr<DBusBasedBleAdvertisingService> _bleService{};
         std::shared_ptr<SettingsService> _settingsService{};
         size_t _onSettingsChangeId = 0;

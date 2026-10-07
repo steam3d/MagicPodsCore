@@ -168,8 +168,8 @@ namespace MagicPodsCore
         return probes;
     }
 
-    PixelBudsDevice::PixelBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model)
-        : Device(deviceInfo, audioClient, settingsService),
+    PixelBudsDevice::PixelBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController, unsigned short model)
+        : Device(deviceInfo, audioClient, settingsService, mediaController),
           _customProductId(model)
     {
         // The channel is not known in advance, GetSoftwareInfo is sent once and the answer carries the channel to use whichever one it was addressed to
@@ -187,10 +187,10 @@ namespace MagicPodsCore
         GetClientStateChangedEvent().Unsubscribe(_clientStateChangedId);
     }
 
-    std::shared_ptr<PixelBudsDevice> PixelBudsDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model)
+    std::shared_ptr<PixelBudsDevice> PixelBudsDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController, unsigned short model)
     {
         // Shared from the start, so Init() can already hand a weak reference to the deferred client restart.
-        auto device = std::make_shared<PixelBudsDevice>(deviceInfo, audioClient, settingsService, model);
+        auto device = std::make_shared<PixelBudsDevice>(deviceInfo, audioClient, settingsService, mediaController, model);
 
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<PixelBudsBatteryCapability>(*device));

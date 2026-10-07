@@ -10,14 +10,14 @@ namespace MagicPodsCore
 {
     void BhfDevice::OnResponseDataReceived(const std::vector<unsigned char> &data){}
 
-    BhfDevice::BhfDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService) : Device(deviceInfo, audioClient, settingsService)
+    BhfDevice::BhfDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController) : Device(deviceInfo, audioClient, settingsService, mediaController)
     {
     }
 
-    std::shared_ptr<BhfDevice> BhfDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService)
+    std::shared_ptr<BhfDevice> BhfDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController)
     {
         // Shared from the start, so Init() can already hand a weak reference to the deferred client restart.
-        auto device = std::make_shared<BhfDevice>(deviceInfo, audioClient, settingsService);
+        auto device = std::make_shared<BhfDevice>(deviceInfo, audioClient, settingsService, mediaController);
 
         device->capabilities.push_back(std::make_unique<BhfBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));

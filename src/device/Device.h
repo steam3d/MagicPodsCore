@@ -12,6 +12,7 @@
 #include "Logger.h"
 #include "dbus/DBusDeviceInfo.h"
 #include "pulseaudio/PulseAudioClient.h"
+#include "media/MediaController.h"
 #include "settings/SettingsService.h"
 
 #include <sdbus-c++/sdbus-c++.h>
@@ -33,6 +34,7 @@ namespace MagicPodsCore {
         std::shared_ptr<DBusDeviceInfo> _deviceInfo{};
         std::shared_ptr<PulseAudioClient> _audioClient{};
         std::shared_ptr<SettingsService> _settingsService{};
+        std::shared_ptr<MediaController> _mediaController{};
         // Read by the deferred restart off the DBus thread, so it is atomic like the attempt counter.
         std::atomic<bool> _connected{};
         Event<bool> _onConnectedPropertyChangedEvent{};
@@ -66,7 +68,7 @@ namespace MagicPodsCore {
         virtual bool ShouldStopSendingStartData() const { return false; }
 
     public:
-        Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService);
+        Device(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController);
         virtual ~Device(); //wrong
         // TODO: убрать возможность копирования
 
@@ -110,6 +112,16 @@ namespace MagicPodsCore {
             return _settingsService;
         }
 
+        void PauseMedia()
+        {
+            _mediaController->Pause();
+        }
+
+        void PlayMedia()
+        {
+            _mediaController->Play();
+        }
+
         ClientState GetClientState() const {
             return _clientState;
         }
@@ -144,6 +156,9 @@ namespace MagicPodsCore {
         
         void SaveSettingInt(const std::string &settingName, const int64_t value);
         std::optional<int64_t> LoadSettingInt(const std::string &settingName);
+
+        void SaveSettingBool(const std::string &settingName, const bool value);
+        std::optional<bool> LoadSettingBool(const std::string &settingName);
 
         nlohmann::json GetAsJson();
     };

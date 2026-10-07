@@ -14,6 +14,8 @@ namespace MagicPodsCore
         GalaxyBudsEarDetectionState Left;
         GalaxyBudsEarDetectionState Right;
 
+         GalaxyBudsEarDetectionStateArgs() = default;
+
         GalaxyBudsEarDetectionStateArgs(GalaxyBudsEarDetectionState left, GalaxyBudsEarDetectionState right)
             : Left(left), Right(right) {}
 
@@ -25,9 +27,9 @@ namespace MagicPodsCore
             return os.str();
         }
 
-        static bool AreStatesEqual(GalaxyBudsEarDetectionStateArgs state1, GalaxyBudsEarDetectionStateArgs state2)
+        bool AreStatesEqual(GalaxyBudsEarDetectionStateArgs state)
         {
-            return state1.Left == state2.Left && state1.Right == state2.Right;
-        }
+            return Left == state.Left && Right == state.Right;
+        }        
     };
 }

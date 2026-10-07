@@ -10,6 +10,7 @@ namespace MagicPodsCore
     enum class AapCmd : unsigned char
     {
         Battery = 0x04,
+        EarDetection = 0x06,
         // Request to change or response that setting in headphones was changed
         Settings = 0x09,
         Notifications = 0x0f,

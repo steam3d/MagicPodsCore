@@ -39,7 +39,7 @@ namespace MagicPodsCore
         static std::vector<std::vector<unsigned char>> CreateChannelProbes();
 
     public:
-        explicit PixelBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model);
+        explicit PixelBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController, unsigned short model);
         ~PixelBudsDevice() override;
 
         unsigned short GetProductId() const override
@@ -61,6 +61,6 @@ namespace MagicPodsCore
         // The buds answer on one channel only, it is resolved by the handshake after every connect.
         void SendRpc(uint32_t methodId, const std::vector<unsigned char> &payload);
 
-        static std::shared_ptr<PixelBudsDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, unsigned short model);
+        static std::shared_ptr<PixelBudsDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController, unsigned short model);
     };
 }
