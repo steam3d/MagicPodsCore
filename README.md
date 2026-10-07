@@ -67,7 +67,7 @@ Complete reference for the MagicPodsCore WebSocket JSON API.
 
 Example frontend projects using the MagicPodsCore:
 - [MagicPodsDecky](https://github.com/steam3d/MagicPodsDecky)
-- [MagicPodsPlasmoid](https://github.com/steam3d/MagicPodsPlasmoid)
+- [MagicPods for Linux](https://github.com/steam3d/MagicPodsLinux)
 
 ## 🧪 Ideas and bugs
 

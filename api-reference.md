@@ -463,6 +463,38 @@ Controls switching between noise control modes.
 | Bit 3 (8)  | WindCancellation  |
 | Bit 4 (16) | NoiseCancellation |
 
+##### Ear detection
+
+Automatically plays media when the headphones are worn and pauses media when one or both earbuds are removed.
+
+```json
+{
+  "earDetection": {
+    "readonly": false,
+    "selected": true,
+    "state": 1
+  }
+}
+```
+
+| Field      |      |
+| ---------- | ---- |
+| `selected` | bool |
+| `state`    | enum |
+| `readonly` | bool |
+
+| selected |         |
+| -------- | ------- |
+| `true`   | Enable  |
+| `false`  | Disable |
+
+| state |               |
+| ----- | ------------- |
+| `0`   | NotAvailable  |
+| `1`   | Worn          |
+| `2`   | PartiallyWorn |
+| `3`   | NotWorn       |
+
 ##### Bluetooth codec
 
 Supported Bluetooth profiles/codecs

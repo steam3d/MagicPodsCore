@@ -30,6 +30,7 @@ ADD ./CMakeLists.txt /app/CMakeLists.txt
 
 WORKDIR /app/build
 
+# RUN cmake -DCMAKE_BUILD_TYPE=Debug ../
 RUN cmake -DCMAKE_BUILD_TYPE=Release ../
 RUN cmake --build ./
 
