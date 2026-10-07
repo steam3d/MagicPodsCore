@@ -4,6 +4,11 @@
 
 #include "TestsAapBle.h"
 #include "device/capabilities/aap/AppAnimationCapability.h"
+#include "device/capabilities/aap/AapHighResolutionMicrophoneCapability.h"
+#include "sdk/aap/enums/AapModelIds.h"
+#include "sdk/aap/setters/AapSetMicrophoneOff.h"
+#include "sdk/aap/setters/AapSetMicrophoneOn.h"
+#include "sdk/aap/watchers/AapMicrophoneWatcher.h"
 #include "StringUtils.h"
 #include "Logger.h"
 #include <cstring>
@@ -35,6 +40,86 @@ TestsAapBle::TestsAapBle()
     Test("TestPrivateAirPods2_6", TestPrivateAirPods2_6(enc));
     Test("TestPrivateAirPods2_7", TestPrivateAirPods2_7(enc));
     Test("TestPrivateAirPods2_8", TestPrivateAirPods2_8(enc));
+    Test("TestMicrophoneWatcherDemux", TestMicrophoneWatcherDemux());
+    Test("TestMicrophoneWatcherRejectsTruncatedFrame", TestMicrophoneWatcherRejectsTruncatedFrame());
+    Test("TestMicrophoneStreamRequests", TestMicrophoneStreamRequests());
+    Test("TestHighResolutionMicrophoneSupport", TestHighResolutionMicrophoneSupport());
+}
+
+bool TestsAapBle::TestMicrophoneWatcherDemux()
+{
+    std::vector<unsigned char> packet(22, 0);
+    packet[0] = 0x04;
+    packet[2] = 0x04;
+    packet[4] = 0x58;
+    packet[6] = 0x01;
+    packet.insert(packet.end(), {0x01, 0x02, 0x03, 0x04, 0x03, 0xAA, 0xBB, 0xCC});
+    packet.insert(packet.end(), {0x05, 0x06, 0x07, 0x08, 0x02, 0xDD, 0xEE});
+
+    AapMicrophoneWatcher watcher{};
+    AapMicrophoneWatcher::AudioFrames receivedFrames{};
+    size_t eventCount = 0;
+    const size_t eventId = watcher.GetEvent().Subscribe(
+        [&receivedFrames, &eventCount](size_t, const AapMicrophoneWatcher::AudioFrames& frames)
+        {
+            receivedFrames = frames;
+            ++eventCount;
+        });
+
+    watcher.ProcessResponse(packet);
+    watcher.ProcessResponse(std::vector<unsigned char>{0x04, 0x00});
+    watcher.GetEvent().Unsubscribe(eventId);
+
+    return eventCount == 1 &&
+           receivedFrames == AapMicrophoneWatcher::AudioFrames{
+               {0xAA, 0xBB, 0xCC},
+               {0xDD, 0xEE}
+           };
+}
+
+bool TestsAapBle::TestMicrophoneWatcherRejectsTruncatedFrame()
+{
+    std::vector<unsigned char> packet(22, 0);
+    packet[0] = 0x04;
+    packet[2] = 0x04;
+    packet[4] = 0x58;
+    packet[6] = 0x01;
+    packet.insert(packet.end(), {0x01, 0x02, 0x03, 0x04, 0x04, 0xAA, 0xBB});
+
+    AapMicrophoneWatcher watcher{};
+    size_t eventCount = 0;
+    const size_t eventId = watcher.GetEvent().Subscribe(
+        [&eventCount](size_t, const AapMicrophoneWatcher::AudioFrames&)
+        {
+            ++eventCount;
+        });
+
+    watcher.ProcessResponse(packet);
+    watcher.GetEvent().Unsubscribe(eventId);
+
+    return AapMicrophoneWatcher::IsAudioPacket(packet) && eventCount == 0;
+}
+
+bool TestsAapBle::TestMicrophoneStreamRequests()
+{
+    const std::vector<unsigned char> expectedStart{
+        0x04, 0x00, 0x04, 0x00, 0x58, 0x00, 0x00, 0x00, 0x09, 0x00,
+        0x00, 0x01, 0x82, 0x00, 0x00, 0x00, 0x04, 0x96, 0x00
+    };
+    const std::vector<unsigned char> expectedStop{
+        0x04, 0x00, 0x04, 0x00, 0x58, 0x00, 0x00, 0x00, 0x02, 0x00, 0x03, 0x01
+    };
+
+    return AapSetMicrophoneOn{}.Request() == expectedStart &&
+           AapSetMicrophoneOff{}.Request() == expectedStop;
+}
+
+bool TestsAapBle::TestHighResolutionMicrophoneSupport()
+{
+    return AapHighResolutionMicrophoneCapability::IsSupported(
+               static_cast<unsigned short>(AapModelIds::airpods5)) &&
+           !AapHighResolutionMicrophoneCapability::IsSupported(
+               static_cast<unsigned short>(AapModelIds::beatssolo4));
 }
 
 bool TestsAapBle::TestAirPodsMaxInEar_utp_22()

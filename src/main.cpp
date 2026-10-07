@@ -391,7 +391,7 @@ bool TryToParseArguments(int argc, char** argv) {
 
 void StartListeningLogSettings(SettingsService &settingsService) {
     #ifdef DEBUG
-    Logger::SetLoggingLevelForGlobalLogger(LogLevel::Debug);
+    Logger::SetLoggingLevelForGlobalLogger(LogLevel::Trace);
     return;
     #endif
 

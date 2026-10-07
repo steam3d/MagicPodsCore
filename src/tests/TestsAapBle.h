@@ -30,6 +30,10 @@ namespace MagicPodsCore
         bool TestPrivateAirPods2_6(const std::string &enc);
         bool TestPrivateAirPods2_7(const std::string &enc);
         bool TestPrivateAirPods2_8(const std::string &enc);
+        bool TestMicrophoneWatcherDemux();
+        bool TestMicrophoneWatcherRejectsTruncatedFrame();
+        bool TestMicrophoneStreamRequests();
+        bool TestHighResolutionMicrophoneSupport();
         void Test(const char *name, bool b);
 
     public:

@@ -16,6 +16,7 @@ Backend service exposing a WebSocket API for managing AirPods, Beats, Galaxy Bud
 - Press duration adjustment
 - Press and hold duration adjustment
 - Customization of single and double tap for call control
+- High-resolution AirPods microphone exposed as `MagicPods Virtual Mic`
 
 ## 🎧 Headphones supported
 

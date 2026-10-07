@@ -6,6 +6,7 @@
 
 #include "Logger.h"
 #include "StringUtils.h"
+#include "sdk/aap/watchers/AapMicrophoneWatcher.h"
 
 #include <thread>
 #include <sys/ioctl.h>
@@ -71,13 +72,21 @@ namespace MagicPodsCore {
         });
 
         _readingThread = std::thread([this, socket, generation]() {
-            unsigned char buffer[1024];
-            std::vector<unsigned char> vectorBuffer(1024); // optimize
+            // AAP 0x58 microphone SDUs can exceed 1 KiB. SOCK_SEQPACKET truncates
+            // a packet when the receive buffer is too small.
+            unsigned char buffer[4096];
+            std::vector<unsigned char> vectorBuffer(4096); // optimize
             while(_isStarted && _connectionGeneration == generation) {
                 memset(buffer, 0, sizeof(buffer));
                 ssize_t receivedBytesLength = recv(socket, buffer, sizeof(buffer), 0);
                 if (receivedBytesLength > 0) {
-                    Logger::Trace("r:%s", StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
+                    // The AAP microphone is a high-rate stream. Logging every
+                    // audio SDU would spend more time formatting hex than
+                    // decoding audio and would expose captured microphone data.
+                    const bool isAapAudio = AapMicrophoneWatcher::IsAudioPacket(
+                        std::span<const unsigned char>{buffer, static_cast<size_t>(receivedBytesLength)});
+                    if (!isAapAudio)
+                        Logger::Trace("r:%s", StringUtils::BytesToHexString(buffer, receivedBytesLength).c_str());
                     vectorBuffer.assign(buffer, buffer + receivedBytesLength);
 
                     _onReceivedDataEvent.FireEvent(vectorBuffer);

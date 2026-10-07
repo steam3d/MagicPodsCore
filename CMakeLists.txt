@@ -17,6 +17,9 @@ add_executable(magicpodscore
 
     src/client/Client.cpp
     src/pulseaudio/PulseAudioClient.cpp
+    src/audio/AacEldDecoder.cpp
+    src/audio/AutomaticGainControl.cpp
+    src/audio/VirtualMicrophone.cpp
 
     src/sdk/aap/Aes.cpp
     src/sdk/aap/AapHelper.cpp
@@ -35,6 +38,8 @@ add_executable(magicpodscore
     src/sdk/aap/setters/AapSetToneVolume.cpp
     src/sdk/aap/setters/AapSetMuteMicrophoneEndCall.cpp
     src/sdk/aap/setters/AapSetAdaptiveAudioNoise.cpp
+    src/sdk/aap/setters/AapSetMicrophoneOn.cpp
+    src/sdk/aap/setters/AapSetMicrophoneOff.cpp
     src/sdk/aap/setters/AapPrivateKeys.cpp
 
     src/sdk/aap/watchers/AapAncWatcher.cpp
@@ -50,6 +55,7 @@ add_executable(magicpodscore
     src/sdk/aap/watchers/AapPersonalizedVolumeWatcher.cpp
     src/sdk/aap/watchers/AapToneVolumeWatcher.cpp
     src/sdk/aap/watchers/AapMuteMicrophoneEndCallWatcher.cpp
+    src/sdk/aap/watchers/AapMicrophoneWatcher.cpp
     src/sdk/aap/watchers/AapAdaptiveAudioNoiseWatcher.cpp
     src/sdk/aap/watchers/AapPrivateKeysWatcher.cpp
 
@@ -86,6 +92,7 @@ add_executable(magicpodscore
     src/device/capabilities/aap/AapMuteMicrophoneEndCallCapability.cpp
     src/device/capabilities/aap/AapAdaptiveAudioNoiseCapability.cpp
     src/device/capabilities/aap/AppAnimationCapability.cpp
+    src/device/capabilities/aap/AapHighResolutionMicrophoneCapability.cpp
 
     src/device/capabilities/sgb/GalaxyBudsCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
@@ -121,6 +128,7 @@ add_executable(magicpodscore
 add_subdirectory(dependencies)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PULSEAUDIO REQUIRED libpulse)
+pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET libavcodec libavutil)
 find_package(OpenSSL REQUIRED)
 target_include_directories(magicpodscore PRIVATE
     src
@@ -136,4 +144,5 @@ target_link_libraries(magicpodscore PRIVATE
     bluetooth
     OpenSSL::Crypto
     ${PULSEAUDIO_LIBRARIES}
+    PkgConfig::FFMPEG
 )

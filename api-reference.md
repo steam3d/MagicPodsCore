@@ -731,6 +731,27 @@ Specifies how a call is ended. If ending a call is assigned to a single press, m
 | `2`      | DoublePress |
 | `3`      | SinglePress |
 
+##### High-resolution microphone
+
+Exposes the proprietary AAC-ELD microphone stream as the system input
+`MagicPods Virtual Mic`. Capture starts only while an application is recording
+from the virtual input.
+
+```json
+{
+  "highResolutionMicrophone": {
+    "readonly": false,
+    "selected": false,
+    "active": false
+  }
+}
+```
+
+`selected` is a writable boolean field. `active` reports runtime state.
+Microphone behavior is configured through the global `magicpods` settings:
+`aap_mic_agc`, `aap_mic_pause_conversation_awareness`, and
+`aap_mic_a2dp_reset`. All three settings are boolean and default to `true`.
+
 
 ## Settings
 
@@ -825,7 +846,3 @@ If any setting changes:
   }
 }
 ```
-
-
-
-

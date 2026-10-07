@@ -5,6 +5,79 @@
 #include "PulseAudioClient.h"
 #include "Logger.h"
 
+#include <algorithm>
+#include <chrono>
+#include <pulse/proplist.h>
+#include <thread>
+
+namespace
+{
+    struct TemporaryPulseConnection
+    {
+        pa_mainloop* MainLoop{};
+        pa_context* Context{};
+
+        ~TemporaryPulseConnection()
+        {
+            if (Context)
+            {
+                pa_context_disconnect(Context);
+                pa_context_unref(Context);
+            }
+            if (MainLoop)
+                pa_mainloop_free(MainLoop);
+        }
+
+        bool Connect(const char* name)
+        {
+            MainLoop = pa_mainloop_new();
+            if (!MainLoop)
+                return false;
+
+            Context = pa_context_new(pa_mainloop_get_api(MainLoop), name);
+            if (!Context || pa_context_connect(Context, nullptr, PA_CONTEXT_NOAUTOSPAWN, nullptr) < 0)
+                return false;
+
+            const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+            while (std::chrono::steady_clock::now() < deadline)
+            {
+                if (pa_mainloop_iterate(MainLoop, 0, nullptr) < 0)
+                    return false;
+
+                const auto state = pa_context_get_state(Context);
+                if (state == PA_CONTEXT_READY)
+                    return true;
+                if (state == PA_CONTEXT_FAILED || state == PA_CONTEXT_TERMINATED)
+                    return false;
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            return false;
+        }
+
+        bool Wait(pa_operation* operation)
+        {
+            if (!operation)
+                return false;
+
+            const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+            while (pa_operation_get_state(operation) == PA_OPERATION_RUNNING &&
+                   std::chrono::steady_clock::now() < deadline)
+            {
+                if (pa_mainloop_iterate(MainLoop, 0, nullptr) < 0)
+                {
+                    pa_operation_unref(operation);
+                    return false;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+
+            const bool completed = pa_operation_get_state(operation) == PA_OPERATION_DONE;
+            pa_operation_unref(operation);
+            return completed;
+        }
+    };
+}
+
 namespace MagicPodsCore
 {
 
@@ -172,6 +245,148 @@ namespace MagicPodsCore
             pa_operation_unref(op);
 
             return card.first ? std::optional<CardInfo>(card.second) : std::nullopt;
+    }
+
+    std::optional<uint32_t> PulseAudioClient::LoadModule(const std::string& name, const std::string& arguments)
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-ModuleLoader"))
+            return std::nullopt;
+
+        uint32_t index = PA_INVALID_INDEX;
+        auto operation = pa_context_load_module(
+            connection.Context,
+            name.c_str(),
+            arguments.c_str(),
+            [](pa_context*, uint32_t moduleIndex, void* userdata)
+            {
+                *static_cast<uint32_t*>(userdata) = moduleIndex;
+            },
+            &index);
+
+        if (!connection.Wait(operation) || index == PA_INVALID_INDEX)
+            return std::nullopt;
+        return index;
+    }
+
+    bool PulseAudioClient::UnloadModule(uint32_t index)
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-ModuleLoader"))
+            return false;
+
+        bool success = false;
+        auto operation = pa_context_unload_module(
+            connection.Context,
+            index,
+            [](pa_context*, int result, void* userdata)
+            {
+                *static_cast<bool*>(userdata) = result != 0;
+            },
+            &success);
+
+        return connection.Wait(operation) && success;
+    }
+
+    bool PulseAudioClient::SetDefaultSource(const std::string& sourceName)
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-DefaultSource"))
+            return false;
+
+        bool success = false;
+        auto operation = pa_context_set_default_source(
+            connection.Context,
+            sourceName.c_str(),
+            [](pa_context*, int result, void* userdata)
+            {
+                *static_cast<bool*>(userdata) = result != 0;
+            },
+            &success);
+
+        return connection.Wait(operation) && success;
+    }
+
+    std::vector<uint32_t> PulseAudioClient::GetModuleIndexesByArgument(const std::string& value)
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-ModuleLoader"))
+            return {};
+
+        struct CallbackData
+        {
+            const std::string& Value;
+            std::vector<uint32_t> Indexes{};
+        } callbackData{value};
+
+        auto operation = pa_context_get_module_info_list(
+            connection.Context,
+            [](pa_context*, const pa_module_info* info, int eol, void* userdata)
+            {
+                if (eol || !info || !info->argument)
+                    return;
+
+                auto& data = *static_cast<CallbackData*>(userdata);
+                if (std::string_view{info->argument}.find(data.Value) != std::string_view::npos)
+                    data.Indexes.push_back(info->index);
+            },
+            &callbackData);
+
+        if (!connection.Wait(operation))
+            return {};
+        return callbackData.Indexes;
+    }
+
+    std::optional<std::string> PulseAudioClient::GetSourceConsumer(const std::string& sourceName)
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-SourceMonitor"))
+            return std::nullopt;
+
+        uint32_t sourceIndex = PA_INVALID_INDEX;
+        auto sourceOperation = pa_context_get_source_info_by_name(
+            connection.Context,
+            sourceName.c_str(),
+            [](pa_context*, const pa_source_info* info, int eol, void* userdata)
+            {
+                if (!eol && info)
+                    *static_cast<uint32_t*>(userdata) = info->index;
+            },
+            &sourceIndex);
+
+        if (!connection.Wait(sourceOperation) || sourceIndex == PA_INVALID_INDEX)
+            return std::nullopt;
+
+        struct CallbackData
+        {
+            uint32_t SourceIndex;
+            std::optional<std::string> Application{};
+        } callbackData{sourceIndex};
+
+        auto outputOperation = pa_context_get_source_output_info_list(
+            connection.Context,
+            [](pa_context*, const pa_source_output_info* info, int eol, void* userdata)
+            {
+                if (eol || !info)
+                    return;
+
+                auto& data = *static_cast<CallbackData*>(userdata);
+                if (info->source != data.SourceIndex || data.Application.has_value())
+                    return;
+
+                const char* application = info->proplist ? pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_NAME) : nullptr;
+                if (application)
+                    data.Application = application;
+                else if (info->name)
+                    data.Application = info->name;
+                else
+                    data.Application = "Unknown application";
+            },
+            &callbackData);
+
+        if (!connection.Wait(outputOperation))
+            return std::nullopt;
+        return callbackData.Application;
     }
 
     std::string PulseAudioClient::GetNameFromMac(const std::string &mac)

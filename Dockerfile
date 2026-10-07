@@ -16,6 +16,8 @@ RUN apt-get update \
         bluez \
         libbluetooth-dev \
         libpulse-dev \
+        libavcodec-dev \
+        libavutil-dev \
         libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 

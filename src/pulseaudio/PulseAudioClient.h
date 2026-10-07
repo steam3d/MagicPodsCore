@@ -35,6 +35,11 @@ namespace MagicPodsCore{
             bool SetCardProfile(const std::string& name, const std::string& profile);
             std::optional<CardInfo> GetCardInfoByName(const std::string& name);
             std::optional<CardInfo> GetCardInfoByIndex(uint32_t index);
+            std::optional<uint32_t> LoadModule(const std::string& name, const std::string& arguments);
+            bool UnloadModule(uint32_t index);
+            bool SetDefaultSource(const std::string& sourceName);
+            std::vector<uint32_t> GetModuleIndexesByArgument(const std::string& value);
+            std::optional<std::string> GetSourceConsumer(const std::string& sourceName);
             std::string GetNameFromMac(const std::string& mac);
             Event<CardInfo>& GatAudioCardPropertyChangedEvent() {
                 return _onAudioCardPropertyChangedEvent;

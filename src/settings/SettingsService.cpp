@@ -49,6 +49,9 @@ void SettingsService::WriteToFile() {
 toml::table SettingsService::GetDefaults() {
     toml::table magicpods{};
     magicpods.insert_or_assign("animation", true);
+    magicpods.insert_or_assign("aap_mic_agc", true);
+    magicpods.insert_or_assign("aap_mic_pause_conversation_awareness", true);
+    magicpods.insert_or_assign("aap_mic_a2dp_reset", true);
     magicpods.insert_or_assign("logLevel", static_cast<int>(LogLevel::Info));
 
     toml::table defaults{};

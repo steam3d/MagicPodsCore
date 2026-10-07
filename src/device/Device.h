@@ -105,6 +105,11 @@ namespace MagicPodsCore {
             return _audioClient;
         }
 
+        std::shared_ptr<SettingsService> GetSettingsService() const {
+            std::lock_guard lock{_propertyMutex};
+            return _settingsService;
+        }
+
         ClientState GetClientState() const {
             return _clientState;
         }
