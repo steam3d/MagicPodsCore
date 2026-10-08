@@ -7,7 +7,6 @@
 
 #include "AapCapability.h"
 #include "audio/VirtualMicrophone.h"
-#include "sdk/aap/watchers/AapConversationAwarenessWatcher.h"
 #include "sdk/aap/watchers/AapMicrophoneWatcher.h"
 #include "settings/SettingsService.h"
 
@@ -25,6 +24,8 @@
 
 namespace MagicPodsCore
 {
+    // Conversation Awareness is not turned off automatically to avoid confusing users.
+    // TODO: Consider adding this option after receiving user feedback.
     class AapHighResolutionMicrophoneCapability : public AapCapability
     {
     private:
@@ -36,7 +37,6 @@ namespace MagicPodsCore
 
         bool _enabled{false};
         bool _useAutomaticGainControl{true};
-        bool _pauseConversationAwareness{true};
         bool _resetA2dp{true};
 
         std::atomic<bool> _active{false};
@@ -47,7 +47,6 @@ namespace MagicPodsCore
         std::atomic<bool> _outputBroken{false};
         std::atomic<int64_t> _lastAudioPacketTime{0};
         std::atomic<int64_t> _lastLevelNotificationTime{0};
-        std::atomic<int> _conversationAwarenessState{-1};
 
         std::string _application{};
         mutable std::mutex _stateMutex{};
@@ -64,11 +63,8 @@ namespace MagicPodsCore
 
         std::unique_ptr<VirtualMicrophone> _virtualMicrophone{};
         std::shared_ptr<SettingsService> _settingsService{};
-        bool _restoreConversationAwareness{false};
 
-        AapConversationAwarenessWatcher _conversationAwarenessWatcher{};
         AapMicrophoneWatcher _microphoneWatcher{};
-        size_t _conversationAwarenessWatcherEventId{};
         size_t _microphoneWatcherEventId{};
         size_t _clientStateChangedEventId{};
         size_t _settingsUpdateEventId{};
@@ -86,7 +82,6 @@ namespace MagicPodsCore
         bool GetDeviceSetting(const std::string& settingName, bool defaultValue);
         bool GetGlobalSetting(const std::string& settingName, bool defaultValue);
         void OnSettingUpdated(const UpdatedSettingNotification& notification);
-        void SetConversationAwareness(bool enabled);
 
     protected:
         nlohmann::json CreateJsonBody() override;

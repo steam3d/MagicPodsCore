@@ -779,10 +779,11 @@ from the virtual input.
 }
 ```
 
-`selected` is a writable boolean field. `active` reports runtime state.
-Microphone behavior is configured through the global `magicpods` settings:
-`aap_mic_agc`, `aap_mic_pause_conversation_awareness`, and
-`aap_mic_a2dp_reset`. All three settings are boolean and default to `true`.
+`selected` is a writable boolean field. `active` reports runtime state (temporary, may be removed).
+
+Microphone behavior is controlled by global `magicpods` settings: `aap_mic_agc` and `aap_mic_a2dp_reset`. Both are boolean and default to `true`.
+
+Disable Conversation Awareness when using the microphone to avoid interference.
 
 
 ## Settings

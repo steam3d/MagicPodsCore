@@ -7,7 +7,6 @@
 
 #include "Logger.h"
 #include "audio/AacEldDecoder.h"
-#include "sdk/aap/enums/AapConversationAwarenessMode.h"
 #include "sdk/aap/enums/AapModelIds.h"
 #include "sdk/aap/setters/AapSetMicrophoneOff.h"
 #include "sdk/aap/setters/AapSetMicrophoneOn.h"
@@ -19,7 +18,6 @@ namespace MagicPodsCore
         constexpr auto GlobalSettingsContainer = "magicpods";
         constexpr auto EnabledSetting = "highResolutionMicrophone";
         constexpr auto AgcSetting = "aap_mic_agc";
-        constexpr auto PauseConversationSetting = "aap_mic_pause_conversation_awareness";
         constexpr auto ResetA2dpSetting = "aap_mic_a2dp_reset";
     }
 
@@ -54,9 +52,7 @@ namespace MagicPodsCore
             return;
 
         const auto settingName = notification.GetSettingName();
-        if (settingName != AgcSetting &&
-            settingName != PauseConversationSetting &&
-            settingName != ResetA2dpSetting)
+        if (settingName != AgcSetting && settingName != ResetA2dpSetting)
         {
             return;
         }
@@ -73,8 +69,6 @@ namespace MagicPodsCore
         std::lock_guard lock{_stateMutex};
         if (settingName == AgcSetting)
             _useAutomaticGainControl = enabled;
-        else if (settingName == PauseConversationSetting)
-            _pauseConversationAwareness = enabled;
         else if (settingName == ResetA2dpSetting)
             _resetA2dp = enabled;
     }
@@ -85,19 +79,12 @@ namespace MagicPodsCore
         _settingsService = device.GetSettingsService();
         _enabled = GetDeviceSetting(EnabledSetting, false);
         _useAutomaticGainControl = GetGlobalSetting(AgcSetting, true);
-        _pauseConversationAwareness = GetGlobalSetting(PauseConversationSetting, true);
         _resetA2dp = GetGlobalSetting(ResetA2dpSetting, true);
 
         _settingsUpdateEventId = _settingsService->GetOnSettingUpdateEvent().Subscribe(
             [this](size_t, const UpdatedSettingNotification& notification)
             {
                 OnSettingUpdated(notification);
-            });
-
-        _conversationAwarenessWatcherEventId = _conversationAwarenessWatcher.GetEvent().Subscribe(
-            [this](size_t, AapConversationAwarenessMode mode)
-            {
-                _conversationAwarenessState = mode == AapConversationAwarenessMode::On ? 1 : 0;
             });
 
         _microphoneWatcherEventId = _microphoneWatcher.GetEvent().Subscribe(
@@ -140,7 +127,6 @@ namespace MagicPodsCore
         _settingsService->GetOnSettingUpdateEvent().Unsubscribe(_settingsUpdateEventId);
         StopMonitor();
         _microphoneWatcher.GetEvent().Unsubscribe(_microphoneWatcherEventId);
-        _conversationAwarenessWatcher.GetEvent().Unsubscribe(_conversationAwarenessWatcherEventId);
     }
 
     bool AapHighResolutionMicrophoneCapability::IsSupported(unsigned short model)
@@ -178,7 +164,6 @@ namespace MagicPodsCore
 
     void AapHighResolutionMicrophoneCapability::OnReceivedData(const std::vector<unsigned char>& data)
     {
-        _conversationAwarenessWatcher.ProcessResponse(data);
         _microphoneWatcher.ProcessResponse(data);
     }
 
@@ -320,11 +305,9 @@ namespace MagicPodsCore
             return false;
 
         bool useAutomaticGainControl;
-        bool pauseConversationAwareness;
         {
             std::lock_guard lock{_stateMutex};
             useAutomaticGainControl = _useAutomaticGainControl;
-            pauseConversationAwareness = _pauseConversationAwareness;
         }
 
         auto output = _virtualMicrophone->OpenOutput(useAutomaticGainControl);
@@ -346,12 +329,6 @@ namespace MagicPodsCore
 
         SendData(AapSetMicrophoneOn{});
         Logger::Info("AirPods high-resolution microphone stream started");
-
-        if (pauseConversationAwareness && _conversationAwarenessState.load() == 1)
-        {
-            _restoreConversationAwareness = true;
-            SetConversationAwareness(false);
-        }
 
         UpdateCaptureState(true, application);
         return true;
@@ -375,10 +352,6 @@ namespace MagicPodsCore
 
         if (device.GetClientState() == ClientState::Connected)
             ResetA2dp();
-
-        if (_restoreConversationAwareness && device.GetClientState() == ClientState::Connected)
-            SetConversationAwareness(true);
-        _restoreConversationAwareness = false;
 
         UpdateCaptureState(false);
         Logger::Info("AirPods high-resolution microphone stream stopped");
@@ -480,14 +453,6 @@ namespace MagicPodsCore
         audioClient->SetCardProfile(cardName, "off");
         audioClient->SetCardProfile(cardName, cardInfo->activeProfile);
         device.PlayMedia();
-    }
-
-    void AapHighResolutionMicrophoneCapability::SetConversationAwareness(bool enabled)
-    {
-        _conversationAwarenessState = enabled ? 1 : 0;
-        device.SetCapabilities({
-            {"conversationAwareness", {{"selected", enabled}}}
-        });
     }
 
     void AapHighResolutionMicrophoneCapability::UpdateCaptureState(
