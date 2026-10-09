@@ -14,6 +14,7 @@ namespace MagicPodsCore
         // Request to change or response that setting in headphones was changed
         Settings = 0x09,
         Notifications = 0x0f,
+        FwInfo = 0x1d,
         ConversationAwareness = 0x4b,
         Microphone = 0x58,
         CustomEq = 0x63,

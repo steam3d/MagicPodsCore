@@ -50,6 +50,7 @@ add_executable(magicpodscore
     src/sdk/aap/watchers/AapConversationAwarenessWatcher.cpp
     src/sdk/aap/watchers/AapConversationAwarenessStateWatcher.cpp
     src/sdk/aap/watchers/AapNoiseCancellationOneAirPodWatcher.cpp
+    src/sdk/aap/watchers/AapFwInfoWatcher.cpp
     src/sdk/aap/watchers/AapPressAndHoldDurationWatcher.cpp
     src/sdk/aap/watchers/AapPressSpeedWatcher.cpp
     src/sdk/aap/watchers/AapVolumeSwipeWatcher.cpp
