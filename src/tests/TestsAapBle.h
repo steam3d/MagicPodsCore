@@ -34,6 +34,8 @@ namespace MagicPodsCore
         bool TestMicrophoneWatcherRejectsTruncatedFrame();
         bool TestMicrophoneStreamRequests();
         bool TestHighResolutionMicrophoneSupport();
+        bool TestCustomEqPacket();
+        bool TestCustomEqSupport();
         void Test(const char *name, bool b);
 
     public:

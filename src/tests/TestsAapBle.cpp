@@ -5,9 +5,12 @@
 #include "TestsAapBle.h"
 #include "device/capabilities/aap/AppAnimationCapability.h"
 #include "device/capabilities/aap/AapHighResolutionMicrophoneCapability.h"
+#include "device/capabilities/aap/AapCustomEqCapability.h"
 #include "sdk/aap/enums/AapModelIds.h"
+#include "sdk/aap/setters/AapSetCustomEq.h"
 #include "sdk/aap/setters/AapSetMicrophoneOff.h"
 #include "sdk/aap/setters/AapSetMicrophoneOn.h"
+#include "sdk/aap/watchers/AapCustomEqWatcher.h"
 #include "sdk/aap/watchers/AapMicrophoneWatcher.h"
 #include "StringUtils.h"
 #include "Logger.h"
@@ -44,6 +47,7 @@ TestsAapBle::TestsAapBle()
     Test("TestMicrophoneWatcherRejectsTruncatedFrame", TestMicrophoneWatcherRejectsTruncatedFrame());
     Test("TestMicrophoneStreamRequests", TestMicrophoneStreamRequests());
     Test("TestHighResolutionMicrophoneSupport", TestHighResolutionMicrophoneSupport());
+    Test("TestCustomEqPacket", TestCustomEqPacket());    
 }
 
 bool TestsAapBle::TestMicrophoneWatcherDemux()
@@ -120,6 +124,38 @@ bool TestsAapBle::TestHighResolutionMicrophoneSupport()
                static_cast<unsigned short>(AapModelIds::airpods5)) &&
            !AapHighResolutionMicrophoneCapability::IsSupported(
                static_cast<unsigned short>(AapModelIds::beatssolo4));
+}
+
+bool TestsAapBle::TestCustomEqPacket()
+{
+    const AapCustomEq expected{
+        AapCustomEqState::Enabled,
+        25,
+        50,
+        75
+    };
+    const std::vector<unsigned char> expectedPacket{
+        0x04, 0x00, 0x04, 0x00, 0x63, 0x00,
+        0x05, 0x00, 0x01, 0x02, 0x19, 0x32, 0x4b
+    };
+
+    AapCustomEqWatcher watcher{};
+    AapCustomEq received{};
+    size_t eventCount = 0;
+    const size_t eventId = watcher.GetEvent().Subscribe(
+        [&received, &eventCount](size_t, AapCustomEq customEq)
+        {
+            received = customEq;
+            ++eventCount;
+        });
+
+    watcher.ProcessResponse(expectedPacket);
+    watcher.ProcessResponse(std::vector<unsigned char>{0x04, 0x00, 0x04, 0x00, 0x63});
+    watcher.GetEvent().Unsubscribe(eventId);
+
+    return AapSetCustomEq(expected).Request() == expectedPacket &&
+           eventCount == 1 &&
+           received.AreStatesEqual(expected);
 }
 
 bool TestsAapBle::TestAirPodsMaxInEar_utp_22()

@@ -352,6 +352,8 @@ If a `capabilities` property is not marked as `readonly: true`, it can be modifi
 
 Send one of the available values listed in `options` (if present) or the value specified in `selected` for each `capabilities` property, as described in this documentation.
 
+Some capabilities require additional parameters besides `selected`. Pass these parameters alongside `selected` in the same capability object. The required parameters and their valid values are listed in the documentation for each capability.
+
 Request:
 
 ```json
@@ -657,6 +659,44 @@ Adaptive audio dynamically responds to your environment and cancels or allows ex
 | selected |                                  |
 | -------- | -------------------------------- |
 | `0-100`  | 0 - more noise, 100 - less noise |
+
+##### Custom equalizer
+
+Controls the three-band equalizer for AirPods Pro 2-3, AirPods 4-5 and AirPods Max 2
+
+```json
+{
+  "customEq": {
+    "readonly": false,
+    "selected": true,
+    "low": 50,
+    "mid": 50,
+    "high": 50
+  }
+}
+```
+
+| Field      |      |
+| ---------- | ---- |
+| `selected` | bool |
+| `low`      | int  |
+| `mid`      | int  |
+| `high`     | int  |
+| `readonly` | bool |
+
+| selected |         |
+| -------- | ------- |
+| `true`   | Enable  |
+| `false`  | Disable |
+
+| Field  |                         |
+| ------ | ----------------------- |
+| `low`  | Low frequencies, 0-100  |
+| `mid`  | Mid frequencies, 0-100  |
+| `high` | High frequencies, 0-100 |
+
+`SetCapabilities` requires `selected`, `low`, `mid`, and `high` together. The
+request is ignored if any field is missing or invalid.
 
 ##### Personalized volume
 

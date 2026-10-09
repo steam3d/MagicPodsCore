@@ -16,7 +16,7 @@ enum class AapModelIds : unsigned short {
     airpodspro = 0x200e,
     airpodspro2 = 0x2014,
     airpodspro3 = 0x2027,    
-    airpodsprousbc = 0x2024,
+    airpodsprousbc = 0x2024, //airpods pro 2
     powerbeatspro = 0x200b,
     airpodsmax = 0x200a,
     airpodsmax2024 = 0x201f,

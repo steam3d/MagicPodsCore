@@ -39,6 +39,7 @@ add_executable(magicpodscore
     src/sdk/aap/setters/AapSetToneVolume.cpp
     src/sdk/aap/setters/AapSetMuteMicrophoneEndCall.cpp
     src/sdk/aap/setters/AapSetAdaptiveAudioNoise.cpp
+    src/sdk/aap/setters/AapSetCustomEq.cpp
     src/sdk/aap/setters/AapSetMicrophoneOn.cpp
     src/sdk/aap/setters/AapSetMicrophoneOff.cpp
     src/sdk/aap/setters/AapPrivateKeys.cpp
@@ -58,6 +59,7 @@ add_executable(magicpodscore
     src/sdk/aap/watchers/AapMuteMicrophoneEndCallWatcher.cpp
     src/sdk/aap/watchers/AapMicrophoneWatcher.cpp
     src/sdk/aap/watchers/AapAdaptiveAudioNoiseWatcher.cpp
+    src/sdk/aap/watchers/AapCustomEqWatcher.cpp
     src/sdk/aap/watchers/AapPrivateKeysWatcher.cpp
     src/sdk/aap/watchers/AapEarDetectionWatcher.cpp
 
@@ -93,6 +95,7 @@ add_executable(magicpodscore
     src/device/capabilities/aap/AapToneVolumeCapability.cpp
     src/device/capabilities/aap/AapMuteMicrophoneEndCallCapability.cpp
     src/device/capabilities/aap/AapAdaptiveAudioNoiseCapability.cpp
+    src/device/capabilities/aap/AapCustomEqCapability.cpp
     src/device/capabilities/aap/AppAnimationCapability.cpp
     src/device/capabilities/aap/AapEarDetectionCapability.cpp
     src/device/capabilities/aap/AapHighResolutionMicrophoneCapability.cpp

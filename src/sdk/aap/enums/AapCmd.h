@@ -16,6 +16,7 @@ namespace MagicPodsCore
         Notifications = 0x0f,
         ConversationAwareness = 0x4b,
         Microphone = 0x58,
+        CustomEq = 0x63,
     };
 
 }

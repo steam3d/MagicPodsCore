@@ -19,6 +19,7 @@
 #include "capabilities/aap/AppAnimationCapability.h"
 #include "capabilities/aap/AapEarDetectionCapability.h"
 #include "capabilities/aap/AapHighResolutionMicrophoneCapability.h"
+#include "capabilities/aap/AapCustomEqCapability.h"
 #include "sdk/aap/setters/AapInit.h"
 #include "sdk/aap/setters/AapInitExt.h"
 #include "sdk/aap/setters/AapEnableNotifications.h"
@@ -80,8 +81,9 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapAdaptiveAudioNoiseCapability>(*device));
         device->capabilities.push_back(std::make_unique<AppAnimationCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapEarDetectionCapability>(*device));
+        device->capabilities.push_back(std::make_unique<AapCustomEqCapability>(*device));
         if (AapHighResolutionMicrophoneCapability::IsSupported(deviceInfo->GetProductId()))
-            device->capabilities.push_back(std::make_unique<AapHighResolutionMicrophoneCapability>(*device));
+            device->capabilities.push_back(std::make_unique<AapHighResolutionMicrophoneCapability>(*device));        
 
         device->_clientStartData.push_back(AapInit{}.Request());
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown2}.Request());
