@@ -805,9 +805,7 @@ Specifies how a call is ended. If ending a call is assigned to a single press, m
 
 ##### High-resolution microphone
 
-Exposes the proprietary AAC-ELD microphone stream as the system input
-`MagicPods Virtual Mic`. Capture starts only while an application is recording
-from the virtual input.
+Adds and selects `MagicPods Virtual Mic` as the input device, allowing you to use the microphone and play audio simultaneously at higher quality than in Hands-Free mode.
 
 ```json
 {
@@ -821,7 +819,11 @@ from the virtual input.
 
 `selected` is a writable boolean field. `active` reports runtime state (temporary, may be removed).
 
-Microphone behavior is controlled by global `magicpods` settings: `aap_mic_agc` and `aap_mic_a2dp_reset`. Both are boolean and default to `true`.
+Microphone behavior is controlled by global `magicpods` settings:
+
+- `aap_mic_agc` — automatically adjusts voice volume by boosting quiet speech and reducing loud audio.
+- `aap_mic_a2dp_reset` — restarts Bluetooth audio after switching the microphone to fix audio playing through only one AirPod. May cause a brief pause and a volume notification.
+- `aap_mic_keep_alive` — keeps the AirPods microphone active while connected and High-Resolution Microphone is enabled. Recommended for using Push-to-Talk in apps.
 
 Disable Conversation Awareness when using the microphone to avoid interference.
 

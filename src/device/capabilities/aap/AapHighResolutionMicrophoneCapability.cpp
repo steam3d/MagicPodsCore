@@ -19,6 +19,7 @@ namespace MagicPodsCore
         constexpr auto EnabledSetting = "highResolutionMicrophone";
         constexpr auto AgcSetting = "aap_mic_agc";
         constexpr auto ResetA2dpSetting = "aap_mic_a2dp_reset";
+        constexpr auto KeepActiveSetting = "aap_mic_keep_alive";
     }
 
     int64_t AapHighResolutionMicrophoneCapability::GetSteadyMilliseconds()
@@ -52,7 +53,9 @@ namespace MagicPodsCore
             return;
 
         const auto settingName = notification.GetSettingName();
-        if (settingName != AgcSetting && settingName != ResetA2dpSetting)
+        if (settingName != AgcSetting &&
+            settingName != ResetA2dpSetting &&
+            settingName != KeepActiveSetting)
         {
             return;
         }
@@ -66,11 +69,18 @@ namespace MagicPodsCore
         }
 
         const bool enabled = value.as_boolean()->get();
-        std::lock_guard lock{_stateMutex};
-        if (settingName == AgcSetting)
-            _useAutomaticGainControl = enabled;
-        else if (settingName == ResetA2dpSetting)
-            _resetA2dp = enabled;
+        {
+            std::lock_guard lock{_stateMutex};
+            if (settingName == AgcSetting)
+                _useAutomaticGainControl = enabled;
+            else if (settingName == ResetA2dpSetting)
+                _resetA2dp = enabled;
+            else if (settingName == KeepActiveSetting)
+                _keepMicrophoneActive = enabled;
+        }
+
+        if (settingName == KeepActiveSetting)
+            _monitorCondition.notify_all();
     }
 
     AapHighResolutionMicrophoneCapability::AapHighResolutionMicrophoneCapability(AapDevice& device)
@@ -80,6 +90,7 @@ namespace MagicPodsCore
         _enabled = GetDeviceSetting(EnabledSetting, false);
         _useAutomaticGainControl = GetGlobalSetting(AgcSetting, true);
         _resetA2dp = GetGlobalSetting(ResetA2dpSetting, true);
+        _keepMicrophoneActive = GetGlobalSetting(KeepActiveSetting, true);
 
         _settingsUpdateEventId = _settingsService->GetOnSettingUpdateEvent().Subscribe(
             [this](size_t, const UpdatedSettingNotification& notification)
@@ -90,10 +101,13 @@ namespace MagicPodsCore
         _microphoneWatcherEventId = _microphoneWatcher.GetEvent().Subscribe(
             [this](size_t, const AapMicrophoneWatcher::AudioFrames& frames)
             {
-                if (!_captureActive.load())
+                if (!_microphoneStreamActive.load())
                     return;
 
                 _lastAudioPacketTime = GetSteadyMilliseconds();
+                if (!_captureActive.load())
+                    return;
+
                 {
                     std::lock_guard lock{_audioQueueMutex};
                     if (_audioQueue.size() >= AudioQueueCapacity)
@@ -234,35 +248,71 @@ namespace MagicPodsCore
         {
             const auto application = _virtualMicrophone->GetConsumer();
             const bool recording = application.has_value();
-            const bool enabled = [&]()
+            bool enabled;
+            bool keepMicrophoneActive;
             {
                 std::lock_guard lock{_stateMutex};
-                return _enabled;
-            }();
+                enabled = _enabled;
+                keepMicrophoneActive = _keepMicrophoneActive;
+            }
             const bool connected = device.GetClientState() == ClientState::Connected;
+            const bool shouldCapture = enabled && connected && recording;
 
-            if (enabled && connected && recording && !_captureActive.load())
+            if (shouldCapture && !_captureActive.load())
             {
                 Logger::Info("Virtual microphone consumer detected: %s", application->c_str());
-                if (StartCapture(application))
-                    pendingA2dpReset = std::chrono::steady_clock::now() + A2dpResetDelay;
+                StartCapture(application);
             }
-            else if (_captureActive.load() && (!enabled || !connected || !recording))
+            else if (_captureActive.load() && !shouldCapture)
             {
                 Logger::Info("Stopping high-resolution microphone capture");
                 StopCapture();
-                pendingA2dpReset.reset();
             }
             else if (_captureActive.load())
             {
                 UpdateCaptureState(true, application);
-                const bool stalled = GetSteadyMilliseconds() - _lastAudioPacketTime.load() > StallTimeout.count();
-                if (stalled || _outputBroken.load())
+                if (_outputBroken.load())
                 {
-                    Logger::Warn("High-resolution microphone stream stalled, restarting capture");
+                    Logger::Warn("High-resolution microphone output failed, restarting capture");
                     StopCapture();
-                    if (StartCapture(application))
-                        pendingA2dpReset = std::chrono::steady_clock::now() + A2dpResetDelay;
+                    StartCapture(application);
+                }
+            }
+
+            const bool shouldStream = enabled && connected &&
+                (keepMicrophoneActive || _captureActive.load());
+            if (shouldStream && !_microphoneStreamActive.load())
+            {
+                StartMicrophoneStream();
+                pendingA2dpReset = std::chrono::steady_clock::now() + A2dpResetDelay;
+            }
+            else if (_microphoneStreamActive.load() && !shouldStream)
+            {
+                StopMicrophoneStream();
+                pendingA2dpReset.reset();
+            }
+
+            const bool stalled = _microphoneStreamActive.load() &&
+                GetSteadyMilliseconds() - _lastAudioPacketTime.load() > StallTimeout.count();
+            if (stalled)
+            {
+                Logger::Warn("High-resolution microphone stream stalled, restarting stream");
+                if (_captureActive.load())
+                    StopCapture();
+                StopMicrophoneStream();
+
+                if (shouldCapture)
+                    StartCapture(application);
+                const bool shouldRestartStream = enabled && connected &&
+                    (keepMicrophoneActive || _captureActive.load());
+                if (shouldRestartStream)
+                {
+                    StartMicrophoneStream();
+                    pendingA2dpReset = std::chrono::steady_clock::now() + A2dpResetDelay;
+                }
+                else
+                {
+                    pendingA2dpReset.reset();
                 }
             }
 
@@ -293,9 +343,35 @@ namespace MagicPodsCore
 
         if (_captureActive.load())
             StopCapture();
+        if (_microphoneStreamActive.load())
+            StopMicrophoneStream();
         _virtualMicrophone.reset();
         _monitorRunning = false;
         Logger::Info("High-resolution microphone monitor stopped for %s", device.GetName().c_str());
+    }
+
+    void AapHighResolutionMicrophoneCapability::StartMicrophoneStream()
+    {
+        if (_microphoneStreamActive.exchange(true))
+            return;
+
+        _lastAudioPacketTime = GetSteadyMilliseconds();
+        SendData(AapSetMicrophoneOn{});
+        Logger::Info("AirPods high-resolution microphone stream started");
+    }
+
+    void AapHighResolutionMicrophoneCapability::StopMicrophoneStream()
+    {
+        if (!_microphoneStreamActive.exchange(false))
+            return;
+
+        if (device.GetClientState() == ClientState::Connected)
+            SendData(AapSetMicrophoneOff{});
+
+        if (device.GetClientState() == ClientState::Connected)
+            ResetA2dp();
+
+        Logger::Info("AirPods high-resolution microphone stream stopped");
     }
 
     bool AapHighResolutionMicrophoneCapability::StartCapture(const std::optional<std::string>& application)
@@ -319,16 +395,12 @@ namespace MagicPodsCore
             _audioQueue.clear();
         }
         _outputBroken = false;
-        _lastAudioPacketTime = GetSteadyMilliseconds();
         _captureActive = true;
         _decodeThread = std::thread(
             &AapHighResolutionMicrophoneCapability::DecodeLoop,
             this,
             std::move(decoder),
             std::move(output));
-
-        SendData(AapSetMicrophoneOn{});
-        Logger::Info("AirPods high-resolution microphone stream started");
 
         UpdateCaptureState(true, application);
         return true;
@@ -339,9 +411,6 @@ namespace MagicPodsCore
         if (!_captureActive.exchange(false))
             return;
 
-        if (device.GetClientState() == ClientState::Connected)
-            SendData(AapSetMicrophoneOff{});
-
         {
             std::lock_guard lock{_audioQueueMutex};
             _audioQueue.clear();
@@ -350,11 +419,8 @@ namespace MagicPodsCore
         if (_decodeThread.joinable())
             _decodeThread.join();
 
-        if (device.GetClientState() == ClientState::Connected)
-            ResetA2dp();
-
         UpdateCaptureState(false);
-        Logger::Info("AirPods high-resolution microphone stream stopped");
+        Logger::Info("High-resolution microphone capture stopped");
     }
 
     void AapHighResolutionMicrophoneCapability::DecodeLoop(

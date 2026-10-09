@@ -38,11 +38,13 @@ namespace MagicPodsCore
         bool _enabled{false};
         bool _useAutomaticGainControl{true};
         bool _resetA2dp{true};
+        bool _keepMicrophoneActive{true};
 
         std::atomic<bool> _active{false};
         std::atomic<float> _level{0.0f};
         std::atomic<bool> _stopMonitor{false};
         std::atomic<bool> _monitorRunning{false};
+        std::atomic<bool> _microphoneStreamActive{false};
         std::atomic<bool> _captureActive{false};
         std::atomic<bool> _outputBroken{false};
         std::atomic<int64_t> _lastAudioPacketTime{0};
@@ -73,6 +75,8 @@ namespace MagicPodsCore
         void StartMonitor();
         void StopMonitor();
         void MonitorLoop();
+        void StartMicrophoneStream();
+        void StopMicrophoneStream();
         bool StartCapture(const std::optional<std::string>& application);
         void StopCapture();
         void DecodeLoop(std::unique_ptr<class AacEldDecoder> decoder, std::unique_ptr<VirtualMicrophoneOutput> output);

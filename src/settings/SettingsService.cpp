@@ -51,6 +51,7 @@ toml::table SettingsService::GetDefaults() {
     magicpods.insert_or_assign("animation", true);
     magicpods.insert_or_assign("aap_mic_agc", true);
     magicpods.insert_or_assign("aap_mic_a2dp_reset", true);
+    magicpods.insert_or_assign("aap_mic_keep_alive", true);
     magicpods.insert_or_assign("logLevel", static_cast<int>(LogLevel::Info));
 
     toml::table defaults{};
