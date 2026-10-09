@@ -662,7 +662,7 @@ Adaptive audio dynamically responds to your environment and cancels or allows ex
 
 ##### Custom equalizer
 
-Controls the three-band equalizer for AirPods Pro 2-3, AirPods 4-5 and AirPods Max 2
+Controls the three-band equalizer for AirPods Pro 2-3, AirPods 4-5 and AirPods Max 2.
 
 ```json
 {

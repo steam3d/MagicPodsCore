@@ -4,7 +4,6 @@
 
 #include "AapCustomEqCapability.h"
 
-#include "sdk/aap/enums/AapModelIds.h"
 #include "sdk/aap/setters/AapSetCustomEq.h"
 
 namespace MagicPodsCore

@@ -281,6 +281,7 @@ void HandleRequest(auto *ws, std::string_view message, uWS::OpCode opCode, uWS::
                 HandleIncorrectResponse(ws, opCode);
     }
     catch(const std::exception& exception) {
+        Logger::Error("HandleRequest failed: %s", exception.what());
         HandleIncorrectResponse(ws, opCode);
     }
 }

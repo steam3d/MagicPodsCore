@@ -83,7 +83,7 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapEarDetectionCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapCustomEqCapability>(*device));
         if (AapHighResolutionMicrophoneCapability::IsSupported(deviceInfo->GetProductId()))
-            device->capabilities.push_back(std::make_unique<AapHighResolutionMicrophoneCapability>(*device));        
+            device->capabilities.push_back(std::make_unique<AapHighResolutionMicrophoneCapability>(*device));
 
         device->_clientStartData.push_back(AapInit{}.Request());
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown2}.Request());
