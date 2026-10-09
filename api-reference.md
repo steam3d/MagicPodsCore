@@ -529,6 +529,44 @@ Supported Bluetooth profiles/codecs
 
 ### AirPods and Beats capabilities
 
+##### Firmware information (read-only)
+
+Reports the device identity, firmware versions, hardware revision, updater identifier, and component serial numbers supplied by the headphones.
+
+```json
+{
+  "firmwareInfo": {
+    "name": "AirPods Pro",
+    "model": "A3047",
+    "manufacturer": "Apple Inc.",
+    "serial": "XXXXXXXXXXXX",
+    "ver1": "8A358",
+    "ver2": "8A358",
+    "hwRev": "1.0.0",
+    "updaterId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+    "leftSerial": "XXXXXXXXXXXX",
+    "rightSerial": "XXXXXXXXXXXX",
+    "ver3": "8A358",
+    "readonly": true
+  }
+}
+```
+
+| Field          | Type   |
+| -------------- | ------ |
+| `name`         | string |
+| `model`        | string |
+| `manufacturer` | string |
+| `serial`       | string |
+| `ver1`         | string |
+| `ver2`         | string |
+| `hwRev`        | string |
+| `updaterId`    | string |
+| `leftSerial`   | string |
+| `rightSerial`  | string |
+| `ver3`         | string |
+| `readonly`     | bool   |
+
 ##### Volume swipe
 
 Adjust the volume by swiping up or down on the sensor located on the AirPods Pro stem.
