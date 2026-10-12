@@ -10,6 +10,7 @@
 #include "sdk/aap/enums/AapModelIds.h"
 #include "sdk/aap/setters/AapSetCustomEq.h"
 #include "sdk/aap/setters/AapSetAncOffMode.h"
+#include "sdk/aap/setters/AapSetDigitalCrown.h"
 #include "sdk/aap/setters/AapSetMicrophoneOff.h"
 #include "sdk/aap/setters/AapSetMicrophoneOn.h"
 #include "sdk/aap/setters/AapSetPressAndHoldAirPodMode.h"
@@ -55,6 +56,7 @@ TestsAapBle::TestsAapBle()
     Test("TestHighResolutionMicrophoneSupport", TestHighResolutionMicrophoneSupport());
     Test("TestCustomEqPacket", TestCustomEqPacket());    
     Test("TestAncOffModePackets", TestAncOffModePackets());
+    Test("TestDigitalCrownPackets", TestDigitalCrownPackets());
     Test("TestPressAndHoldAirPodMode", TestPressAndHoldAirPodMode());
     Test("TestPressAndHoldAirPodModeAnc", TestPressAndHoldAirPodModeAnc());
     Test("TestStemControlPackets", TestStemControlPackets());
@@ -180,6 +182,20 @@ bool TestsAapBle::TestAncOffModePackets()
     return !IsValidAapAncOffMode(0x00) &&
            AapSetAncOffMode(AapAncOffMode::Enabled).Request() == expectedEnabled &&
            AapSetAncOffMode(AapAncOffMode::Disabled).Request() == expectedDisabled;
+}
+
+bool TestsAapBle::TestDigitalCrownPackets()
+{
+    const std::vector<unsigned char> expectedBackToFront{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x1c, 0x01, 0x00, 0x00, 0x00
+    };
+    const std::vector<unsigned char> expectedFrontToBack{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x1c, 0x02, 0x00, 0x00, 0x00
+    };
+
+    return !IsValidAapDigitalCrownMode(0x00) &&
+           AapSetDigitalCrown(AapDigitalCrownMode::BackToFront).Request() == expectedBackToFront &&
+           AapSetDigitalCrown(AapDigitalCrownMode::FrontToBack).Request() == expectedFrontToBack;
 }
 
 bool TestsAapBle::TestPressAndHoldAirPodMode()

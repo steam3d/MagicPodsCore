@@ -5,6 +5,7 @@
 #include "AapDevice.h"
 #include "capabilities/aap/AapAncCapability.h"
 #include "capabilities/aap/AapAncOffModeCapability.h"
+#include "capabilities/aap/AapDigitalCrownCapability.h"
 #include "capabilities/aap/AapConversationAwarenessCapability.h"
 #include "capabilities/aap/AapConversationAwarenessStateCapability.h"
 #include "capabilities/aap/AapStemControlCapability.h"
@@ -76,6 +77,8 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapFwInfoCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAncCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAncOffModeCapability>(*device));
+        if (AapDigitalCrownCapability::IsSupported(deviceInfo->GetProductId()))
+            device->capabilities.push_back(std::make_unique<AapDigitalCrownCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapConversationAwarenessCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapConversationAwarenessStateCapability>(*device));
         if (AapStemControlCapability::IsSupported(deviceInfo->GetProductId()))

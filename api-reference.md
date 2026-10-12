@@ -758,6 +758,25 @@ The current value cannot be read from the headphones, so `selected` defaults to 
 | Bit 2 (`4`) | Transparency     |
 | Bit 3 (`8`) | Adaptive         |
 
+##### Digital Crown direction*
+
+Configures the direction used to adjust volume with the Digital Crown on AirPods Max.
+
+```json
+{
+  "digitalCrown": {
+    "readonly": false,
+    "selected": 1
+  }
+}
+```
+
+| selected |               |
+| -------- | ------------- |
+| `-1`     | Do not apply  |
+| `1`      | Back to front |
+| `2`      | Front to back |
+
 ##### Tone volume
 
 Adjusts the volume of sound effects played by AirPods when no audio is playing.

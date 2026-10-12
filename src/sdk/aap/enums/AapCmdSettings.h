@@ -16,6 +16,7 @@ namespace MagicPodsCore
         PressAndHoldAirPodMode = 0x16, // Can't get current state from AirPods
         PressAndHoldDuration = 0x18,
         PressAndHoldAirPodModeAnc = 0x1a, // Can't get current state from AirPods
+        DigitalCrown = 0x1c, // Can't get current state from AirPods
         PressSpeed = 0x17,
         VolumeSwipe = 0x25,
         VolumeSwipeLength = 0x23,

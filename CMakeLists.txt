@@ -30,6 +30,7 @@ add_executable(magicpodscore
     src/sdk/aap/setters/AapRequest.cpp
     src/sdk/aap/setters/AapSetAnc.cpp
     src/sdk/aap/setters/AapSetAncOffMode.cpp
+    src/sdk/aap/setters/AapSetDigitalCrown.cpp
     src/sdk/aap/setters/AapSetConversationAwarenessStatus.cpp
     src/sdk/aap/setters/AapSetStemControl.cpp
     src/sdk/aap/setters/AapSetNoiseCancellationOneAirPod.cpp
@@ -90,6 +91,7 @@ add_executable(magicpodscore
     src/device/capabilities/aap/AapCapability.cpp
     src/device/capabilities/aap/AapAncCapability.cpp
     src/device/capabilities/aap/AapAncOffModeCapability.cpp
+    src/device/capabilities/aap/AapDigitalCrownCapability.cpp
     src/device/capabilities/aap/AapBatteryCapability.cpp
     src/device/capabilities/aap/AapConversationAwarenessCapability.cpp
     src/device/capabilities/aap/AapConversationAwarenessStateCapability.cpp
