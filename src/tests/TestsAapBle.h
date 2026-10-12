@@ -36,6 +36,7 @@ namespace MagicPodsCore
         bool TestHighResolutionMicrophoneSupport();
         bool TestCustomEqPacket();
         bool TestCustomEqSupport();
+        bool TestStemControlPackets();        
         void Test(const char *name, bool b);
 
     public:

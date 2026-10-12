@@ -30,6 +30,7 @@ add_executable(magicpodscore
     src/sdk/aap/setters/AapRequest.cpp
     src/sdk/aap/setters/AapSetAnc.cpp
     src/sdk/aap/setters/AapSetConversationAwarenessStatus.cpp
+    src/sdk/aap/setters/AapSetStemControl.cpp
     src/sdk/aap/setters/AapSetNoiseCancellationOneAirPod.cpp
     src/sdk/aap/setters/AapSetPressAndHoldDuration.cpp
     src/sdk/aap/setters/AapSetPressSpeed.cpp
@@ -49,6 +50,7 @@ add_executable(magicpodscore
     src/sdk/aap/watchers/AapWatcher.cpp
     src/sdk/aap/watchers/AapConversationAwarenessWatcher.cpp
     src/sdk/aap/watchers/AapConversationAwarenessStateWatcher.cpp
+    src/sdk/aap/watchers/AapStemControlStateWatcher.cpp
     src/sdk/aap/watchers/AapNoiseCancellationOneAirPodWatcher.cpp
     src/sdk/aap/watchers/AapFwInfoWatcher.cpp
     src/sdk/aap/watchers/AapPressAndHoldDurationWatcher.cpp
@@ -87,6 +89,8 @@ add_executable(magicpodscore
     src/device/capabilities/aap/AapBatteryCapability.cpp
     src/device/capabilities/aap/AapConversationAwarenessCapability.cpp
     src/device/capabilities/aap/AapConversationAwarenessStateCapability.cpp
+    src/device/capabilities/aap/AapStemControlCapability.cpp
+    src/device/capabilities/aap/AapStemControlStateCapability.cpp
     src/device/capabilities/aap/AapNoiseCancellationOneAirPodModeCapability.cpp
     src/device/capabilities/aap/AapPressAndHoldDurationCapability.cpp
     src/device/capabilities/aap/AapPressSpeedCapability.cpp

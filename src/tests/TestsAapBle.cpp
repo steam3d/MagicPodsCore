@@ -6,12 +6,15 @@
 #include "device/capabilities/aap/AppAnimationCapability.h"
 #include "device/capabilities/aap/AapHighResolutionMicrophoneCapability.h"
 #include "device/capabilities/aap/AapCustomEqCapability.h"
+#include "device/capabilities/aap/AapStemControlCapability.h"
 #include "sdk/aap/enums/AapModelIds.h"
 #include "sdk/aap/setters/AapSetCustomEq.h"
 #include "sdk/aap/setters/AapSetMicrophoneOff.h"
 #include "sdk/aap/setters/AapSetMicrophoneOn.h"
+#include "sdk/aap/setters/AapSetStemControl.h"
 #include "sdk/aap/watchers/AapCustomEqWatcher.h"
 #include "sdk/aap/watchers/AapMicrophoneWatcher.h"
+#include "sdk/aap/watchers/AapStemControlStateWatcher.h"
 #include "StringUtils.h"
 #include "Logger.h"
 #include <cstring>
@@ -48,6 +51,7 @@ TestsAapBle::TestsAapBle()
     Test("TestMicrophoneStreamRequests", TestMicrophoneStreamRequests());
     Test("TestHighResolutionMicrophoneSupport", TestHighResolutionMicrophoneSupport());
     Test("TestCustomEqPacket", TestCustomEqPacket());    
+    Test("TestStemControlPackets", TestStemControlPackets());
 }
 
 bool TestsAapBle::TestMicrophoneWatcherDemux()
@@ -156,6 +160,38 @@ bool TestsAapBle::TestCustomEqPacket()
     return AapSetCustomEq(expected).Request() == expectedPacket &&
            eventCount == 1 &&
            received.AreStatesEqual(expected);
+}
+
+bool TestsAapBle::TestStemControlPackets()
+{
+    const std::vector<unsigned char> expectedConfig{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x39, 0x0b, 0x00, 0x00, 0x00
+    };
+    const std::vector<unsigned char> expectedState{
+        0x04, 0x00, 0x04, 0x00, 0x19, 0x00, 0x06, 0x02
+    };
+
+    AapStemControlStateWatcher stateWatcher{};
+    AapStemControlState receivedState{};
+    size_t stateEventCount = 0;
+    const size_t stateEventId = stateWatcher.GetEvent().Subscribe(
+        [&receivedState, &stateEventCount](size_t, AapStemControlState state)
+        {
+            receivedState = state;
+            ++stateEventCount;
+        });
+
+    stateWatcher.ProcessResponse(expectedState);
+    stateWatcher.ProcessResponse(expectedState);
+    stateWatcher.ProcessResponse(std::vector<unsigned char>{0x04, 0x00, 0x04, 0x00, 0x19, 0x00, 0x06});
+    stateWatcher.ProcessResponse(std::vector<unsigned char>{0x04, 0x00, 0x04, 0x00, 0x19, 0x00, 0x04, 0x02});
+
+    stateWatcher.GetEvent().Unsubscribe(stateEventId);
+
+    return AapSetStemControl(0x0b).Request() == expectedConfig &&
+           stateEventCount == 2 &&
+           receivedState.Press == AapStemControlPress::DoublePress &&
+           receivedState.Bud == AapStemControlBud::Right;
 }
 
 bool TestsAapBle::TestAirPodsMaxInEar_utp_22()

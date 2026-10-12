@@ -800,6 +800,68 @@ Notifies when a conversation starts or ends.
 | `true`   | Start conversation |
 | `false`  | Stop conversation  |
 
+##### Stem control
+
+Subscribes to AirPods stem press events, replacing the default button behavior.
+
+```json
+{
+  "stemControl": {
+    "readonly": false,
+    "selected": 11
+  }
+}
+```
+
+| Field      | Type |
+| ---------- | ---- |
+| `selected` | int  |
+| `readonly` | bool |
+
+`selected` is a bitmask. Combine the values for every gesture that should be
+handled by the connected device.
+
+| selected  |              |
+| --------- | ------------ |
+| 0         | off          |
+| Bit 0 (1) | Single press |
+| Bit 1 (2) | Double press |
+| Bit 2 (4) | Triple press |
+| Bit 3 (8) | Long press   |
+
+
+##### Stem control state (read-only)
+
+Reports AirPods stem press events, including the gesture type and which AirPod was pressed.
+
+```json
+{
+  "stemControlState": {
+    "readonly": true,
+    "press": 6,
+    "stem": 2
+  }
+}
+```
+
+| Field      | Type |
+| ---------- | ---- |
+| `press`    | enum |
+| `bud`      | enum |
+| `readonly` | bool |
+
+| press |              |
+| ----- | ------------ |
+| `5`   | Single press |
+| `6`   | Double press |
+| `7`   | Triple press |
+| `8`   | Long press   |
+
+| bud |              |
+| --- | ------------ |
+| `1` | Left AirPod  |
+| `2` | Right AirPod |
+
 ##### Noise cancellation with one AirPod
 
 Allow AirPods to be put in noise cancellation mode when only one AirPod is in your ear.
