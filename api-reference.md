@@ -709,7 +709,7 @@ Configures the action performed by pressing and holding each AirPod.
 
 ```json
 {
-  "pressAndHoldsAirPodMode": {
+  "pressAndHoldAirPodMode": {
     "readonly": false,
     "selected": {
       "right": 1,

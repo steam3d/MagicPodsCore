@@ -5,20 +5,20 @@
 #pragma once
 
 #include "AapRequest.h"
-#include "sdk/aap/enums/AapPressAndHoldsAirPodMode.h"
+#include "sdk/aap/enums/AapPressAndHoldAirPodMode.h"
 
 namespace MagicPodsCore
 {
-    class AapSetPressAndHoldsAirPodMode : public AapRequest
+    class AapSetPressAndHoldAirPodMode : public AapRequest
     {
     private:
-        AapPressAndHoldsAirPodMode _rightMode;
-        AapPressAndHoldsAirPodMode _leftMode;
+        AapPressAndHoldAirPodMode _rightMode;
+        AapPressAndHoldAirPodMode _leftMode;
 
     public:
-        AapSetPressAndHoldsAirPodMode(
-            AapPressAndHoldsAirPodMode rightMode,
-            AapPressAndHoldsAirPodMode leftMode);
+        AapSetPressAndHoldAirPodMode(
+            AapPressAndHoldAirPodMode rightMode,
+            AapPressAndHoldAirPodMode leftMode);
         std::vector<unsigned char> Request() const override;
     };
 }

@@ -5,15 +5,15 @@
 #pragma once
 
 #include "AapCapability.h"
-#include "sdk/aap/enums/AapPressAndHoldsAirPodMode.h"
+#include "sdk/aap/enums/AapPressAndHoldAirPodMode.h"
 
 namespace MagicPodsCore
 {
-    class AapPressAndHoldsAirPodModeCapability : public AapCapability
+    class AapPressAndHoldAirPodModeCapability : public AapCapability
     {
     private:
         // Application-only value for the UI's "Do not apply" option. It is outside
-        // the byte range, is not part of AapPressAndHoldsAirPodMode, and is never sent.
+        // the byte range, is not part of AapPressAndHoldAirPodMode, and is never sent.
         static constexpr int DoNotApply = -1;
 
         int _rightOption{DoNotApply};
@@ -29,8 +29,8 @@ namespace MagicPodsCore
         void OnReceivedData(const std::vector<unsigned char>& data) override;
 
     public:
-        explicit AapPressAndHoldsAirPodModeCapability(AapDevice& device);
-        ~AapPressAndHoldsAirPodModeCapability() override;
+        explicit AapPressAndHoldAirPodModeCapability(AapDevice& device);
+        ~AapPressAndHoldAirPodModeCapability() override;
         void SetFromJson(const nlohmann::json& json) override;
 
         static bool IsSupported(unsigned short model);

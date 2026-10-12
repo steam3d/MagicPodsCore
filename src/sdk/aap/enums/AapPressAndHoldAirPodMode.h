@@ -8,31 +8,31 @@
 
 namespace MagicPodsCore
 {
-    enum class AapPressAndHoldsAirPodMode : unsigned char
+    enum class AapPressAndHoldAirPodMode : unsigned char
     {
         NoiseControl = 0x01,
         Siri = 0x05,
     };
 
-    static bool IsValidAapPressAndHoldsAirPodMode(unsigned char value)
+    static bool IsValidAapPressAndHoldAirPodMode(unsigned char value)
     {
-        switch (static_cast<AapPressAndHoldsAirPodMode>(value))
+        switch (static_cast<AapPressAndHoldAirPodMode>(value))
         {
-        case AapPressAndHoldsAirPodMode::NoiseControl:
-        case AapPressAndHoldsAirPodMode::Siri:
+        case AapPressAndHoldAirPodMode::NoiseControl:
+        case AapPressAndHoldAirPodMode::Siri:
             return true;
         default:
             return false;
         }
     }
 
-    static std::string AapPressAndHoldsAirPodModeToString(AapPressAndHoldsAirPodMode value)
+    static std::string AapPressAndHoldAirPodModeToString(AapPressAndHoldAirPodMode value)
     {
         switch (value)
         {
-        case AapPressAndHoldsAirPodMode::NoiseControl:
+        case AapPressAndHoldAirPodMode::NoiseControl:
             return "NoiseControl";
-        case AapPressAndHoldsAirPodMode::Siri:
+        case AapPressAndHoldAirPodMode::Siri:
             return "Siri";
         default:
             return "Unknown value";

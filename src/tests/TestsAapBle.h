@@ -37,7 +37,7 @@ namespace MagicPodsCore
         bool TestCustomEqPacket();
         bool TestCustomEqSupport();
         bool TestAncOffModePackets();
-        bool TestPressAndHoldsAirPodMode();
+        bool TestPressAndHoldAirPodMode();
         bool TestPressAndHoldAirPodModeAnc();
         bool TestStemControlPackets();        
         void Test(const char *name, bool b);

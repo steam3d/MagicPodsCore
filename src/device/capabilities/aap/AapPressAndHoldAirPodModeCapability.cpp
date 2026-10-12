@@ -2,48 +2,48 @@
 // Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
-#include "AapPressAndHoldsAirPodModeCapability.h"
+#include "AapPressAndHoldAirPodModeCapability.h"
 #include "sdk/aap/enums/AapModelIds.h"
-#include "sdk/aap/setters/AapSetPressAndHoldsAirPodMode.h"
+#include "sdk/aap/setters/AapSetPressAndHoldAirPodMode.h"
 
 namespace MagicPodsCore
 {
-    static constexpr auto RightSetting = "press_and_holds_airpod_mode_right";
-    static constexpr auto LeftSetting = "press_and_holds_airpod_mode_left";
+    static constexpr auto RightSetting = "press_and_hold_airpod_mode_right";
+    static constexpr auto LeftSetting = "press_and_hold_airpod_mode_left";
 
-    bool AapPressAndHoldsAirPodModeCapability::IsValidOption(int value)
+    bool AapPressAndHoldAirPodModeCapability::IsValidOption(int value)
     {
         return value == DoNotApply ||
                (value >= 0 && value <= 0xff &&
-                IsValidAapPressAndHoldsAirPodMode(static_cast<unsigned char>(value)));
+                IsValidAapPressAndHoldAirPodMode(static_cast<unsigned char>(value)));
     }
 
-    std::string AapPressAndHoldsAirPodModeCapability::OptionToString(int value)
+    std::string AapPressAndHoldAirPodModeCapability::OptionToString(int value)
     {
         if (value == DoNotApply)
             return "DoNotApply";
         if (value >= 0 && value <= 0xff &&
-            IsValidAapPressAndHoldsAirPodMode(static_cast<unsigned char>(value)))
+            IsValidAapPressAndHoldAirPodMode(static_cast<unsigned char>(value)))
         {
-            return AapPressAndHoldsAirPodModeToString(
-                static_cast<AapPressAndHoldsAirPodMode>(value));
+            return AapPressAndHoldAirPodModeToString(
+                static_cast<AapPressAndHoldAirPodMode>(value));
         }
         return "Unknown value";
     }
 
-    void AapPressAndHoldsAirPodModeCapability::SendPreference()
+    void AapPressAndHoldAirPodModeCapability::SendPreference()
     {
         // Both bytes must be sent together. Do not overwrite either bud when its
         // current value is unknown and no preference has been configured for it.
         if (_rightOption == DoNotApply || _leftOption == DoNotApply)
             return;
 
-        SendData(AapSetPressAndHoldsAirPodMode(
-            static_cast<AapPressAndHoldsAirPodMode>(_rightOption),
-            static_cast<AapPressAndHoldsAirPodMode>(_leftOption)));
+        SendData(AapSetPressAndHoldAirPodMode(
+            static_cast<AapPressAndHoldAirPodMode>(_rightOption),
+            static_cast<AapPressAndHoldAirPodMode>(_leftOption)));
     }
 
-    nlohmann::json AapPressAndHoldsAirPodModeCapability::CreateJsonBody()
+    nlohmann::json AapPressAndHoldAirPodModeCapability::CreateJsonBody()
     {
         auto bodyJson = nlohmann::json::object();
         bodyJson["selected"] = {
@@ -53,12 +53,12 @@ namespace MagicPodsCore
         return bodyJson;
     }
 
-    void AapPressAndHoldsAirPodModeCapability::OnReceivedData(const std::vector<unsigned char>&)
+    void AapPressAndHoldAirPodModeCapability::OnReceivedData(const std::vector<unsigned char>&)
     {
     }
 
-    AapPressAndHoldsAirPodModeCapability::AapPressAndHoldsAirPodModeCapability(AapDevice& device)
-        : AapCapability("pressAndHoldsAirPodMode", false, device)
+    AapPressAndHoldAirPodModeCapability::AapPressAndHoldAirPodModeCapability(AapDevice& device)
+        : AapCapability("pressAndHoldAirPodMode", false, device)
     {
         _clientStateChangedEventId = device.GetClientStateChangedEvent().Subscribe(
             [this](size_t, ClientState state)
@@ -76,7 +76,7 @@ namespace MagicPodsCore
                     if (value >= DoNotApply && value <= 0xff && IsValidOption(static_cast<int>(value)))
                         _rightOption = static_cast<int>(value);
                     else
-                        Logger::Error("PressAndHoldsAirPodMode right setting has unexpected value: %lld",
+                        Logger::Error("PressAndHoldAirPodMode right setting has unexpected value: %lld",
                             static_cast<long long>(value));
                 }
 
@@ -87,7 +87,7 @@ namespace MagicPodsCore
                     if (value >= DoNotApply && value <= 0xff && IsValidOption(static_cast<int>(value)))
                         _leftOption = static_cast<int>(value);
                     else
-                        Logger::Error("PressAndHoldsAirPodMode left setting has unexpected value: %lld",
+                        Logger::Error("PressAndHoldAirPodMode left setting has unexpected value: %lld",
                             static_cast<long long>(value));
                 }
 
@@ -101,18 +101,18 @@ namespace MagicPodsCore
 
                 SendPreference();
                 isAvailable = true;
-                Logger::Info("PressAndHoldsAirPodMode updated: right=%s, left=%s",
+                Logger::Info("PressAndHoldAirPodMode updated: right=%s, left=%s",
                     OptionToString(_rightOption).c_str(), OptionToString(_leftOption).c_str());
                 _onChanged.FireEvent(*this);
             });
     }
 
-    AapPressAndHoldsAirPodModeCapability::~AapPressAndHoldsAirPodModeCapability()
+    AapPressAndHoldAirPodModeCapability::~AapPressAndHoldAirPodModeCapability()
     {
         device.GetClientStateChangedEvent().Unsubscribe(_clientStateChangedEventId);
     }
 
-    bool AapPressAndHoldsAirPodModeCapability::IsSupported(unsigned short model)
+    bool AapPressAndHoldAirPodModeCapability::IsSupported(unsigned short model)
     {
         switch (static_cast<AapModelIds>(model))
         {
@@ -132,7 +132,7 @@ namespace MagicPodsCore
         }
     }
 
-    void AapPressAndHoldsAirPodModeCapability::SetFromJson(const nlohmann::json& json)
+    void AapPressAndHoldAirPodModeCapability::SetFromJson(const nlohmann::json& json)
     {
         if (!json.contains(name))
             return;
@@ -140,7 +140,7 @@ namespace MagicPodsCore
         const auto& capability = json.at(name);
         if (!capability.contains("selected") || !capability["selected"].is_object())
         {
-            Logger::Error("Error: AapPressAndHoldsAirPodModeCapability::SetFromJson got no selected object");
+            Logger::Error("Error: AapPressAndHoldAirPodModeCapability::SetFromJson got no selected object");
             return;
         }
 
@@ -148,7 +148,7 @@ namespace MagicPodsCore
         if (!selected.contains("right") || !selected["right"].is_number_integer() ||
             !selected.contains("left") || !selected["left"].is_number_integer())
         {
-            Logger::Error("Error: AapPressAndHoldsAirPodModeCapability::SetFromJson got no right or left integer");
+            Logger::Error("Error: AapPressAndHoldAirPodModeCapability::SetFromJson got no right or left integer");
             return;
         }
 
@@ -157,7 +157,7 @@ namespace MagicPodsCore
         if (!IsValidOption(right) || !IsValidOption(left))
         {
             Logger::Error(
-                "Error: AapPressAndHoldsAirPodModeCapability::SetFromJson got unexpected options: right=%d, left=%d",
+                "Error: AapPressAndHoldAirPodModeCapability::SetFromJson got unexpected options: right=%d, left=%d",
                 right, left);
             return;
         }
@@ -177,12 +177,12 @@ namespace MagicPodsCore
 
         if (changed)
         {
-            Logger::Info("PressAndHoldsAirPodMode updated: right=%s, left=%s",
+            Logger::Info("PressAndHoldAirPodMode updated: right=%s, left=%s",
                 OptionToString(_rightOption).c_str(), OptionToString(_leftOption).c_str());
             _onChanged.FireEvent(*this);
         }
 
-        Logger::Debug("AapPressAndHoldsAirPodModeCapability::SetFromJson set options to right=%s, left=%s",
+        Logger::Debug("AapPressAndHoldAirPodModeCapability::SetFromJson set options to right=%s, left=%s",
             OptionToString(_rightOption).c_str(), OptionToString(_leftOption).c_str());
     }
 }
