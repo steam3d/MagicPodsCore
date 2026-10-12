@@ -150,6 +150,7 @@ namespace MagicPodsCore {
         void DisconnectAsync(std::function<void(const sdbus::Error*)>&& callback);
 
         void SetCapabilities(const nlohmann::json &json);
+        void SendRawData(const std::vector<unsigned char>& data);
 
         void SaveSettingString(const std::string &settingName, const std::string &value);
         std::optional<std::string> LoadSettingString(const std::string &settingName);

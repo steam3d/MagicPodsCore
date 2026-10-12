@@ -401,6 +401,25 @@ Example of a noise control capability:
 
 Common capabilities independent of the headphone manufacturer
 
+##### Send raw hexadecimal data
+
+Sends a complete byte sequence directly to the headphone protocol transport. FOR DEBUG ONLY.
+
+
+Example `SetCapabilities` value:
+
+```json
+{
+  "sendHex": {
+    "selected": "0400040009000d01000000"
+  }
+}
+```
+
+| Field      | Type       |
+| ---------- | ---------- |
+| `selected` | hex string |
+
 ##### Battery (readonly)
 
 Unique capability structure that indicates the battery level of headphones. Always sends `single`, `left`, `right`, and `case` entries, even if the headphones support only some of them. Unavailable battery types will have the `NotAvailable` status.

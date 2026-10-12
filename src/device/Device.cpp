@@ -4,6 +4,9 @@
 
 #include "Device.h"
 #include "DevicesInfoFetcher.h"
+#ifdef DEBUG
+#include "capabilities/cmn/CmnSendHexCapability.h"
+#endif
 
 namespace MagicPodsCore {
     void Device::SubscribeCapabilitiesChanges()
@@ -50,6 +53,10 @@ namespace MagicPodsCore {
     void Device::Init()
     {
         Logger::Info("%s: Init", GetName().c_str());
+#ifdef DEBUG
+        if (_client)
+            capabilities.push_back(std::make_unique<CmnSendHexCapability>(*this));
+#endif
         SubscribeCapabilitiesChanges();
 
         if (_client){
@@ -216,6 +223,11 @@ namespace MagicPodsCore {
         {
             capability->SetFromJson(json);
         }
+    }
+
+    void Device::SendRawData(const std::vector<unsigned char>& data)
+    {
+        _client->SendData(data);
     }
 
     void Device::SaveSettingString(const std::string &settingName, const std::string &value)
