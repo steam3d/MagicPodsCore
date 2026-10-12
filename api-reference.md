@@ -465,6 +465,26 @@ Controls switching between noise control modes.
 | Bit 3 (8)  | WindCancellation  |
 | Bit 4 (16) | NoiseCancellation |
 
+##### Off listening mode option*
+
+Controls whether Off is available as a listening mode.
+`-1` - leaves the headphone setting unchanged.
+
+```json
+{
+  "ancOffMode": {
+    "readonly": false,
+    "selected": 1
+  }
+}
+```
+
+| selected |                                |
+| -------- | ------------------------------ |
+| `-1`     | Do not apply a preference      |
+| `1`      | Enable the Off listening mode  |
+| `2`      | Disable the Off listening mode |
+
 ##### Ear detection
 
 Automatically plays media when the headphones are worn and pauses media when one or both earbuds are removed.
@@ -800,7 +820,7 @@ Notifies when a conversation starts or ends.
 | `true`   | Start conversation |
 | `false`  | Stop conversation  |
 
-##### Stem control
+##### Stem control*
 
 Subscribes to AirPods stem press events, replacing the default button behavior.
 

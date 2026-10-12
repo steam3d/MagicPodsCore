@@ -21,6 +21,7 @@ namespace MagicPodsCore
         ToneVolume = 0x1f,
         EndCall = 0x24,
         AdaptiveAudioNoise = 0x2e,
+        AncOffMode = 0x34, // Can't get current state from AirPods
         StemControl = 0x39, //Can't get current state from AirPods
     };
 }

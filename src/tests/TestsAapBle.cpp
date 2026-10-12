@@ -9,6 +9,7 @@
 #include "device/capabilities/aap/AapStemControlCapability.h"
 #include "sdk/aap/enums/AapModelIds.h"
 #include "sdk/aap/setters/AapSetCustomEq.h"
+#include "sdk/aap/setters/AapSetAncOffMode.h"
 #include "sdk/aap/setters/AapSetMicrophoneOff.h"
 #include "sdk/aap/setters/AapSetMicrophoneOn.h"
 #include "sdk/aap/setters/AapSetStemControl.h"
@@ -51,6 +52,7 @@ TestsAapBle::TestsAapBle()
     Test("TestMicrophoneStreamRequests", TestMicrophoneStreamRequests());
     Test("TestHighResolutionMicrophoneSupport", TestHighResolutionMicrophoneSupport());
     Test("TestCustomEqPacket", TestCustomEqPacket());    
+    Test("TestAncOffModePackets", TestAncOffModePackets());
     Test("TestStemControlPackets", TestStemControlPackets());
 }
 
@@ -160,6 +162,20 @@ bool TestsAapBle::TestCustomEqPacket()
     return AapSetCustomEq(expected).Request() == expectedPacket &&
            eventCount == 1 &&
            received.AreStatesEqual(expected);
+}
+
+bool TestsAapBle::TestAncOffModePackets()
+{
+    const std::vector<unsigned char> expectedEnabled{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x34, 0x01, 0x00, 0x00, 0x00
+    };
+    const std::vector<unsigned char> expectedDisabled{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x34, 0x02, 0x00, 0x00, 0x00
+    };
+
+    return !IsValidAapAncOffMode(0x00) &&
+           AapSetAncOffMode(AapAncOffMode::Enabled).Request() == expectedEnabled &&
+           AapSetAncOffMode(AapAncOffMode::Disabled).Request() == expectedDisabled;
 }
 
 bool TestsAapBle::TestStemControlPackets()
