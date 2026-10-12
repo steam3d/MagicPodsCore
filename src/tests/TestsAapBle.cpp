@@ -13,6 +13,7 @@
 #include "sdk/aap/setters/AapSetMicrophoneOff.h"
 #include "sdk/aap/setters/AapSetMicrophoneOn.h"
 #include "sdk/aap/setters/AapSetPressAndHoldsAirPodMode.h"
+#include "sdk/aap/setters/AapSetPressAndHoldAirPodModeAnc.h"
 #include "sdk/aap/setters/AapSetStemControl.h"
 #include "sdk/aap/watchers/AapCustomEqWatcher.h"
 #include "sdk/aap/watchers/AapMicrophoneWatcher.h"
@@ -55,6 +56,7 @@ TestsAapBle::TestsAapBle()
     Test("TestCustomEqPacket", TestCustomEqPacket());    
     Test("TestAncOffModePackets", TestAncOffModePackets());
     Test("TestPressAndHoldsAirPodMode", TestPressAndHoldsAirPodMode());
+    Test("TestPressAndHoldAirPodModeAnc", TestPressAndHoldAirPodModeAnc());
     Test("TestStemControlPackets", TestStemControlPackets());
 }
 
@@ -193,6 +195,15 @@ bool TestsAapBle::TestPressAndHoldsAirPodMode()
            AapSetPressAndHoldsAirPodMode(
                AapPressAndHoldsAirPodMode::NoiseControl,
                AapPressAndHoldsAirPodMode::Siri).Request() == expectedPacket;
+}
+
+bool TestsAapBle::TestPressAndHoldAirPodModeAnc()
+{
+    const std::vector<unsigned char> expectedPacket{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x1a, 0x0f, 0x00, 0x00, 0x00
+    };
+
+    return AapSetPressAndHoldAirPodModeAnc(0x0f).Request() == expectedPacket;
 }
 
 bool TestsAapBle::TestStemControlPackets()

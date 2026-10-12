@@ -711,6 +711,34 @@ Configures the action performed by pressing and holding each AirPod.
 | `1`            | Noise control    |
 | `5`            | Siri             |
 
+##### Press and hold noise control modes*
+
+Configures the listening modes included when pressing and holding an AirPod assigned to noise control.
+The current value cannot be read from the headphones, so `selected` defaults to `-1`.
+
+```json
+{
+  "pressAndHoldAirPodModeAnc": {
+    "readonly": false,
+    "selected": 15,
+    "options": 15
+  }
+}
+```
+
+| Field      |               |
+| ---------- | ------------- |
+| `selected` | bitmask (int) |
+| `options`  | bitmask (int) |
+
+| Value       |                  |
+| ----------- | ---------------- |
+| `-1`        | Do not apply     |
+| Bit 0 (`1`) | Off              |
+| Bit 1 (`2`) | Noise control    |
+| Bit 2 (`4`) | Transparency     |
+| Bit 3 (`8`) | Adaptive         |
+
 ##### Tone volume
 
 Adjusts the volume of sound effects played by AirPods when no audio is playing.
