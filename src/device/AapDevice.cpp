@@ -10,6 +10,7 @@
 #include "capabilities/aap/AapStemControlCapability.h"
 #include "capabilities/aap/AapStemControlStateCapability.h"
 #include "capabilities/aap/AapNoiseCancellationOneAirPodModeCapability.h"
+#include "capabilities/aap/AapPressAndHoldsAirPodModeCapability.h"
 #include "capabilities/aap/AapPressAndHoldDurationCapability.h"
 #include "capabilities/aap/AapPressSpeedCapability.h"
 #include "capabilities/aap/AapVolumeSwipeCapability.h"
@@ -82,6 +83,8 @@ namespace MagicPodsCore
             device->capabilities.push_back(std::make_unique<AapStemControlStateCapability>(*device));
         }
         device->capabilities.push_back(std::make_unique<AapNoiseCancellationOneAirPodModeCapability>(*device));
+        if (AapPressAndHoldsAirPodModeCapability::IsSupported(deviceInfo->GetProductId()))
+            device->capabilities.push_back(std::make_unique<AapPressAndHoldsAirPodModeCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapPressAndHoldDurationCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapPressSpeedCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapVolumeSwipeCapability>(*device));

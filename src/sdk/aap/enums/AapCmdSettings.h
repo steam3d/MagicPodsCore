@@ -13,6 +13,7 @@ namespace MagicPodsCore
         Anc = 0x0d,
         ConversationAwareness = 0x28,
         NoiseCancellationOneAirPod = 0x1b,
+        PressAndHoldsAirPodMode = 0x16, // Can't get current state from AirPods
         PressAndHoldDuration = 0x18,
         PressSpeed = 0x17,
         VolumeSwipe = 0x25,

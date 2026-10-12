@@ -684,6 +684,33 @@ Adjust the duration required to press and hold on your AirPods.
 | `1`      | Shorter  |
 | `2`      | Shortest |
 
+##### Press and hold action*
+
+Configures the action performed by pressing and holding each AirPod.
+
+```json
+{
+  "pressAndHoldsAirPodMode": {
+    "readonly": false,
+    "selected": {
+      "right": 1,
+      "left": 5
+    }
+  }
+}
+```
+
+| Field            | Type |
+| ---------------- | ---- |
+| `selected.right` | enum |
+| `selected.left`  | enum |
+
+| selected value |                  |
+| -------------- | ---------------- |
+| `-1`           | Do not apply     |
+| `1`            | Noise control    |
+| `5`            | Siri             |
+
 ##### Tone volume
 
 Adjusts the volume of sound effects played by AirPods when no audio is playing.

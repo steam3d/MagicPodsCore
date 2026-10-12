@@ -33,6 +33,7 @@ add_executable(magicpodscore
     src/sdk/aap/setters/AapSetConversationAwarenessStatus.cpp
     src/sdk/aap/setters/AapSetStemControl.cpp
     src/sdk/aap/setters/AapSetNoiseCancellationOneAirPod.cpp
+    src/sdk/aap/setters/AapSetPressAndHoldsAirPodMode.cpp
     src/sdk/aap/setters/AapSetPressAndHoldDuration.cpp
     src/sdk/aap/setters/AapSetPressSpeed.cpp
     src/sdk/aap/setters/AapSetVolumeSwipe.cpp
@@ -94,6 +95,7 @@ add_executable(magicpodscore
     src/device/capabilities/aap/AapStemControlCapability.cpp
     src/device/capabilities/aap/AapStemControlStateCapability.cpp
     src/device/capabilities/aap/AapNoiseCancellationOneAirPodModeCapability.cpp
+    src/device/capabilities/aap/AapPressAndHoldsAirPodModeCapability.cpp
     src/device/capabilities/aap/AapPressAndHoldDurationCapability.cpp
     src/device/capabilities/aap/AapPressSpeedCapability.cpp
     src/device/capabilities/aap/AapVolumeSwipeCapability.cpp
