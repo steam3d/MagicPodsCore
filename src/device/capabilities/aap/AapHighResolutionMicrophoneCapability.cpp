@@ -166,7 +166,7 @@ namespace MagicPodsCore
         std::lock_guard lock{_stateMutex};
         auto bodyJson = nlohmann::json::object();
         bodyJson["selected"] = _enabled;
-        bodyJson["active"] = _active.load();
+        // bodyJson["active"] = _active.load();
         // bodyJson["level"] = _level.load();
         // if (_application.empty())
         //     bodyJson["application"] = nullptr;
@@ -525,7 +525,8 @@ namespace MagicPodsCore
         bool active,
         const std::optional<std::string>& application)
     {
-        bool changed = _active.exchange(active) != active;
+        // const bool changed = _active.exchange(active) != active; // Enable when active is exposed in JSON.
+        _active.store(active);
         {
             std::lock_guard lock{_stateMutex};
             const std::string newApplication = active && application.has_value() ? application.value() : std::string{};
@@ -534,8 +535,8 @@ namespace MagicPodsCore
         }
         if (!active)
             _level = 0.0f;
-        if (changed)
-            _onChanged.FireEvent(*this);
+        // if (changed)
+        //     _onChanged.FireEvent(*this);
     }
 
     void AapHighResolutionMicrophoneCapability::NotifyLevelChanged()

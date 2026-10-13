@@ -1024,13 +1024,12 @@ Adds and selects `MagicPods Virtual Mic` as the input device, allowing you to us
 {
   "highResolutionMicrophone": {
     "readonly": false,
-    "selected": false,
-    "active": false
+    "selected": false
   }
 }
 ```
 
-`selected` is a writable boolean field. `active` reports runtime state (temporary, may be removed).
+`selected` is a writable boolean field.
 
 Microphone behavior is controlled by global `magicpods` settings:
 

@@ -106,13 +106,7 @@ namespace MagicPodsCore
         SendData(AapSetCustomEq(newOption));
 
         // AirPods do not always report the changed value back immediately.
-        if (!isAvailable)
-        {
-            isAvailable = true;
-            option = newOption;
-            _onChanged.FireEvent(*this);
-        }
-        else if (!option.AreStatesEqual(newOption))
+        if (!option.AreStatesEqual(newOption))
         {
             option = newOption;
             _onChanged.FireEvent(*this);
