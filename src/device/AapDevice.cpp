@@ -76,22 +76,9 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapFwInfoCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAncCapability>(*device));
-        if (AapAncOffModeCapability::IsSupported(deviceInfo->GetProductId()))
-            device->capabilities.push_back(std::make_unique<AapAncOffModeCapability>(*device));
-        if (AapDigitalCrownCapability::IsSupported(deviceInfo->GetProductId()))
-            device->capabilities.push_back(std::make_unique<AapDigitalCrownCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapConversationAwarenessCapability>(*device));
-        device->capabilities.push_back(std::make_unique<AapConversationAwarenessStateCapability>(*device));
-        if (AapStemControlCapability::IsSupported(deviceInfo->GetProductId()))
-        {
-            device->capabilities.push_back(std::make_unique<AapStemControlCapability>(*device));
-            device->capabilities.push_back(std::make_unique<AapStemControlStateCapability>(*device));
-        }
+        device->capabilities.push_back(std::make_unique<AapConversationAwarenessStateCapability>(*device));        
         device->capabilities.push_back(std::make_unique<AapNoiseCancellationOneAirPodModeCapability>(*device));
-        if (AapPressAndHoldAirPodModeCapability::IsSupported(deviceInfo->GetProductId()))
-            device->capabilities.push_back(std::make_unique<AapPressAndHoldAirPodModeCapability>(*device));
-        if (AapPressAndHoldAirPodModeAncCapability::IsSupported(deviceInfo->GetProductId()))
-            device->capabilities.push_back(std::make_unique<AapPressAndHoldAirPodModeAncCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapPressAndHoldDurationCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapPressSpeedCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapVolumeSwipeCapability>(*device));
@@ -103,8 +90,28 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AppAnimationCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapEarDetectionCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapCustomEqCapability>(*device));
+
+        //setting related
+        if (AapStemControlCapability::IsSupported(deviceInfo->GetProductId()))
+        {
+            device->capabilities.push_back(std::make_unique<AapStemControlCapability>(*device));
+            device->capabilities.push_back(std::make_unique<AapStemControlStateCapability>(*device));
+        }
+
+        if (AapPressAndHoldAirPodModeCapability::IsSupported(deviceInfo->GetProductId()))
+            device->capabilities.push_back(std::make_unique<AapPressAndHoldAirPodModeCapability>(*device));
+
+        if (AapPressAndHoldAirPodModeAncCapability::IsSupported(deviceInfo->GetProductId()))
+            device->capabilities.push_back(std::make_unique<AapPressAndHoldAirPodModeAncCapability>(*device));
+
         if (AapHighResolutionMicrophoneCapability::IsSupported(deviceInfo->GetProductId()))
             device->capabilities.push_back(std::make_unique<AapHighResolutionMicrophoneCapability>(*device));
+        
+        if (AapAncOffModeCapability::IsSupported(deviceInfo->GetProductId()))
+            device->capabilities.push_back(std::make_unique<AapAncOffModeCapability>(*device));
+
+        if (AapDigitalCrownCapability::IsSupported(deviceInfo->GetProductId()))
+            device->capabilities.push_back(std::make_unique<AapDigitalCrownCapability>(*device));
 
         device->_clientStartData.push_back(AapInit{}.Request());
         device->_clientStartData.push_back(AapEnableNotifications{AapNotificationsMode::Unknown2}.Request());
