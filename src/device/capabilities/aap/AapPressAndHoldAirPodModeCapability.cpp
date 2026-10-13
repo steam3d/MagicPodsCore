@@ -162,8 +162,20 @@ namespace MagicPodsCore
             return;
         }
 
-        if (right == DoNotApply || left == DoNotApply)
+        const bool preferenceIsDisabled =
+            _rightOption == DoNotApply && _leftOption == DoNotApply;
+        if (preferenceIsDisabled)
         {
+            // When enabling the preference through one bud, use its value for
+            // both buds so a partial DoNotApply state is never persisted.
+            if (right == DoNotApply && left != DoNotApply)
+                right = left;
+            else if (left == DoNotApply && right != DoNotApply)
+                left = right;
+        }
+        else if (right == DoNotApply || left == DoNotApply)
+        {
+            // Clearing either bud disables the preference for both buds.
             right = DoNotApply;
             left = DoNotApply;
         }
