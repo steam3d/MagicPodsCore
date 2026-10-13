@@ -8,6 +8,17 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 0400040009001f32000000
+    //
+    // 0  1  2  3  4  5  6  7  8  9  10
+    //                      m
+    // 04 00 04 00 09 00 1f 32 00 00 00 50%
+    //
+    // 7 byte:
+    // 0f-64 - Volume from 15 to 100
+    // Sets the volume of sound effects played by the AirPods
+    // ---------------------------------------------------------------------------
     class AapSetToneVolume : public AapRequest
     {
     private:

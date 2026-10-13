@@ -10,6 +10,23 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 0400040019000602
+    //
+    // 0  1  2  3  4  5  6  7
+    //                   p  b
+    // 04 00 04 00 19 00 06 02 Double press, right AirPod
+    //
+    // 6 byte:
+    // 05 - Single press
+    // 06 - Double press
+    // 07 - Triple press
+    // 08 - Long press
+    //
+    // 7 byte:
+    // 01 - Left AirPod
+    // 02 - Right AirPod
+    // ---------------------------------------------------------------------------
     class AapStemControlStateWatcher : public AapWatcher
     {
     private:

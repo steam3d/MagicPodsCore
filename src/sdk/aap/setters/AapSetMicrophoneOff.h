@@ -8,6 +8,11 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 040004005800000002000301
+    //
+    // Stops the high-resolution microphone audio stream.
+    // ---------------------------------------------------------------------------
     class AapSetMicrophoneOff final : public AapRequest
     {
     public:

@@ -10,6 +10,22 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 04 00 04 00 1d 00 xx ll ll [service] 00 [device information]
+    //
+    // 4 byte:
+    // 1d - Firmware information
+    //
+    // 7-8 bytes:
+    // Payload length in little-endian order
+    //
+    // 9 byte:
+    // Start of the null-terminated service field
+    //
+    // Device information follows the service field as null-terminated strings:
+    // name, model, manufacturer, serial, version 1, version 2, hardware revision,
+    // updater identifier, left serial, right serial, version 3
+    // ---------------------------------------------------------------------------
     class AapFwInfoWatcher : public AapWatcher
     {
     private:

@@ -8,6 +8,11 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 04000400580000000900000182000000049600
+    //
+    // Starts the high-resolution microphone audio stream.
+    // ---------------------------------------------------------------------------
     class AapSetMicrophoneOn final : public AapRequest
     {
     public:

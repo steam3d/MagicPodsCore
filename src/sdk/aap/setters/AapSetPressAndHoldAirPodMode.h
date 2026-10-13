@@ -9,6 +9,22 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 0400040009001601050000
+    //
+    // 0  1  2  3  4  5  6  7  8  9  10
+    //                      r  l
+    // 04 00 04 00 09 00 16 01 05 00 00 Right: Noise control, left: Siri
+    //
+    // 7 byte:
+    // 01 - Noise control for right AirPod
+    // 05 - Siri for right AirPod
+    //
+    // 8 byte:
+    // 01 - Noise control for left AirPod
+    // 05 - Siri for left AirPod
+    // Selects the press-and-hold action for each AirPod
+    // ---------------------------------------------------------------------------
     class AapSetPressAndHoldAirPodMode : public AapRequest
     {
     private:

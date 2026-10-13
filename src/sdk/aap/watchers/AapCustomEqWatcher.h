@@ -10,6 +10,32 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 04000400630005000102323232
+    //
+    // 0  1  2  3  4  5  6  7  8  9  10 11 12
+    //                            s  l  m  h
+    // 04 00 04 00 63 00 05 00 01 02 32 32 32 Enabled, 50/50/50
+    //
+    // 6-7 bytes:
+    // 05 00 - Payload length
+    //
+    // 8 byte:
+    // 01 - Equalizer state packet
+    //
+    // 9 byte:
+    // 01 - Disabled
+    // 02 - Enabled
+    //
+    // 10 byte:
+    // 00-64 - Low frequency level from 0 to 100
+    //
+    // 11 byte:
+    // 00-64 - Mid frequency level from 0 to 100
+    //
+    // 12 byte:
+    // 00-64 - High frequency level from 0 to 100
+    // ---------------------------------------------------------------------------
     class AapCustomEqWatcher : public AapWatcher
     {
     private:

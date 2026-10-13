@@ -9,6 +9,12 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 0400040030000500
+    //
+    // Requests the IRK and ENC keys for decrypting private BLE advertisements.
+    // Response packet type: 0x31.
+    // ---------------------------------------------------------------------------
     class AapPrivateKeys : public AapRequest
     {
 

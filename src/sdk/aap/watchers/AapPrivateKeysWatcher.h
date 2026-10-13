@@ -10,6 +10,26 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 04 00 04 00 31 00 cc [key records]
+    //
+    // 4 byte:
+    // 31 - Private keys response
+    //
+    // 6 byte:
+    // Number of key records
+    //
+    // Each key record:
+    // 0 byte:
+    // 01 - Identity Resolving Key (IRK)
+    // 04 - Encryption key (ENC)
+    //
+    // 2 byte:
+    // Key length
+    //
+    // 4 byte:
+    // Start of key data
+    // ---------------------------------------------------------------------------
     class AapPrivateKeysWatcher: public AapWatcher
     {
     private:

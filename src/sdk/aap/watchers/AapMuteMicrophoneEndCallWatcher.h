@@ -10,6 +10,30 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 0400040009002421220300
+    // 0400040009002420030000 Custom response
+    //
+    // 0  1  2  3  4  5  6  7  8  9  10
+    //                         m  c
+    // 04 00 04 00 09 00 24 21 22 03 00
+    //
+    // 7 byte:
+    // 21 - Standard response
+    // 20 - Custom response, possibly newer firmware or H2 chip
+    //
+    // Standard response, 8 byte:
+    // 22 - Double pressing for mute microphone
+    // 23 - Single pressing for mute microphone
+    //
+    // Standard response, 9 byte:
+    // 02 - Double pressing for end call
+    // 03 - Single pressing for end call
+    //
+    // Custom response, 8 byte:
+    // 02 - Double pressing for mute microphone, single pressing for end call
+    // 03 - Single pressing for mute microphone, double pressing for end call
+    // ---------------------------------------------------------------------------
     class AapMuteMicrophoneEndCallWatcher: public AapWatcher
     {
     private:

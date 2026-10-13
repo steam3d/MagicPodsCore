@@ -12,6 +12,21 @@
 
 namespace MagicPodsCore
 {
+    // ---------------------------------------------------------------------------
+    // 04 00 04 00 58 00 01 00 [14 header bytes] [audio frames]
+    //
+    // 4-5 bytes:
+    // 58 00 - Microphone packet
+    //
+    // 6-7 bytes:
+    // 01 00 - Audio packet
+    //
+    // 22 byte:
+    // Start of the first audio frame
+    //
+    // Each audio frame contains four header bytes, one length byte, and the
+    // encoded audio data
+    // ---------------------------------------------------------------------------
     class AapMicrophoneWatcher : public AapWatcher
     {
     public:
