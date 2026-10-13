@@ -3,6 +3,7 @@
 // License: GPL-3.0
 
 #include "AapAncOffModeCapability.h"
+#include "sdk/aap/enums/AapModelIds.h"
 #include "sdk/aap/setters/AapSetAncOffMode.h"
 
 namespace MagicPodsCore
@@ -62,6 +63,19 @@ namespace MagicPodsCore
     AapAncOffModeCapability::~AapAncOffModeCapability()
     {
         device.GetClientStateChangedEvent().Unsubscribe(clientStateChangedEventId);
+    }
+
+    bool AapAncOffModeCapability::IsSupported(unsigned short model)
+    {
+        switch (static_cast<AapModelIds>(model))
+        {
+        case AapModelIds::airpodspro2:
+        case AapModelIds::airpodspro3:
+        case AapModelIds::airpodsprousbc:
+            return true;
+        default:
+            return false;
+        }
     }
 
     void AapAncOffModeCapability::SetFromJson(const nlohmann::json& json)

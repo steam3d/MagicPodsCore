@@ -13,7 +13,7 @@ namespace MagicPodsCore
     {
     private:
         // Application-only value for the UI's "Do not apply" option. It is outside
-        // the byte range, is not part of AapAncOffMode, and is never sent to headphones.
+        // the byte range and is never sent to headphones.
         static constexpr int DoNotApply = -1;
 
         int option{DoNotApply};
@@ -29,5 +29,7 @@ namespace MagicPodsCore
         explicit AapAncOffModeCapability(AapDevice& device);
         ~AapAncOffModeCapability() override;
         void SetFromJson(const nlohmann::json& json) override;
+
+        static bool IsSupported(unsigned short model);
     };
 }

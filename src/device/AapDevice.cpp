@@ -76,7 +76,8 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapFwInfoCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAncCapability>(*device));
-        device->capabilities.push_back(std::make_unique<AapAncOffModeCapability>(*device));
+        if (AapAncOffModeCapability::IsSupported(deviceInfo->GetProductId()))
+            device->capabilities.push_back(std::make_unique<AapAncOffModeCapability>(*device));
         if (AapDigitalCrownCapability::IsSupported(deviceInfo->GetProductId()))
             device->capabilities.push_back(std::make_unique<AapDigitalCrownCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapConversationAwarenessCapability>(*device));
