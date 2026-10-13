@@ -152,6 +152,7 @@ namespace MagicPodsCore
         case AapModelIds::airpods4anc:
         case AapModelIds::airpods5wcc:
         case AapModelIds::airpods5:
+        case AapModelIds::airpodsprousbc:
         case AapModelIds::airpodspro2:
         case AapModelIds::airpodspro3:
         case AapModelIds::airpodsmax2:
