@@ -16,7 +16,7 @@ namespace MagicPodsCore
     namespace
     {
         constexpr auto GlobalSettingsContainer = "magicpods";
-        constexpr auto EnabledSetting = "hd_mic";
+        constexpr auto EnabledSetting = "aap_mic";
         constexpr auto AgcSetting = "aap_mic_agc";
         constexpr auto ResetA2dpSetting = "aap_mic_a2dp_reset";
         constexpr auto KeepActiveSetting = "aap_mic_keep_alive";

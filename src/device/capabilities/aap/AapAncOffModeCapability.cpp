@@ -8,7 +8,7 @@
 
 namespace MagicPodsCore
 {
-    static constexpr auto AncOffModeSetting = "anc_off_mode";
+    static constexpr auto AncOffModeSetting = "aap_anc_off_mode";
 
     std::string AapAncOffModeCapability::OptionToString(int value)
     {

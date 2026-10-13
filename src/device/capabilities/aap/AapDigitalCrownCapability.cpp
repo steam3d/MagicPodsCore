@@ -8,7 +8,7 @@
 
 namespace MagicPodsCore
 {
-    static constexpr auto DigitalCrownSetting = "digital_crown";
+    static constexpr auto DigitalCrownSetting = "aap_digital_crown";
 
     std::string AapDigitalCrownCapability::OptionToString(int value)
     {

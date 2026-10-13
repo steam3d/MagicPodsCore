@@ -8,8 +8,8 @@
 
 namespace MagicPodsCore
 {
-    static constexpr auto RightSetting = "press_and_hold_airpod_mode_right";
-    static constexpr auto LeftSetting = "press_and_hold_airpod_mode_left";
+    static constexpr auto RightSetting = "aap_hold_right_mode";
+    static constexpr auto LeftSetting = "aap_hold_left_mode";
 
     bool AapPressAndHoldAirPodModeCapability::IsValidOption(int value)
     {

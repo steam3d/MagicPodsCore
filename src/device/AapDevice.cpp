@@ -119,7 +119,7 @@ namespace MagicPodsCore
         if (AapInitExt::IsSupported(deviceInfo->GetProductId()))
             device->_clientStartData.push_back(AapInitExt{}.Request());
 
-        if (!device->LoadSettingString("irk").has_value() || !device->LoadSettingString("enc").has_value())
+        if (!device->LoadSettingString("irk").has_value() || !device->LoadSettingString("enc").has_value()) //TODO: irk and enc must be renamed to aap_irk and aap_enc
             device->_clientStartData.push_back(AapPrivateKeys{}.Request());
 
         //TODO: Add initData to client

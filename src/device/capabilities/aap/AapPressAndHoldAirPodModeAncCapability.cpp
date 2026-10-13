@@ -10,7 +10,7 @@
 
 namespace MagicPodsCore
 {
-    static constexpr auto PressAndHoldAirPodModeAncSetting = "press_and_hold_airpod_mode_anc";
+    static constexpr auto PressAndHoldAirPodModeAncSetting = "aap_hold_mode_anc";
 
     unsigned char AapPressAndHoldAirPodModeAncCapability::ModeToFlag(AapAncMode mode)
     {

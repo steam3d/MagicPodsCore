@@ -8,7 +8,7 @@
 
 namespace MagicPodsCore
 {
-    static constexpr auto StemControlSetting = "stem_control";
+    static constexpr auto StemControlSetting = "aap_stem_control";
 
     nlohmann::json AapStemControlCapability::CreateJsonBody()
     {
