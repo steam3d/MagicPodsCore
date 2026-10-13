@@ -54,6 +54,11 @@ namespace MagicPodsCore
         case AapModelIds::airpodspro2:
         case AapModelIds::airpodspro3:
         case AapModelIds::airpodsprousbc:
+        case AapModelIds::airpods4:
+        case AapModelIds::airpods4anc:
+        case AapModelIds::airpods5:
+        case AapModelIds::airpods5wcc:
+        //case AapModelIds::airpodsmax2: must be tested befor enabling
             return true;
         default:
             return false;

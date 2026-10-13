@@ -952,7 +952,7 @@ Reports AirPods stem press events, including the gesture type and which AirPod w
   "stemControlState": {
     "readonly": true,
     "press": 6,
-    "stem": 2
+    "bud": 2
   }
 }
 ```

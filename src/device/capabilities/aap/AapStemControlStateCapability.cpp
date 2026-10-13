@@ -10,7 +10,7 @@ namespace MagicPodsCore
     {
         auto bodyJson = nlohmann::json::object();
         bodyJson["press"] = static_cast<unsigned char>(option.Press);
-        bodyJson["stem"] = static_cast<unsigned char>(option.Bud);
+        bodyJson["bud"] = static_cast<unsigned char>(option.Bud);
         return bodyJson;
     }
 
