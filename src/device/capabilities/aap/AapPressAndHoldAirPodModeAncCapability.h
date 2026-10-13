@@ -12,6 +12,8 @@ namespace MagicPodsCore
     class AapPressAndHoldAirPodModeAncCapability : public AapCapability
     {
     private:
+        // Application-only value for the UI's "Do not apply" option. It is outside
+        // the byte range and is never sent to headphones.
         static constexpr int DoNotApply = -1;
 
         int _option{DoNotApply};

@@ -66,8 +66,8 @@ namespace MagicPodsCore
                 if (state != ClientState::Connected)
                     return;
 
-                _rightOption = DoNotApply;
-                _leftOption = DoNotApply;
+                _rightOption = DoNotApply; //default value
+                _leftOption = DoNotApply; //default value
 
                 const auto rightSetting = this->device.LoadSettingInt(RightSetting);
                 if (rightSetting.has_value())

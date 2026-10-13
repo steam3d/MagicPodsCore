@@ -42,7 +42,7 @@ namespace MagicPodsCore
                 if (state != ClientState::Connected)
                     return;
 
-                _option = DoNotApply;
+                _option = DoNotApply; //default value
                 const auto setting = this->device.LoadSettingInt(DigitalCrownSetting);
                 if (setting.has_value())
                 {
