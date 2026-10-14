@@ -954,6 +954,29 @@ Reports the raw hearing protection strength supplied by the headphones. The supp
 | `selected` | int  |
 | `readonly` | bool |
 
+##### Optimized charge
+
+Delays full charging to reduce battery ageing and extend battery lifespan.
+
+```json
+{
+  "optimizedCharge": {
+    "readonly": false,
+    "selected": false
+  }
+}
+```
+
+| Field      | Type |
+| ---------- | ---- |
+| `selected` | bool |
+| `readonly` | bool |
+
+| selected |         |
+| -------- | ------- |
+| `true`   | Enable  |
+| `false`  | Disable |
+
 ##### Stem control*
 
 Subscribes to AirPods stem press events, replacing the default button behavior.

@@ -46,6 +46,7 @@ add_executable(magicpodscore
     src/sdk/aap/setters/AapSetAdaptiveAudioNoise.cpp
     src/sdk/aap/setters/AapSetCustomEq.cpp
     src/sdk/aap/setters/AapSetHearingProtection.cpp
+    src/sdk/aap/setters/AapSetOptimizedCharge.cpp
     src/sdk/aap/setters/AapSetMicrophoneOn.cpp
     src/sdk/aap/setters/AapSetMicrophoneOff.cpp
     src/sdk/aap/setters/AapPrivateKeys.cpp
@@ -70,6 +71,8 @@ add_executable(magicpodscore
     src/sdk/aap/watchers/AapCustomEqWatcher.cpp
     src/sdk/aap/watchers/AapHearingProtectionWatcher.cpp
     src/sdk/aap/watchers/AapHearingProtectionStrengthWatcher.cpp
+    src/sdk/aap/watchers/AapOptimizedChargeWatcher.cpp
+    src/sdk/aap/watchers/AapSleepDetectionWatcher.cpp
     src/sdk/aap/watchers/AapPrivateKeysWatcher.cpp
     src/sdk/aap/watchers/AapEarDetectionWatcher.cpp
 
@@ -115,6 +118,8 @@ add_executable(magicpodscore
     src/device/capabilities/aap/AapFwInfoCapability.cpp
     src/device/capabilities/aap/AapHearingProtectionCapability.cpp
     src/device/capabilities/aap/AapHearingProtectionStrengthCapability.cpp
+    src/device/capabilities/aap/AapOptimizedChargeCapability.cpp
+    src/device/capabilities/aap/AapSleepDetectionCapability.cpp
     src/device/capabilities/aap/AppAnimationCapability.cpp
     src/device/capabilities/aap/AapEarDetectionCapability.cpp
     src/device/capabilities/aap/AapHighResolutionMicrophoneCapability.cpp

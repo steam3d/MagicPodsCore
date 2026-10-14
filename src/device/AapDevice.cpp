@@ -29,6 +29,7 @@
 #include "capabilities/aap/AapFwInfoCapability.h"
 #include "capabilities/aap/AapHearingProtectionCapability.h"
 #include "capabilities/aap/AapHearingProtectionStrengthCapability.h"
+#include "capabilities/aap/AapOptimizedChargeCapability.h"
 #include "sdk/aap/setters/AapInit.h"
 #include "sdk/aap/setters/AapInitExt.h"
 #include "sdk/aap/setters/AapEnableNotifications.h"
@@ -94,6 +95,7 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapCustomEqCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapHearingProtectionCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapHearingProtectionStrengthCapability>(*device));
+        device->capabilities.push_back(std::make_unique<AapOptimizedChargeCapability>(*device));
 
         //setting related
         if (AapStemControlCapability::IsSupported(deviceInfo->GetProductId()))

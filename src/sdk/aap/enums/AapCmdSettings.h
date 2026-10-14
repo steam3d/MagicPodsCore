@@ -28,5 +28,6 @@ namespace MagicPodsCore
         HearingProtection = 0x37,
         HearingProtectionStrength = 0x38,
         StemControl = 0x39, //Can't get current state from AirPods
+        OptimizedCharge = 0x3b,
     };
 }
