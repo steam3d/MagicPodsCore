@@ -25,6 +25,8 @@ namespace MagicPodsCore
         EndCall = 0x24,
         AdaptiveAudioNoise = 0x2e,
         AncOffMode = 0x34, // Can't get current state from AirPods
+        HearingProtection = 0x37,
+        HearingProtectionStrength = 0x38,
         StemControl = 0x39, //Can't get current state from AirPods
     };
 }

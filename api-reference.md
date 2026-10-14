@@ -913,6 +913,47 @@ Notifies when a conversation starts or ends.
 | `true`   | Start conversation |
 | `false`  | Stop conversation  |
 
+##### Hearing protection
+
+Reports and controls whether the hearing protection mode is enabled. 
+
+```json
+{
+  "hearingProtection": {
+    "readonly": false,
+    "selected": false
+  }
+}
+```
+
+| Field      | Type |
+| ---------- | ---- |
+| `selected` | bool |
+| `readonly` | bool |
+
+| selected |         |
+| -------- | ------- |
+| `true`   | Enable  |
+| `false`  | Disable |
+
+##### Hearing protection strength (read-only)
+
+Reports the raw hearing protection strength supplied by the headphones. The supported range and unit are not yet confirmed.
+
+```json
+{
+  "hearingProtectionStrength": {
+    "readonly": true,
+    "selected": 82
+  }
+}
+```
+
+| Field      | Type |
+| ---------- | ---- |
+| `selected` | int  |
+| `readonly` | bool |
+
 ##### Stem control*
 
 Subscribes to AirPods stem press events, replacing the default button behavior.
