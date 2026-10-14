@@ -411,7 +411,7 @@ Example `SetCapabilities` value:
 ```json
 {
   "sendHex": {
-    "selected": "0400040009000d01000000"
+    "selected": "040004"
   }
 }
 ```
@@ -484,10 +484,11 @@ Controls switching between noise control modes.
 | Bit 3 (8)  | WindCancellation  |
 | Bit 4 (16) | NoiseCancellation |
 
-##### Off listening mode option*
+##### Off listening mode option (override)
 
 Controls whether Off is available as a listening mode.
-`-1` - leaves the headphone setting unchanged.
+
+_This feature cannot read the current AirPods setting, but it can overwrite it._
 
 ```json
 {
@@ -500,7 +501,7 @@ Controls whether Off is available as a listening mode.
 
 | selected |                                |
 | -------- | ------------------------------ |
-| `-1`     | Do not apply a preference      |
+| `-1`     | Do not apply                   |
 | `1`      | Enable the Off listening mode  |
 | `2`      | Disable the Off listening mode |
 
@@ -703,9 +704,11 @@ Adjust the duration required to press and hold on your AirPods.
 | `1`      | Shorter  |
 | `2`      | Shortest |
 
-##### Press and hold action*
+##### Press and hold action (override)
 
 Configures the action performed by pressing and holding each AirPod.
+
+_This feature cannot read the current AirPods setting, but it can overwrite it._
 
 ```json
 {
@@ -730,10 +733,11 @@ Configures the action performed by pressing and holding each AirPod.
 | `1`            | Noise control    |
 | `5`            | Siri             |
 
-##### Press and hold noise control modes*
+##### Press and hold noise control modes (override)
 
-Configures the listening modes included when pressing and holding an AirPod assigned to noise control.
-The current value cannot be read from the headphones, so `selected` defaults to `-1`.
+Configures the listening modes included when pressing and holding an AirPod assigned to noise control. At least two modes must be selected.
+
+_This feature cannot read the current AirPods setting, but it can overwrite it._
 
 ```json
 {
@@ -758,9 +762,11 @@ The current value cannot be read from the headphones, so `selected` defaults to 
 | Bit 2 (`4`) | Transparency     |
 | Bit 3 (`8`) | Adaptive         |
 
-##### Digital Crown direction*
+##### Digital Crown direction (override)
 
 Configures the direction used to adjust volume with the Digital Crown on AirPods Max.
+
+_This feature cannot read the current AirPods setting, but it can overwrite it._
 
 ```json
 {
@@ -915,7 +921,7 @@ Notifies when a conversation starts or ends.
 
 ##### Hearing protection
 
-Reports and controls whether the hearing protection mode is enabled. 
+Automatically reduces exposure to loud sounds while preserving awareness of your surroundings.
 
 ```json
 {
@@ -979,7 +985,9 @@ Delays full charging to reduce battery ageing and extend battery lifespan.
 
 ##### Sleep detection
 
-Controls whether the headphones detect when the user falls asleep.
+Automatically pauses music, podcasts, and other audio when your AirPods detect that you've fallen asleep.
+
+_Only the On/Off toggle was tested. Actual sleep detection functionality was not tested._
 
 ```json
 {
@@ -1000,7 +1008,7 @@ Controls whether the headphones detect when the user falls asleep.
 | `true`   | Enable  |
 | `false`  | Disable |
 
-##### Stem control*
+##### Stem control
 
 Subscribes to AirPods stem press events, replacing the default button behavior.
 
@@ -1107,6 +1115,8 @@ Specifies how a call is ended. If ending a call is assigned to a single press, m
 
 Adds and selects `MagicPods Virtual Mic` as the input device, allowing you to use the microphone and play audio simultaneously at higher quality than in Hands-Free mode.
 
+_Disable Conversation Awareness when using the microphone to avoid interference._
+
 ```json
 {
   "highResolutionMicrophone": {
@@ -1123,9 +1133,6 @@ Microphone behavior is controlled by global `magicpods` settings:
 - `aap_mic_agc` — automatically adjusts voice volume by boosting quiet speech and reducing loud audio.
 - `aap_mic_a2dp_reset` — restarts Bluetooth audio after switching the microphone to fix audio playing through only one AirPod. May cause a brief pause and a volume notification.
 - `aap_mic_keep_alive` — keeps the AirPods microphone active while connected and High-Resolution Microphone is enabled. Recommended for using Push-to-Talk in apps.
-
-Disable Conversation Awareness when using the microphone to avoid interference.
-
 
 ## Settings
 
