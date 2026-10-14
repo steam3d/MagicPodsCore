@@ -25,7 +25,7 @@ namespace MagicPodsCore
     nlohmann::json AapDigitalCrownCapability::CreateJsonBody()
     {
         auto bodyJson = nlohmann::json::object();
-        bodyJson["selected"] = _option;
+        bodyJson["selected"] = option;
         return bodyJson;
     }
 
@@ -36,13 +36,13 @@ namespace MagicPodsCore
     AapDigitalCrownCapability::AapDigitalCrownCapability(AapDevice& device)
         : AapCapability("digitalCrown", false, device)
     {
-        _clientStateChangedEventId = device.GetClientStateChangedEvent().Subscribe(
+        clientStateChangedEventId = device.GetClientStateChangedEvent().Subscribe(
             [this](size_t, ClientState state)
             {
                 if (state != ClientState::Connected)
                     return;
 
-                _option = DoNotApply; //default value
+                option = DoNotApply; //default value
                 const auto setting = this->device.LoadSettingInt(DigitalCrownSetting);
                 if (setting.has_value())
                 {
@@ -51,7 +51,7 @@ namespace MagicPodsCore
                         (value >= 0 && value <= 0xff &&
                          IsValidAapDigitalCrownMode(static_cast<unsigned char>(value))))
                     {
-                        _option = static_cast<int>(value);
+                        option = static_cast<int>(value);
                     }
                     else
                     {
@@ -60,18 +60,18 @@ namespace MagicPodsCore
                     }
                 }
 
-                if (_option != DoNotApply)
-                    SendData(AapSetDigitalCrown(static_cast<AapDigitalCrownMode>(_option)));
+                if (option != DoNotApply)
+                    SendData(AapSetDigitalCrown(static_cast<AapDigitalCrownMode>(option)));
 
                 isAvailable = true;
-                Logger::Info("DigitalCrown updated: %s", OptionToString(_option).c_str());
+                Logger::Info("DigitalCrown updated: %s", OptionToString(option).c_str());
                 _onChanged.FireEvent(*this);
             });
     }
 
     AapDigitalCrownCapability::~AapDigitalCrownCapability()
     {
-        device.GetClientStateChangedEvent().Unsubscribe(_clientStateChangedEventId);
+        device.GetClientStateChangedEvent().Unsubscribe(clientStateChangedEventId);
     }
 
     bool AapDigitalCrownCapability::IsSupported(unsigned short model)
@@ -112,14 +112,14 @@ namespace MagicPodsCore
             SendData(AapSetDigitalCrown(static_cast<AapDigitalCrownMode>(selected)));
         device.SaveSettingInt(DigitalCrownSetting, selected);
 
-        if (_option != selected)
+        if (option != selected)
         {
-            _option = selected;
-            Logger::Info("DigitalCrown updated: %s", OptionToString(_option).c_str());
+            option = selected;
+            Logger::Info("DigitalCrown updated: %s", OptionToString(option).c_str());
             _onChanged.FireEvent(*this);
         }
 
         Logger::Debug("AapDigitalCrownCapability::SetFromJson set option to %s",
-            OptionToString(_option).c_str());
+            OptionToString(option).c_str());
     }
 }

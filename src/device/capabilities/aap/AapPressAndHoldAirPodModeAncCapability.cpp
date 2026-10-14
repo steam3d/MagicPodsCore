@@ -57,7 +57,7 @@ namespace MagicPodsCore
     nlohmann::json AapPressAndHoldAirPodModeAncCapability::CreateJsonBody()
     {
         auto bodyJson = nlohmann::json::object();
-        bodyJson["selected"] = _option;
+        bodyJson["selected"] = option;
         bodyJson["options"] = GetAvailableModes();
         return bodyJson;
     }
@@ -69,13 +69,13 @@ namespace MagicPodsCore
     AapPressAndHoldAirPodModeAncCapability::AapPressAndHoldAirPodModeAncCapability(AapDevice& device)
         : AapCapability("pressAndHoldAirPodModeAnc", false, device)
     {
-        _clientStateChangedEventId = device.GetClientStateChangedEvent().Subscribe(
+        clientStateChangedEventId = device.GetClientStateChangedEvent().Subscribe(
             [this](size_t, ClientState state)
             {
                 if (state != ClientState::Connected)
                     return;
 
-                _option = DoNotApply; //default value
+                option = DoNotApply; //default value
                 const auto setting = this->device.LoadSettingInt(PressAndHoldAirPodModeAncSetting);
                 if (setting.has_value())
                 {
@@ -83,7 +83,7 @@ namespace MagicPodsCore
                     if (value >= DoNotApply && value <= 0xff && IsValidOption(static_cast<int>(value)))
                     {
                         const int savedOption = static_cast<int>(value);
-                        _option = savedOption == DoNotApply || HasAtLeastTwoModes(savedOption)
+                        option = savedOption == DoNotApply || HasAtLeastTwoModes(savedOption)
                             ? savedOption
                             : DoNotApply;
                     }
@@ -92,18 +92,18 @@ namespace MagicPodsCore
                             static_cast<long long>(value));
                 }
 
-                if (_option != DoNotApply)
-                    SendData(AapSetPressAndHoldAirPodModeAnc(static_cast<unsigned char>(_option)));
+                if (option != DoNotApply)
+                    SendData(AapSetPressAndHoldAirPodModeAnc(static_cast<unsigned char>(option)));
 
                 isAvailable = true;
-                Logger::Info("PressAndHoldAirPodModeAnc updated: %d", _option);
+                Logger::Info("PressAndHoldAirPodModeAnc updated: %d", option);
                 _onChanged.FireEvent(*this);
             });
     }
 
     AapPressAndHoldAirPodModeAncCapability::~AapPressAndHoldAirPodModeAncCapability()
     {
-        device.GetClientStateChangedEvent().Unsubscribe(_clientStateChangedEventId);
+        device.GetClientStateChangedEvent().Unsubscribe(clientStateChangedEventId);
     }
 
     bool AapPressAndHoldAirPodModeAncCapability::IsSupported(unsigned short model)
@@ -156,13 +156,13 @@ namespace MagicPodsCore
             SendData(AapSetPressAndHoldAirPodModeAnc(static_cast<unsigned char>(selected)));
         device.SaveSettingInt(PressAndHoldAirPodModeAncSetting, selected);
 
-        if (_option != selected)
+        if (option != selected)
         {
-            _option = selected;
-            Logger::Info("PressAndHoldAirPodModeAnc updated: %d", _option);
+            option = selected;
+            Logger::Info("PressAndHoldAirPodModeAnc updated: %d", option);
             _onChanged.FireEvent(*this);
         }
 
-        Logger::Debug("AapPressAndHoldAirPodModeAncCapability::SetFromJson set option to %d", _option);
+        Logger::Debug("AapPressAndHoldAirPodModeAncCapability::SetFromJson set option to %d", option);
     }
 }

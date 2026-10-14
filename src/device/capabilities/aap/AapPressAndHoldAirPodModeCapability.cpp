@@ -35,20 +35,20 @@ namespace MagicPodsCore
     {
         // Both bytes must be sent together. Do not overwrite either bud when its
         // current value is unknown and no preference has been configured for it.
-        if (_rightOption == DoNotApply || _leftOption == DoNotApply)
+        if (rightOption == DoNotApply || leftOption == DoNotApply)
             return;
 
         SendData(AapSetPressAndHoldAirPodMode(
-            static_cast<AapPressAndHoldAirPodMode>(_rightOption),
-            static_cast<AapPressAndHoldAirPodMode>(_leftOption)));
+            static_cast<AapPressAndHoldAirPodMode>(rightOption),
+            static_cast<AapPressAndHoldAirPodMode>(leftOption)));
     }
 
     nlohmann::json AapPressAndHoldAirPodModeCapability::CreateJsonBody()
     {
         auto bodyJson = nlohmann::json::object();
         bodyJson["selected"] = {
-            {"right", _rightOption},
-            {"left", _leftOption}
+            {"right", rightOption},
+            {"left", leftOption}
         };
         return bodyJson;
     }
@@ -60,21 +60,21 @@ namespace MagicPodsCore
     AapPressAndHoldAirPodModeCapability::AapPressAndHoldAirPodModeCapability(AapDevice& device)
         : AapCapability("pressAndHoldAirPodMode", false, device)
     {
-        _clientStateChangedEventId = device.GetClientStateChangedEvent().Subscribe(
+        clientStateChangedEventId = device.GetClientStateChangedEvent().Subscribe(
             [this](size_t, ClientState state)
             {
                 if (state != ClientState::Connected)
                     return;
 
-                _rightOption = DoNotApply; //default value
-                _leftOption = DoNotApply; //default value
+                rightOption = DoNotApply; //default value
+                leftOption = DoNotApply; //default value
 
                 const auto rightSetting = this->device.LoadSettingInt(RightSetting);
                 if (rightSetting.has_value())
                 {
                     const auto value = rightSetting.value();
                     if (value >= DoNotApply && value <= 0xff && IsValidOption(static_cast<int>(value)))
-                        _rightOption = static_cast<int>(value);
+                        rightOption = static_cast<int>(value);
                     else
                         Logger::Error("PressAndHoldAirPodMode right setting has unexpected value: %lld",
                             static_cast<long long>(value));
@@ -85,7 +85,7 @@ namespace MagicPodsCore
                 {
                     const auto value = leftSetting.value();
                     if (value >= DoNotApply && value <= 0xff && IsValidOption(static_cast<int>(value)))
-                        _leftOption = static_cast<int>(value);
+                        leftOption = static_cast<int>(value);
                     else
                         Logger::Error("PressAndHoldAirPodMode left setting has unexpected value: %lld",
                             static_cast<long long>(value));
@@ -93,23 +93,23 @@ namespace MagicPodsCore
 
                 // The protocol always writes both buds in one command. A partial
                 // DoNotApply state cannot be honored without overwriting one bud.
-                if (_rightOption == DoNotApply || _leftOption == DoNotApply)
+                if (rightOption == DoNotApply || leftOption == DoNotApply)
                 {
-                    _rightOption = DoNotApply;
-                    _leftOption = DoNotApply;
+                    rightOption = DoNotApply;
+                    leftOption = DoNotApply;
                 }
 
                 SendPreference();
                 isAvailable = true;
                 Logger::Info("PressAndHoldAirPodMode updated: right=%s, left=%s",
-                    OptionToString(_rightOption).c_str(), OptionToString(_leftOption).c_str());
+                    OptionToString(rightOption).c_str(), OptionToString(leftOption).c_str());
                 _onChanged.FireEvent(*this);
             });
     }
 
     AapPressAndHoldAirPodModeCapability::~AapPressAndHoldAirPodModeCapability()
     {
-        device.GetClientStateChangedEvent().Unsubscribe(_clientStateChangedEventId);
+        device.GetClientStateChangedEvent().Unsubscribe(clientStateChangedEventId);
     }
 
     bool AapPressAndHoldAirPodModeCapability::IsSupported(unsigned short model)
@@ -163,7 +163,7 @@ namespace MagicPodsCore
         }
 
         const bool preferenceIsDisabled =
-            _rightOption == DoNotApply && _leftOption == DoNotApply;
+            rightOption == DoNotApply && leftOption == DoNotApply;
         if (preferenceIsDisabled)
         {
             // When enabling the preference through one bud, use its value for
@@ -180,9 +180,9 @@ namespace MagicPodsCore
             left = DoNotApply;
         }
 
-        const bool changed = _rightOption != right || _leftOption != left;
-        _rightOption = right;
-        _leftOption = left;
+        const bool changed = rightOption != right || leftOption != left;
+        rightOption = right;
+        leftOption = left;
         device.SaveSettingInt(RightSetting, right);
         device.SaveSettingInt(LeftSetting, left);
         SendPreference();
@@ -190,11 +190,11 @@ namespace MagicPodsCore
         if (changed)
         {
             Logger::Info("PressAndHoldAirPodMode updated: right=%s, left=%s",
-                OptionToString(_rightOption).c_str(), OptionToString(_leftOption).c_str());
+                OptionToString(rightOption).c_str(), OptionToString(leftOption).c_str());
             _onChanged.FireEvent(*this);
         }
 
         Logger::Debug("AapPressAndHoldAirPodModeCapability::SetFromJson set options to right=%s, left=%s",
-            OptionToString(_rightOption).c_str(), OptionToString(_leftOption).c_str());
+            OptionToString(rightOption).c_str(), OptionToString(leftOption).c_str());
     }
 }

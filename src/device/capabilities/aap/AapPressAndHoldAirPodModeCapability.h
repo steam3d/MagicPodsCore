@@ -16,9 +16,9 @@ namespace MagicPodsCore
         // the byte range and is never sent to headphones.
         static constexpr int DoNotApply = -1;
 
-        int _rightOption{DoNotApply};
-        int _leftOption{DoNotApply};
-        size_t _clientStateChangedEventId{};
+        int rightOption{DoNotApply};
+        int leftOption{DoNotApply};
+        size_t clientStateChangedEventId{};
 
         static bool IsValidOption(int value);
         static std::string OptionToString(int value);

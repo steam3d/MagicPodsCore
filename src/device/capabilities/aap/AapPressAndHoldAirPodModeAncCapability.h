@@ -16,8 +16,8 @@ namespace MagicPodsCore
         // the byte range and is never sent to headphones.
         static constexpr int DoNotApply = -1;
 
-        int _option{DoNotApply};
-        size_t _clientStateChangedEventId{};
+        int option{DoNotApply};
+        size_t clientStateChangedEventId{};
 
         static unsigned char ModeToFlag(AapAncMode mode);
         static bool HasAtLeastTwoModes(int value);
