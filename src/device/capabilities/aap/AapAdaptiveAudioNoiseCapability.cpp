@@ -53,14 +53,14 @@ namespace MagicPodsCore
 
         if (capability.contains("selected") && capability["selected"].is_number_integer())
         {
-            unsigned char selected = static_cast<unsigned char>(capability["selected"].get<int>());            
+            int selected = capability["selected"].get<int>();
             if (selected >= 0 && selected <= 100){
                 unsigned char nativeMode = static_cast<unsigned char>(selected);                
                 SendData(AapSetAdaptiveAudioNoise(nativeMode));
 
                 // Manually notify because AirPods will not send a notification that the option has been changed.
-                if (option != selected){
-                    option = selected;
+                if (option != nativeMode){
+                    option = nativeMode;
                     Logger::Info("%s updated: %d",name.c_str(), nativeMode);
                     _onChanged.FireEvent(*this);
                 }

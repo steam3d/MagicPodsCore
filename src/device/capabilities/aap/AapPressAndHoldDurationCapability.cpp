@@ -52,8 +52,9 @@ namespace MagicPodsCore
 
         if (capability.contains("selected") && capability["selected"].is_number_integer())
         {
-            unsigned char selected = static_cast<unsigned char>(capability["selected"].get<int>());
-            if (isValidAapPressAndHoldDurationMode(selected)){
+            int selected = capability["selected"].get<int>();
+            if (selected >= 0 && selected <= 0xff &&
+                isValidAapPressAndHoldDurationMode(static_cast<unsigned char>(selected))){
                 AapPressAndHoldDurationMode nativeMode = static_cast<AapPressAndHoldDurationMode>(selected);
                 SendData(AapSetPressAndHoldDuration(nativeMode));
 

@@ -105,8 +105,9 @@ namespace MagicPodsCore
 
         if (capability.contains("selected") && capability["selected"].is_number_integer())
         {
-            unsigned char selected = static_cast<unsigned char>(capability["selected"].get<int>());
-            if (isValidDeviceAncModesType(selected))
+            int selected = capability["selected"].get<int>();
+            if (selected >= 0 && selected <= 0xff &&
+                isValidDeviceAncModesType(static_cast<unsigned char>(selected)))
             {
                 AapAncMode nativeMode = DeviceAncModesToAapAncMode(static_cast<DeviceAncModes>(selected));
                 SendData(AapSetAnc(nativeMode));

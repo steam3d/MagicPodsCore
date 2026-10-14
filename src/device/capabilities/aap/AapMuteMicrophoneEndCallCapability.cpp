@@ -52,9 +52,11 @@ namespace MagicPodsCore
 
         if (capability.contains("selected") && capability["selected"].is_number_integer())
         {
-            unsigned char selected = static_cast<unsigned char>(capability["selected"].get<int>());
-            if (isValidAapEndCallMode(selected)){
+            int selected = capability["selected"].get<int>();
+            if (selected >= 0 && selected <= 0xff &&
+                isValidAapEndCallMode(static_cast<unsigned char>(selected))){
                 AapEndCallMode nativeMode = static_cast<AapEndCallMode>(selected);
+                //idk why, but AirPods response on change
                 SendData(AapSetMuteMicrophoneEndCall(nativeMode));
 
                 //AirPods will send notification after change
