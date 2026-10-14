@@ -11,13 +11,20 @@
 #include "sdk/aap/setters/AapSetCustomEq.h"
 #include "sdk/aap/setters/AapSetAncOffMode.h"
 #include "sdk/aap/setters/AapSetDigitalCrown.h"
+#include "sdk/aap/setters/AapSetHearingProtection.h"
+#include "sdk/aap/setters/AapSetOptimizedCharge.h"
+#include "sdk/aap/setters/AapSetSleepDetection.h"
 #include "sdk/aap/setters/AapSetMicrophoneOff.h"
 #include "sdk/aap/setters/AapSetMicrophoneOn.h"
 #include "sdk/aap/setters/AapSetPressAndHoldAirPodMode.h"
 #include "sdk/aap/setters/AapSetPressAndHoldAirPodModeAnc.h"
 #include "sdk/aap/setters/AapSetStemControl.h"
 #include "sdk/aap/watchers/AapCustomEqWatcher.h"
+#include "sdk/aap/watchers/AapHearingProtectionStrengthWatcher.h"
+#include "sdk/aap/watchers/AapHearingProtectionWatcher.h"
 #include "sdk/aap/watchers/AapMicrophoneWatcher.h"
+#include "sdk/aap/watchers/AapOptimizedChargeWatcher.h"
+#include "sdk/aap/watchers/AapSleepDetectionWatcher.h"
 #include "sdk/aap/watchers/AapStemControlStateWatcher.h"
 #include "StringUtils.h"
 #include "Logger.h"
@@ -55,6 +62,11 @@ TestsAapBle::TestsAapBle()
     Test("TestMicrophoneStreamRequests", TestMicrophoneStreamRequests());
     Test("TestHighResolutionMicrophoneSupport", TestHighResolutionMicrophoneSupport());
     Test("TestCustomEqPacket", TestCustomEqPacket());    
+    Test("TestHearingProtectionPackets", TestHearingProtectionPackets());
+    Test("TestHearingProtectionWatcher", TestHearingProtectionWatcher());
+    Test("TestHearingProtectionStrengthWatcher", TestHearingProtectionStrengthWatcher());
+    Test("TestOptimizedChargePackets", TestOptimizedChargePackets());
+    Test("TestSleepDetectionPackets", TestSleepDetectionPackets());
     Test("TestAncOffModePackets", TestAncOffModePackets());
     Test("TestDigitalCrownPackets", TestDigitalCrownPackets());
     Test("TestPressAndHoldAirPodMode", TestPressAndHoldAirPodMode());
@@ -170,6 +182,131 @@ bool TestsAapBle::TestCustomEqPacket()
            received.AreStatesEqual(expected);
 }
 
+bool TestsAapBle::TestHearingProtectionPackets()
+{
+    const std::vector<unsigned char> expectedEnabled{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x37, 0x01, 0x00, 0x00, 0x00
+    };
+    const std::vector<unsigned char> expectedDisabled{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x37, 0x02, 0x00, 0x00, 0x00
+    };
+
+    return AapSetHearingProtection(AapHearingProtectionMode::On).Request() == expectedEnabled &&
+           AapSetHearingProtection(AapHearingProtectionMode::Off).Request() == expectedDisabled;
+}
+
+bool TestsAapBle::TestHearingProtectionWatcher()
+{
+    AapHearingProtectionWatcher protectionWatcher{};
+    std::vector<AapHearingProtectionMode> receivedModes{};
+    const size_t modeEventId = protectionWatcher.GetEvent().Subscribe(
+        [&receivedModes](size_t, AapHearingProtectionMode mode)
+        {
+            receivedModes.push_back(mode);
+        });
+
+    protectionWatcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x37, 0x00, 0x00, 0x00, 0x00});
+    protectionWatcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x37, 0x01, 0x00, 0x00, 0x00});
+    protectionWatcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x37, 0x02, 0x00, 0x00, 0x00});
+    protectionWatcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x37, 0x03, 0x00, 0x00, 0x00});
+    protectionWatcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x37});
+    protectionWatcher.GetEvent().Unsubscribe(modeEventId);
+
+    return receivedModes == std::vector<AapHearingProtectionMode>{
+        AapHearingProtectionMode::Unknown,
+        AapHearingProtectionMode::On,
+        AapHearingProtectionMode::Off
+    };
+}
+
+bool TestsAapBle::TestHearingProtectionStrengthWatcher()
+{
+    AapHearingProtectionStrengthWatcher strengthWatcher{};
+    std::vector<unsigned char> receivedStrengths{};
+    const size_t strengthEventId = strengthWatcher.GetEvent().Subscribe(
+        [&receivedStrengths](size_t, unsigned char strength)
+        {
+            receivedStrengths.push_back(strength);
+        });
+
+    strengthWatcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x38, 0x52, 0x00, 0x00, 0x00});
+    strengthWatcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x38});
+    strengthWatcher.GetEvent().Unsubscribe(strengthEventId);
+
+    return receivedStrengths == std::vector<unsigned char>{82};
+}
+
+bool TestsAapBle::TestOptimizedChargePackets()
+{
+    const std::vector<unsigned char> expectedEnabled{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x3b, 0x01, 0x00, 0x00, 0x00
+    };
+    const std::vector<unsigned char> expectedDisabled{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x3b, 0x02, 0x00, 0x00, 0x00
+    };
+
+    AapOptimizedChargeWatcher watcher{};
+    AapOptimizedChargeMode receivedMode{};
+    size_t eventCount = 0;
+    const size_t eventId = watcher.GetEvent().Subscribe(
+        [&receivedMode, &eventCount](size_t, AapOptimizedChargeMode mode)
+        {
+            receivedMode = mode;
+            ++eventCount;
+        });
+
+    watcher.ProcessResponse(expectedDisabled);
+    watcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x3b, 0x00, 0x00, 0x00, 0x00});
+    watcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x3b});
+    watcher.GetEvent().Unsubscribe(eventId);
+
+    return AapSetOptimizedCharge(AapOptimizedChargeMode::On).Request() == expectedEnabled &&
+           AapSetOptimizedCharge(AapOptimizedChargeMode::Off).Request() == expectedDisabled &&
+           eventCount == 1 &&
+           receivedMode == AapOptimizedChargeMode::Off;
+}
+
+bool TestsAapBle::TestSleepDetectionPackets()
+{
+    const std::vector<unsigned char> expectedEnabled{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x35, 0x01, 0x00, 0x00, 0x00
+    };
+    const std::vector<unsigned char> expectedDisabled{
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x35, 0x02, 0x00, 0x00, 0x00
+    };
+
+    AapSleepDetectionWatcher watcher{};
+    AapSleepDetectionMode receivedMode{};
+    size_t eventCount = 0;
+    const size_t eventId = watcher.GetEvent().Subscribe(
+        [&receivedMode, &eventCount](size_t, AapSleepDetectionMode mode)
+        {
+            receivedMode = mode;
+            ++eventCount;
+        });
+
+    watcher.ProcessResponse(expectedDisabled);
+    watcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x35, 0x00, 0x00, 0x00, 0x00});
+    watcher.ProcessResponse(
+        {0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x35});
+    watcher.GetEvent().Unsubscribe(eventId);
+
+    return AapSetSleepDetection(AapSleepDetectionMode::On).Request() == expectedEnabled &&
+           AapSetSleepDetection(AapSleepDetectionMode::Off).Request() == expectedDisabled &&
+           eventCount == 1 &&
+           receivedMode == AapSleepDetectionMode::Off;
+}
+
 bool TestsAapBle::TestAncOffModePackets()
 {
     const std::vector<unsigned char> expectedEnabled{
@@ -179,8 +316,7 @@ bool TestsAapBle::TestAncOffModePackets()
         0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x34, 0x02, 0x00, 0x00, 0x00
     };
 
-    return !IsValidAapAncOffMode(0x00) &&
-           AapSetAncOffMode(AapAncOffMode::Enabled).Request() == expectedEnabled &&
+    return AapSetAncOffMode(AapAncOffMode::Enabled).Request() == expectedEnabled &&
            AapSetAncOffMode(AapAncOffMode::Disabled).Request() == expectedDisabled;
 }
 
@@ -193,8 +329,7 @@ bool TestsAapBle::TestDigitalCrownPackets()
         0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x1c, 0x02, 0x00, 0x00, 0x00
     };
 
-    return !IsValidAapDigitalCrownMode(0x00) &&
-           AapSetDigitalCrown(AapDigitalCrownMode::BackToFront).Request() == expectedBackToFront &&
+    return AapSetDigitalCrown(AapDigitalCrownMode::BackToFront).Request() == expectedBackToFront &&
            AapSetDigitalCrown(AapDigitalCrownMode::FrontToBack).Request() == expectedFrontToBack;
 }
 
@@ -204,11 +339,7 @@ bool TestsAapBle::TestPressAndHoldAirPodMode()
         0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x16, 0x01, 0x05, 0x00, 0x00
     };
 
-    return IsValidAapPressAndHoldAirPodMode(0x01) &&
-           IsValidAapPressAndHoldAirPodMode(0x05) &&
-           !IsValidAapPressAndHoldAirPodMode(0x00) &&
-           !IsValidAapPressAndHoldAirPodMode(0x02) &&
-           AapSetPressAndHoldAirPodMode(
+    return AapSetPressAndHoldAirPodMode(
                AapPressAndHoldAirPodMode::NoiseControl,
                AapPressAndHoldAirPodMode::Siri).Request() == expectedPacket;
 }

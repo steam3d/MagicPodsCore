@@ -36,6 +36,11 @@ namespace MagicPodsCore
         bool TestHighResolutionMicrophoneSupport();
         bool TestCustomEqPacket();
         bool TestCustomEqSupport();
+        bool TestHearingProtectionPackets();
+        bool TestHearingProtectionWatcher();
+        bool TestHearingProtectionStrengthWatcher();
+        bool TestOptimizedChargePackets();
+        bool TestSleepDetectionPackets();
         bool TestAncOffModePackets();
         bool TestDigitalCrownPackets();
         bool TestPressAndHoldAirPodMode();
