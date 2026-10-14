@@ -977,6 +977,29 @@ Delays full charging to reduce battery ageing and extend battery lifespan.
 | `true`   | Enable  |
 | `false`  | Disable |
 
+##### Sleep detection
+
+Controls whether the headphones detect when the user falls asleep.
+
+```json
+{
+  "sleepDetection": {
+    "readonly": false,
+    "selected": false
+  }
+}
+```
+
+| Field      | Type |
+| ---------- | ---- |
+| `selected` | bool |
+| `readonly` | bool |
+
+| selected |         |
+| -------- | ------- |
+| `true`   | Enable  |
+| `false`  | Disable |
+
 ##### Stem control*
 
 Subscribes to AirPods stem press events, replacing the default button behavior.

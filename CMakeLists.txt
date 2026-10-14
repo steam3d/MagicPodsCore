@@ -47,6 +47,7 @@ add_executable(magicpodscore
     src/sdk/aap/setters/AapSetCustomEq.cpp
     src/sdk/aap/setters/AapSetHearingProtection.cpp
     src/sdk/aap/setters/AapSetOptimizedCharge.cpp
+    src/sdk/aap/setters/AapSetSleepDetection.cpp
     src/sdk/aap/setters/AapSetMicrophoneOn.cpp
     src/sdk/aap/setters/AapSetMicrophoneOff.cpp
     src/sdk/aap/setters/AapPrivateKeys.cpp
