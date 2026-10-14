@@ -24,6 +24,8 @@ namespace MagicPodsCore
     // 01 - Noise control for left AirPod
     // 05 - Siri for left AirPod
     // Selects the press-and-hold action for each AirPod
+    //
+    // It's interesting that Beats reports the currently selected mode but doesn't provide selected noise control options.
     // ---------------------------------------------------------------------------
     class AapSetPressAndHoldAirPodMode : public AapRequest
     {
