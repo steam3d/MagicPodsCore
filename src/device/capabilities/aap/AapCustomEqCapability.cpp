@@ -11,10 +11,12 @@ namespace MagicPodsCore
     nlohmann::json AapCustomEqCapability::CreateJsonBody()
     {
         auto bodyJson = nlohmann::json::object();
-        bodyJson["selected"] = option.State == AapCustomEqState::Enabled;
-        bodyJson["low"] = option.Low;
-        bodyJson["mid"] = option.Mid;
-        bodyJson["high"] = option.High;
+        bodyJson["selected"] = {
+            {"enabled", option.State == AapCustomEqState::Enabled},
+            {"low", option.Low},
+            {"mid", option.Mid},
+            {"high", option.High}
+        };
         return bodyJson;
     }
 
@@ -60,42 +62,49 @@ namespace MagicPodsCore
             return;
         }
 
-        if (!capability.contains("selected") ||
-            !capability.contains("low") ||
-            !capability.contains("mid") ||
-            !capability.contains("high"))
+        if (!capability.contains("selected") || !capability.at("selected").is_object())
         {
-            Logger::Error("Error: %s::SetFromJson requires selected, low, mid and high", name.c_str());
+            Logger::Error("Error: %s::SetFromJson requires a selected object", name.c_str());
             return;
         }
 
-        if (!capability.at("selected").is_boolean())
+        const auto& selected = capability.at("selected");
+        if (!selected.contains("enabled") ||
+            !selected.contains("low") ||
+            !selected.contains("mid") ||
+            !selected.contains("high"))
         {
-            Logger::Error("Error: %s::SetFromJson selected is not a boolean", name.c_str());
+            Logger::Error("Error: %s::SetFromJson selected requires enabled, low, mid and high", name.c_str());
+            return;
+        }
+
+        if (!selected.at("enabled").is_boolean())
+        {
+            Logger::Error("Error: %s::SetFromJson selected.enabled is not a boolean", name.c_str());
             return;
         }
 
         AapCustomEq newOption{};
-        newOption.State = capability.at("selected").get<bool>()
+        newOption.State = selected.at("enabled").get<bool>()
             ? AapCustomEqState::Enabled
             : AapCustomEqState::Disabled;
 
-        if (!capability.at("low").is_number_integer() ||
-            !capability.at("mid").is_number_integer() ||
-            !capability.at("high").is_number_integer())
+        if (!selected.at("low").is_number_integer() ||
+            !selected.at("mid").is_number_integer() ||
+            !selected.at("high").is_number_integer())
         {
-            Logger::Error("Error: %s::SetFromJson low, mid and high must be integers", name.c_str());
+            Logger::Error("Error: %s::SetFromJson selected.low, selected.mid and selected.high must be integers", name.c_str());
             return;
         }
 
-        const int low = capability.at("low").get<int>();
-        const int mid = capability.at("mid").get<int>();
-        const int high = capability.at("high").get<int>();
+        const int low = selected.at("low").get<int>();
+        const int mid = selected.at("mid").get<int>();
+        const int high = selected.at("high").get<int>();
         if (low < 0 || low > 100 ||
             mid < 0 || mid > 100 ||
             high < 0 || high > 100)
         {
-            Logger::Error("Error: %s::SetFromJson low, mid and high must be between 0 and 100", name.c_str());
+            Logger::Error("Error: %s::SetFromJson selected.low, selected.mid and selected.high must be between 0 and 100", name.c_str());
             return;
         }
 

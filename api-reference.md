@@ -17,7 +17,7 @@ After connecting to the WebSocket, MagicPodsCore sends an `init` message and the
 ```json
 {
   "init": {
-    "api": 0,
+    "api": 1,
     "version": "2.0.7"
   }
 }
@@ -351,8 +351,6 @@ Response:
 If a `capabilities` property is not marked as `readonly: true`, it can be modified.
 
 Send one of the available values listed in `options` (if present) or the value specified in `selected` for each `capabilities` property, as described in this documentation.
-
-Some capabilities require additional parameters besides `selected`. Pass these parameters alongside `selected` in the same capability object. The required parameters and their valid values are listed in the documentation for each capability.
 
 Request:
 
@@ -825,35 +823,38 @@ Controls the three-band equalizer for AirPods Pro 2-3, AirPods 4-5 and AirPods M
 {
   "customEq": {
     "readonly": false,
-    "selected": true,
-    "low": 50,
-    "mid": 50,
-    "high": 50
+    "selected": {
+      "enabled": true,
+      "low": 50,
+      "mid": 50,
+      "high": 50
+    }
   }
 }
 ```
 
-| Field      |      |
-| ---------- | ---- |
-| `selected` | bool |
-| `low`      | int  |
-| `mid`      | int  |
-| `high`     | int  |
-| `readonly` | bool |
+| Field              |        |
+| ------------------ | ------ |
+| `selected`         | object |
+| `selected.enabled` | bool   |
+| `selected.low`     | int    |
+| `selected.mid`     | int    |
+| `selected.high`    | int    |
+| `readonly`         | bool   |
 
-| selected |         |
-| -------- | ------- |
-| `true`   | Enable  |
-| `false`  | Disable |
+| selected.enabled |         |
+| ---------------- | ------- |
+| `true`           | Enable  |
+| `false`          | Disable |
 
-| Field  |                         |
-| ------ | ----------------------- |
-| `low`  | Low frequencies, 0-100  |
-| `mid`  | Mid frequencies, 0-100  |
-| `high` | High frequencies, 0-100 |
+| Field           |                         |
+| --------------- | ----------------------- |
+| `selected.low`  | Low frequencies, 0-100  |
+| `selected.mid`  | Mid frequencies, 0-100  |
+| `selected.high` | High frequencies, 0-100 |
 
-`SetCapabilities` requires `selected`, `low`, `mid`, and `high` together. The
-request is ignored if any field is missing or invalid.
+`SetCapabilities` requires `enabled`, `low`, `mid`, and `high` together inside
+`selected`. The request is ignored if any field is missing or invalid.
 
 ##### Personalized volume
 
