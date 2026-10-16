@@ -14,7 +14,7 @@ namespace MagicPodsCore
     //
     // 0  1  2  3  4  5  6  7  8  9  10
     //                      r  l  ar al
-    // 04 00 04 00 09 00 16 05 05 07 06 Active: Noise control for both, alternative: Volume up/down
+    // 04 00 04 00 09 00 16 05 05 07 06 Active: Noise control for both, alternative: Volume down/up
     //
     // 7-8 bytes:
     // Active mode for the right and left earbud.
@@ -24,8 +24,8 @@ namespace MagicPodsCore
     //
     // 01 - Siri
     // 05 - Noise control
-    // 06 - Volume down
-    // 07 - Volume up
+    // 06 - Volume up
+    // 07 - Volume down
     //
     // Both pairs must contain valid modes. Volume control uses a complementary
     // 06/07 or 07/06 pair.

@@ -12,8 +12,8 @@ namespace MagicPodsCore
     {
         Siri = 0x01,
         NoiseControl = 0x05,
-        VolumeDown = 0x06,
-        VolumeUp = 0x07,
+        VolumeUp = 0x06,
+        VolumeDown = 0x07,
     };
 
     static bool IsValidAapPressAndHoldAirPodMode(unsigned char value)
@@ -22,8 +22,8 @@ namespace MagicPodsCore
         {
         case AapPressAndHoldAirPodMode::Siri:
         case AapPressAndHoldAirPodMode::NoiseControl:
-        case AapPressAndHoldAirPodMode::VolumeDown:
         case AapPressAndHoldAirPodMode::VolumeUp:
+        case AapPressAndHoldAirPodMode::VolumeDown:
             return true;
         default:
             return false;
@@ -38,10 +38,10 @@ namespace MagicPodsCore
             return "Siri";
         case AapPressAndHoldAirPodMode::NoiseControl:
             return "NoiseControl";
-        case AapPressAndHoldAirPodMode::VolumeDown:
-            return "VolumeDown";
         case AapPressAndHoldAirPodMode::VolumeUp:
             return "VolumeUp";
+        case AapPressAndHoldAirPodMode::VolumeDown:
+            return "VolumeDown";
         default:
             return "Unknown value";
         }

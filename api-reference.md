@@ -725,8 +725,8 @@ Configures the action performed by pressing and holding each earbud.
 | ----- | ------------- |
 | `1`   | Siri          |
 | `5`   | Noise control |
-| `6`   | Volume down   |
-| `7`   | Volume up     |
+| `6`   | Volume up     |
+| `7`   | Volume down   |
 
 Send only the changed earbud:
 
