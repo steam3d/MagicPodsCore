@@ -27,20 +27,37 @@ namespace MagicPodsCore {
 
         if (settingValue.is_boolean()){
             bool value = settingValue.as_boolean()->get();
-            if (value){
-                _bleService->StartListening();
-                _bleService->StartScan(true);
-                Logger::Debug("Ble service started");
+            // BLE scan keeps BlueZ discovery active and breaks auto-reconnect of other BLE devices,
+            // so we start it only when there is a device that uses it
+            if (value && HasAapDevice()){
+                if (!_isBleScanStarted){
+                    _bleService->StartListening();
+                    _bleService->StartScan(true);
+                    _isBleScanStarted = true;
+                    Logger::Debug("Ble service started");
+                }
             }
             else
             {
-                _bleService->StopScan();
-                Logger::Debug("Ble service stopped");
+                if (_isBleScanStarted){
+                    _bleService->StopScan();
+                    _isBleScanStarted = false;
+                    Logger::Debug("Ble service stopped");
+                }
             }
         }
         else{
             Logger::Error("Failed to read animation setting");
         }
+    }
+
+    bool DevicesInfoFetcher::HasAapDevice() const
+    {
+        for (const auto& [address, device] : _devicesMap) {
+            if (std::dynamic_pointer_cast<AapDevice>(device) != nullptr)
+                return true;
+        }
+        return false;
     }
 
     DevicesInfoFetcher::DevicesInfoFetcher(const std::shared_ptr<SettingsService> &settingsService): _settingsService{settingsService} {
@@ -52,9 +69,9 @@ namespace MagicPodsCore {
                 UpdateBleState();
         });
 
-        UpdateBleState();
-
         ClearAndFillDevicesMap();
+
+        UpdateBleState();
 
         for (auto& device : _dbusService.GetAllDevices()) {
             Logger::Info("Device with address (known): %s", device->GetAddress().c_str());
@@ -67,6 +84,7 @@ namespace MagicPodsCore {
                 if (auto device = TryCreateDevice(addedDeviceInfo)) {
                     _devicesMap.emplace(addedDeviceInfo->GetAddress(), device);
                     _onDeviceAddEvent.FireEvent(device);
+                    UpdateBleState();
                 }
                 //TrySelectNewActiveDevice();
                 // TODO: уведомление о добавлении устройства
@@ -78,6 +96,7 @@ namespace MagicPodsCore {
             if (_devicesMap.contains(removedDeviceInfo->GetAddress())) {
                 _onDeviceRemoveEvent.FireEvent(_devicesMap.at(removedDeviceInfo->GetAddress()));
                 _devicesMap.erase(removedDeviceInfo->GetAddress());
+                UpdateBleState();
             }
 
             TrySelectNewActiveDevice();
@@ -90,7 +109,8 @@ namespace MagicPodsCore {
 
 DevicesInfoFetcher::~DevicesInfoFetcher()
 {
-    _bleService->StopScan(); //wrong we must check if it is running
+    if (_isBleScanStarted)
+        _bleService->StopScan();
     _settingsService->GetOnSettingUpdateEvent().Unsubscribe(_onSettingsChangeId);
 }
 
