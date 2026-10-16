@@ -24,6 +24,7 @@
 #include "sdk/aap/watchers/AapHearingProtectionWatcher.h"
 #include "sdk/aap/watchers/AapMicrophoneWatcher.h"
 #include "sdk/aap/watchers/AapOptimizedChargeWatcher.h"
+#include "sdk/aap/watchers/AapPressAndHoldAirPodModeWatcher.h"
 #include "sdk/aap/watchers/AapSleepDetectionWatcher.h"
 #include "sdk/aap/watchers/AapStemControlStateWatcher.h"
 #include "StringUtils.h"
@@ -70,6 +71,7 @@ TestsAapBle::TestsAapBle()
     Test("TestAncOffModePackets", TestAncOffModePackets());
     Test("TestDigitalCrownPackets", TestDigitalCrownPackets());
     Test("TestPressAndHoldAirPodMode", TestPressAndHoldAirPodMode());
+    Test("TestPressAndHoldAirPodModeWatcher", TestPressAndHoldAirPodModeWatcher());
     Test("TestPressAndHoldAirPodModeAnc", TestPressAndHoldAirPodModeAnc());
     Test("TestStemControlPackets", TestStemControlPackets());
 }
@@ -336,12 +338,47 @@ bool TestsAapBle::TestDigitalCrownPackets()
 bool TestsAapBle::TestPressAndHoldAirPodMode()
 {
     const std::vector<unsigned char> expectedPacket{
-        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x16, 0x01, 0x05, 0x00, 0x00
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x16, 0x05, 0x05, 0x07, 0x06
     };
 
-    return AapSetPressAndHoldAirPodMode(
-               AapPressAndHoldAirPodMode::NoiseControl,
-               AapPressAndHoldAirPodMode::Siri).Request() == expectedPacket;
+    const auto standardState = AapPressAndHoldAirPodModeState::Create(0x05, 0x05, 0x07, 0x06);
+    const auto volumeState = AapPressAndHoldAirPodModeState::Create(0x07, 0x06, 0x05, 0x05);
+    if (!standardState.has_value() || !volumeState.has_value())
+        return false;
+
+    const auto volumeToStandard = volumeState->SetRight(0x05);
+    const auto standardToVolume = standardState->SetLeft(0x07);
+    const auto invalidState = AapPressAndHoldAirPodModeState::Create(0x05, 0x05, 0x07, 0x07);
+
+    return AapSetPressAndHoldAirPodMode(standardState.value()).Request() == expectedPacket &&
+           volumeToStandard == standardState.value() &&
+           standardToVolume == AapPressAndHoldAirPodModeState::Create(0x06, 0x07, 0x05, 0x05).value() &&
+           !invalidState.has_value();
+}
+
+bool TestsAapBle::TestPressAndHoldAirPodModeWatcher()
+{
+    AapPressAndHoldAirPodModeWatcher watcher{};
+    std::optional<AapPressAndHoldAirPodModeState> receivedState{};
+    size_t eventCount = 0;
+    const size_t eventId = watcher.GetEvent().Subscribe(
+        [&receivedState, &eventCount](size_t, const AapPressAndHoldAirPodModeState& state)
+        {
+            receivedState = state;
+            ++eventCount;
+        });
+
+    watcher.ProcessResponse({
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x16, 0x05, 0x05, 0x07, 0x06
+    });
+    watcher.ProcessResponse({
+        0x04, 0x00, 0x04, 0x00, 0x09, 0x00, 0x16, 0x05, 0x05, 0x07, 0x00
+    });
+    watcher.ProcessResponse({0x04, 0x00, 0x04});
+    watcher.GetEvent().Unsubscribe(eventId);
+
+    return eventCount == 1 &&
+           receivedState == AapPressAndHoldAirPodModeState::Create(0x05, 0x05, 0x07, 0x06);
 }
 
 bool TestsAapBle::TestPressAndHoldAirPodModeAnc()

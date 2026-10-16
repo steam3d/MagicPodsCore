@@ -24,6 +24,7 @@ add_executable(magicpodscore
 
     src/sdk/aap/Aes.cpp
     src/sdk/aap/AapHelper.cpp
+    src/sdk/aap/structs/AapPressAndHoldAirPodModeState.cpp
     src/sdk/aap/setters/AapEnableNotifications.cpp
     src/sdk/aap/setters/AapInit.cpp
     src/sdk/aap/setters/AapInitExt.cpp
@@ -60,6 +61,7 @@ add_executable(magicpodscore
     src/sdk/aap/watchers/AapStemControlStateWatcher.cpp
     src/sdk/aap/watchers/AapNoiseCancellationOneAirPodWatcher.cpp
     src/sdk/aap/watchers/AapFwInfoWatcher.cpp
+    src/sdk/aap/watchers/AapPressAndHoldAirPodModeWatcher.cpp
     src/sdk/aap/watchers/AapPressAndHoldDurationWatcher.cpp
     src/sdk/aap/watchers/AapPressSpeedWatcher.cpp
     src/sdk/aap/watchers/AapVolumeSwipeWatcher.cpp

@@ -5,24 +5,18 @@
 #pragma once
 
 #include "AapCapability.h"
-#include "sdk/aap/enums/AapPressAndHoldAirPodMode.h"
+#include "sdk/aap/watchers/AapPressAndHoldAirPodModeWatcher.h"
+
+#include <optional>
 
 namespace MagicPodsCore
 {
     class AapPressAndHoldAirPodModeCapability : public AapCapability
     {
     private:
-        // Application-only value for the UI's "Do not apply" option. It is outside
-        // the byte range and is never sent to headphones.
-        static constexpr int DoNotApply = -1;
-
-        int rightOption{DoNotApply};
-        int leftOption{DoNotApply};
-        size_t clientStateChangedEventId{};
-
-        static bool IsValidOption(int value);
-        static std::string OptionToString(int value);
-        void SendPreference();
+        std::optional<AapPressAndHoldAirPodModeState> option{};
+        AapPressAndHoldAirPodModeWatcher watcher{};
+        size_t watcherEventId{};
 
     protected:
         nlohmann::json CreateJsonBody() override;
@@ -32,7 +26,5 @@ namespace MagicPodsCore
         explicit AapPressAndHoldAirPodModeCapability(AapDevice& device);
         ~AapPressAndHoldAirPodModeCapability() override;
         void SetFromJson(const nlohmann::json& json) override;
-
-        static bool IsSupported(unsigned short model);
     };
 }

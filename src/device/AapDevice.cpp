@@ -98,6 +98,7 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapHearingProtectionStrengthCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapOptimizedChargeCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapSleepDetectionCapability>(*device));
+        device->capabilities.push_back(std::make_unique<AapPressAndHoldAirPodModeCapability>(*device));
 
         //setting related
         if (AapStemControlCapability::IsSupported(deviceInfo->GetProductId()))
@@ -105,9 +106,6 @@ namespace MagicPodsCore
             device->capabilities.push_back(std::make_unique<AapStemControlCapability>(*device));
             device->capabilities.push_back(std::make_unique<AapStemControlStateCapability>(*device));
         }
-
-        if (AapPressAndHoldAirPodModeCapability::IsSupported(deviceInfo->GetProductId()))
-            device->capabilities.push_back(std::make_unique<AapPressAndHoldAirPodModeCapability>(*device));
 
         if (AapPressAndHoldAirPodModeAncCapability::IsSupported(deviceInfo->GetProductId()))
             device->capabilities.push_back(std::make_unique<AapPressAndHoldAirPodModeAncCapability>(*device));

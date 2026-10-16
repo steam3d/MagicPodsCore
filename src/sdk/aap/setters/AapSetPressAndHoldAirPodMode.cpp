@@ -9,21 +9,23 @@
 namespace MagicPodsCore
 {
     AapSetPressAndHoldAirPodMode::AapSetPressAndHoldAirPodMode(
-        AapPressAndHoldAirPodMode rightMode,
-        AapPressAndHoldAirPodMode leftMode)
-        : AapRequest{"AapSetPressAndHoldAirPodMode"}, _rightMode{rightMode}, _leftMode{leftMode}
+        const AapPressAndHoldAirPodModeState& state)
+        : AapRequest{"AapSetPressAndHoldAirPodMode"}, _state{state}
     {
     }
 
     std::vector<unsigned char> AapSetPressAndHoldAirPodMode::Request() const
     {
-        return std::vector<unsigned char>{
+        const auto& active = _state.GetActive();
+        const auto& alternative = _state.GetAlternative();
+        return {
             0x04, 0x00, 0x04, 0x00,
             static_cast<unsigned char>(AapCmd::Settings), 0x00,
             static_cast<unsigned char>(AapCmdSettings::PressAndHoldAirPodMode),
-            static_cast<unsigned char>(_rightMode),
-            static_cast<unsigned char>(_leftMode),
-            0x00, 0x00
+            static_cast<unsigned char>(active[0]),
+            static_cast<unsigned char>(active[1]),
+            static_cast<unsigned char>(alternative[0]),
+            static_cast<unsigned char>(alternative[1])
         };
     }
 }

@@ -5,38 +5,41 @@
 #pragma once
 
 #include "AapRequest.h"
-#include "sdk/aap/enums/AapPressAndHoldAirPodMode.h"
+#include "sdk/aap/structs/AapPressAndHoldAirPodModeState.h"
 
 namespace MagicPodsCore
 {
     // ---------------------------------------------------------------------------
-    // 0400040009001601050000
+    // 0400040009001605050706
     //
     // 0  1  2  3  4  5  6  7  8  9  10
-    //                      r  l
-    // 04 00 04 00 09 00 16 01 05 00 00 Right: Noise control, left: Siri
+    //                      r  l  ar al
+    // 04 00 04 00 09 00 16 05 05 07 06 Active: Noise control for both, alternative: Volume up/down
     //
-    // 7 byte:
-    // 01 - Noise control for right AirPod
-    // 05 - Siri for right AirPod
+    // 7-8 bytes:
+    // Active mode for the right and left earbud.
     //
-    // 8 byte:
-    // 01 - Noise control for left AirPod
-    // 05 - Siri for left AirPod
-    // Selects the press-and-hold action for each AirPod
+    // 9-10 bytes:
+    // Alternative mode for the right and left earbud.
     //
-    // It's interesting that Beats reports the currently selected mode but doesn't provide selected noise control options.
+    // 01 - Siri
+    // 05 - Noise control
+    // 06 - Volume down
+    // 07 - Volume up
+    //
+    // Both pairs must contain valid modes. Volume control uses a complementary
+    // 06/07 or 07/06 pair.
+    //
+    // This packet is confirmed for compatible Beats models.
+    // AirPods behavior requires additional research.
     // ---------------------------------------------------------------------------
     class AapSetPressAndHoldAirPodMode : public AapRequest
     {
     private:
-        AapPressAndHoldAirPodMode _rightMode;
-        AapPressAndHoldAirPodMode _leftMode;
+        AapPressAndHoldAirPodModeState _state;
 
     public:
-        AapSetPressAndHoldAirPodMode(
-            AapPressAndHoldAirPodMode rightMode,
-            AapPressAndHoldAirPodMode leftMode);
+        explicit AapSetPressAndHoldAirPodMode(const AapPressAndHoldAirPodModeState& state);
         std::vector<unsigned char> Request() const override;
     };
 }

@@ -10,16 +10,20 @@ namespace MagicPodsCore
 {
     enum class AapPressAndHoldAirPodMode : unsigned char
     {
-        NoiseControl = 0x01,
-        Siri = 0x05,
+        Siri = 0x01,
+        NoiseControl = 0x05,
+        VolumeDown = 0x06,
+        VolumeUp = 0x07,
     };
 
     static bool IsValidAapPressAndHoldAirPodMode(unsigned char value)
     {
         switch (static_cast<AapPressAndHoldAirPodMode>(value))
         {
-        case AapPressAndHoldAirPodMode::NoiseControl:
         case AapPressAndHoldAirPodMode::Siri:
+        case AapPressAndHoldAirPodMode::NoiseControl:
+        case AapPressAndHoldAirPodMode::VolumeDown:
+        case AapPressAndHoldAirPodMode::VolumeUp:
             return true;
         default:
             return false;
@@ -30,10 +34,14 @@ namespace MagicPodsCore
     {
         switch (value)
         {
-        case AapPressAndHoldAirPodMode::NoiseControl:
-            return "NoiseControl";
         case AapPressAndHoldAirPodMode::Siri:
             return "Siri";
+        case AapPressAndHoldAirPodMode::NoiseControl:
+            return "NoiseControl";
+        case AapPressAndHoldAirPodMode::VolumeDown:
+            return "VolumeDown";
+        case AapPressAndHoldAirPodMode::VolumeUp:
+            return "VolumeUp";
         default:
             return "Unknown value";
         }

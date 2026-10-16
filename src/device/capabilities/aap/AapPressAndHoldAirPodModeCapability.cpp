@@ -3,133 +3,56 @@
 // License: GPL-3.0
 
 #include "AapPressAndHoldAirPodModeCapability.h"
-#include "sdk/aap/enums/AapModelIds.h"
 #include "sdk/aap/setters/AapSetPressAndHoldAirPodMode.h"
 
 namespace MagicPodsCore
 {
-    static constexpr auto RightSetting = "aap_hold_right_mode";
-    static constexpr auto LeftSetting = "aap_hold_left_mode";
-
-    bool AapPressAndHoldAirPodModeCapability::IsValidOption(int value)
-    {
-        return value == DoNotApply ||
-               (value >= 0 && value <= 0xff &&
-                IsValidAapPressAndHoldAirPodMode(static_cast<unsigned char>(value)));
-    }
-
-    std::string AapPressAndHoldAirPodModeCapability::OptionToString(int value)
-    {
-        if (value == DoNotApply)
-            return "DoNotApply";
-        if (value >= 0 && value <= 0xff &&
-            IsValidAapPressAndHoldAirPodMode(static_cast<unsigned char>(value)))
-        {
-            return AapPressAndHoldAirPodModeToString(
-                static_cast<AapPressAndHoldAirPodMode>(value));
-        }
-        return "Unknown value";
-    }
-
-    void AapPressAndHoldAirPodModeCapability::SendPreference()
-    {
-        // Both bytes must be sent together. Do not overwrite either bud when its
-        // current value is unknown and no preference has been configured for it.
-        if (rightOption == DoNotApply || leftOption == DoNotApply)
-            return;
-
-        SendData(AapSetPressAndHoldAirPodMode(
-            static_cast<AapPressAndHoldAirPodMode>(rightOption),
-            static_cast<AapPressAndHoldAirPodMode>(leftOption)));
-    }
-
     nlohmann::json AapPressAndHoldAirPodModeCapability::CreateJsonBody()
     {
+        const auto& active = option->GetActive();
         auto bodyJson = nlohmann::json::object();
         bodyJson["selected"] = {
-            {"right", rightOption},
-            {"left", leftOption}
+            {"right", active[0]},
+            {"left", active[1]}
         };
+        bodyJson["options"] = option->IsVolumeSupported()
+            ? nlohmann::json{
+                AapPressAndHoldAirPodMode::Siri,
+                AapPressAndHoldAirPodMode::NoiseControl,
+                AapPressAndHoldAirPodMode::VolumeDown,
+                AapPressAndHoldAirPodMode::VolumeUp}
+            : nlohmann::json{
+                AapPressAndHoldAirPodMode::Siri,
+                AapPressAndHoldAirPodMode::NoiseControl};
         return bodyJson;
     }
 
-    void AapPressAndHoldAirPodModeCapability::OnReceivedData(const std::vector<unsigned char>&)
+    void AapPressAndHoldAirPodModeCapability::OnReceivedData(const std::vector<unsigned char>& data)
     {
+        watcher.ProcessResponse(data);
     }
 
-    AapPressAndHoldAirPodModeCapability::AapPressAndHoldAirPodModeCapability(AapDevice& device)
-        : AapCapability("pressAndHoldAirPodMode", false, device)
+    AapPressAndHoldAirPodModeCapability::AapPressAndHoldAirPodModeCapability(AapDevice& device) : AapCapability("pressAndHoldAirPodMode", false, device)
     {
-        clientStateChangedEventId = device.GetClientStateChangedEvent().Subscribe(
-            [this](size_t, ClientState state)
+        watcherEventId = watcher.GetEvent().Subscribe([this](size_t, const AapPressAndHoldAirPodModeState& mode)
+        {
+            if (!isAvailable)
             {
-                if (state != ClientState::Connected)
-                    return;
-
-                rightOption = DoNotApply; //default value
-                leftOption = DoNotApply; //default value
-
-                const auto rightSetting = this->device.LoadSettingInt(RightSetting);
-                if (rightSetting.has_value())
-                {
-                    const auto value = rightSetting.value();
-                    if (value >= DoNotApply && value <= 0xff && IsValidOption(static_cast<int>(value)))
-                        rightOption = static_cast<int>(value);
-                    else
-                        Logger::Error("PressAndHoldAirPodMode right setting has unexpected value: %lld",
-                            static_cast<long long>(value));
-                }
-
-                const auto leftSetting = this->device.LoadSettingInt(LeftSetting);
-                if (leftSetting.has_value())
-                {
-                    const auto value = leftSetting.value();
-                    if (value >= DoNotApply && value <= 0xff && IsValidOption(static_cast<int>(value)))
-                        leftOption = static_cast<int>(value);
-                    else
-                        Logger::Error("PressAndHoldAirPodMode left setting has unexpected value: %lld",
-                            static_cast<long long>(value));
-                }
-
-                // The protocol always writes both buds in one command. A partial
-                // DoNotApply state cannot be honored without overwriting one bud.
-                if (rightOption == DoNotApply || leftOption == DoNotApply)
-                {
-                    rightOption = DoNotApply;
-                    leftOption = DoNotApply;
-                }
-
-                SendPreference();
                 isAvailable = true;
-                Logger::Info("PressAndHoldAirPodMode updated: right=%s, left=%s",
-                    OptionToString(rightOption).c_str(), OptionToString(leftOption).c_str());
+                option = mode;
                 _onChanged.FireEvent(*this);
-            });
+            }
+            else if (option.value() != mode)
+            {
+                option = mode;
+                _onChanged.FireEvent(*this);
+            }
+        });
     }
 
     AapPressAndHoldAirPodModeCapability::~AapPressAndHoldAirPodModeCapability()
     {
-        device.GetClientStateChangedEvent().Unsubscribe(clientStateChangedEventId);
-    }
-
-    bool AapPressAndHoldAirPodModeCapability::IsSupported(unsigned short model)
-    {
-        switch (static_cast<AapModelIds>(model))
-        {
-        case AapModelIds::airpodspro:
-        case AapModelIds::airpodspro2:
-        case AapModelIds::airpodspro3:
-        case AapModelIds::airpodsprousbc:
-        case AapModelIds::beatsfitpro:
-        case AapModelIds::airpods4anc:
-        case AapModelIds::airpods5wcc:
-        case AapModelIds::airpods5:
-        case AapModelIds::powerbeatspro2:
-        case AapModelIds::powerbeatsfit:
-            return true;
-        default:
-            return false;
-        }
+        watcher.GetEvent().Unsubscribe(watcherEventId);
     }
 
     void AapPressAndHoldAirPodModeCapability::SetFromJson(const nlohmann::json& json)
@@ -137,64 +60,41 @@ namespace MagicPodsCore
         if (!json.contains(name))
             return;
 
+        if (!isAvailable || !option.has_value())
+        {
+            Logger::Error("Error: %s::SetFromJson got no state from headphones", name.c_str());
+            return;
+        }
+
         const auto& capability = json.at(name);
-        if (!capability.contains("selected") || !capability["selected"].is_object())
+        if (!capability.contains("selected") || !capability.at("selected").is_object())
         {
-            Logger::Error("Error: AapPressAndHoldAirPodModeCapability::SetFromJson got no selected object");
+            Logger::Error("Error: %s::SetFromJson got no selected object", name.c_str());
             return;
         }
 
-        const auto& selected = capability["selected"];
-        if (!selected.contains("right") || !selected["right"].is_number_integer() ||
-            !selected.contains("left") || !selected["left"].is_number_integer())
+        const auto& selected = capability.at("selected");
+        if (selected.size() != 1 ||
+            (!selected.contains("right") && !selected.contains("left")) ||
+            !selected.begin().value().is_number_integer())
         {
-            Logger::Error("Error: AapPressAndHoldAirPodModeCapability::SetFromJson got no right or left integer");
+            Logger::Error("Error: %s::SetFromJson expects exactly one right or left integer", name.c_str());
             return;
         }
 
-        int right = selected["right"].get<int>();
-        int left = selected["left"].get<int>();
-        if (!IsValidOption(right) || !IsValidOption(left))
-        {
-            Logger::Error(
-                "Error: AapPressAndHoldAirPodModeCapability::SetFromJson got unexpected options: right=%d, left=%d",
-                right, left);
+        const bool isRight = selected.contains("right");
+        const int value = selected.begin().value().get<int>();
+        const auto newOption = isRight
+            ? option->SetRight(value)
+            : option->SetLeft(value);
+
+        if (newOption == option.value())
             return;
-        }
 
-        const bool preferenceIsDisabled =
-            rightOption == DoNotApply && leftOption == DoNotApply;
-        if (preferenceIsDisabled)
-        {
-            // When enabling the preference through one bud, use its value for
-            // both buds so a partial DoNotApply state is never persisted.
-            if (right == DoNotApply && left != DoNotApply)
-                right = left;
-            else if (left == DoNotApply && right != DoNotApply)
-                left = right;
-        }
-        else if (right == DoNotApply || left == DoNotApply)
-        {
-            // Clearing either bud disables the preference for both buds.
-            right = DoNotApply;
-            left = DoNotApply;
-        }
+        SendData(AapSetPressAndHoldAirPodMode(newOption));
 
-        const bool changed = rightOption != right || leftOption != left;
-        rightOption = right;
-        leftOption = left;
-        device.SaveSettingInt(RightSetting, right);
-        device.SaveSettingInt(LeftSetting, left);
-        SendPreference();
-
-        if (changed)
-        {
-            Logger::Info("PressAndHoldAirPodMode updated: right=%s, left=%s",
-                OptionToString(rightOption).c_str(), OptionToString(leftOption).c_str());
-            _onChanged.FireEvent(*this);
-        }
-
-        Logger::Debug("AapPressAndHoldAirPodModeCapability::SetFromJson set options to right=%s, left=%s",
-            OptionToString(rightOption).c_str(), OptionToString(leftOption).c_str());
+        // Manually notify because the headphones do not report the changed setting.
+        option = newOption;
+        _onChanged.FireEvent(*this);
     }
 }

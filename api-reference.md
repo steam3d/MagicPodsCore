@@ -702,11 +702,11 @@ Adjust the duration required to press and hold on your AirPods.
 | `1`      | Shorter  |
 | `2`      | Shortest |
 
-##### Press and hold action (override)
+##### Press and hold action
 
-Configures the action performed by pressing and holding each AirPod.
+Configures the action performed by pressing and holding each earbud.
 
-_This feature cannot read the current AirPods setting, but it can overwrite it._
+> AirPods are not currently supported and require additional protocol research.
 
 ```json
 {
@@ -715,21 +715,30 @@ _This feature cannot read the current AirPods setting, but it can overwrite it._
     "selected": {
       "right": 1,
       "left": 5
-    }
+    },
+    "options": [1, 5, 6, 7]
   }
 }
 ```
 
-| Field            | Type |
-| ---------------- | ---- |
-| `selected.right` | enum |
-| `selected.left`  | enum |
+| Value | Mode          |
+| ----- | ------------- |
+| `1`   | Siri          |
+| `5`   | Noise control |
+| `6`   | Volume down   |
+| `7`   | Volume up     |
 
-| selected value |                  |
-| -------------- | ---------------- |
-| `-1`           | Do not apply     |
-| `1`            | Noise control    |
-| `5`            | Siri             |
+Send only the changed earbud:
+
+```json
+{
+  "pressAndHoldAirPodMode": {
+    "selected": {
+      "right": 7
+    }
+  }
+}
+```
 
 ##### Press and hold noise control modes (override)
 
