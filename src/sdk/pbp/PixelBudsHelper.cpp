@@ -3,43 +3,26 @@
 // License: GPL-3.0
 
 #include "PixelBudsHelper.h"
+#include "BtVendorIds.h"
 
 namespace MagicPodsCore
 {
-
-    PixelBudsModelIds PixelBudsHelper::GetModelFromClass(unsigned int clazz)
+    PixelBudsModelIds PixelBudsHelper::GetModelFromVidPid(unsigned short vendorId, unsigned short productId)
     {
-        if (clazz == PIXELBUDSPRO2CLASS)
-        {
-            return PixelBudsModelIds::PixelBudsPro2;
-        }
-        else if (clazz == PIXELBUDSPROCLASS)
-        {
-            return PixelBudsModelIds::PixelBudsPro;
-        }
-        else
-        {
-            return PixelBudsModelIds::Unknown;
-        }
-    }
-
-    PixelBudsModelIds PixelBudsHelper::GetModelFromName(const std::string &name)
-    {
-        if (name.empty())
+        if (vendorId != static_cast<unsigned short>(BtVendorIds::Google))
             return PixelBudsModelIds::Unknown;
 
-        std::string _name = StringUtils::ToLowerCase(name);
-
-        if (_name.find("pixel buds pro 2") != std::string::npos)
+        switch (productId)
         {
-            return PixelBudsModelIds::PixelBudsPro2;
-        }
-        else if (_name.find("pixel buds pro") != std::string::npos)
-        {
+        case static_cast<unsigned short>(PixelBudsModelIds::PixelBudsASeries):
+            return PixelBudsModelIds::PixelBudsASeries;
+        case static_cast<unsigned short>(PixelBudsModelIds::PixelBudsPro):
             return PixelBudsModelIds::PixelBudsPro;
-        }
-        else
-        {
+        case static_cast<unsigned short>(PixelBudsModelIds::PixelBudsPro2):
+            return PixelBudsModelIds::PixelBudsPro2;
+        case static_cast<unsigned short>(PixelBudsModelIds::PixelBuds2a):
+            return PixelBudsModelIds::PixelBuds2a;
+        default:
             return PixelBudsModelIds::Unknown;
         }
     }
@@ -54,24 +37,20 @@ namespace MagicPodsCore
         return std::find(_guids.begin(), _guids.end(), MAESTRO) != _guids.end();
     }
 
-    PixelBudsModelIds PixelBudsHelper::SearchModel(const std::vector<std::string> &guids, const std::optional<unsigned int> &clazz, const std::string &name)
+    PixelBudsModelIds PixelBudsHelper::SearchModel(const std::vector<std::string> &guids, unsigned short vendorId, unsigned short productId)
     {
         if (!IsPixelBudsDevice(guids))
             return PixelBudsModelIds::Unknown;
 
-        if (clazz.has_value())
-        {
-            if (PixelBudsModelIds model = GetModelFromClass(clazz.value()); model != PixelBudsModelIds::Unknown)
-                return model;
-        }
-
-        return GetModelFromName(name);
+        return GetModelFromVidPid(vendorId, productId);
     }
 
     std::string PixelBudsHelper::GetServiceGuid(PixelBudsModelIds model)
     {
-        if (model == PixelBudsModelIds::PixelBudsPro ||
-            model == PixelBudsModelIds::PixelBudsPro2)
+        if (model == PixelBudsModelIds::PixelBudsASeries ||
+            model == PixelBudsModelIds::PixelBudsPro ||
+            model == PixelBudsModelIds::PixelBudsPro2 ||
+            model == PixelBudsModelIds::PixelBuds2a)
         {
             return std::string(MAESTRO);
         }

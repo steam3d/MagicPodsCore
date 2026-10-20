@@ -197,7 +197,7 @@ DevicesInfoFetcher::~DevicesInfoFetcher()
             });
             return newDevice;
         }
-        else if (PixelBudsModelIds model = PixelBudsHelper::SearchModel(deviceInfo->GetUuids(), deviceInfo->GetClass(), deviceInfo->GetName());
+        else if (PixelBudsModelIds model = PixelBudsHelper::SearchModel(deviceInfo->GetUuids(), deviceInfo->GetVendorId(), deviceInfo->GetProductId());
                  model != PixelBudsModelIds::Unknown)
         {
             auto newDevice = PixelBudsDevice::Create(deviceInfo, _audioClient, _settingsService, _mediaController, static_cast<unsigned short>(model));

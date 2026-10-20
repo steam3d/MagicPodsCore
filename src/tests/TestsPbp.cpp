@@ -432,7 +432,7 @@ bool TestsPbp::TestAnc2()
     return ancData == PixelBudsAncState::Active;
 }
 
-// Off, transparency and noise cancellation for the Pixel Buds Pro, plus adaptive for the Pro 2
+// A-Series has no noise control. Pixel Buds Pro and 2a have ANC, while Pro 2 also has adaptive mode.
 bool TestsPbp::TestAnc3()
 {
     auto optionsFlagFor = [](PixelBudsModelIds model)
@@ -445,14 +445,17 @@ bool TestsPbp::TestAnc3()
         return optionsFlag;
     };
 
-    unsigned char expectedPro = static_cast<unsigned char>(DeviceAncModes::Off) |
+    unsigned char expectedAnc = static_cast<unsigned char>(DeviceAncModes::Off) |
                                 static_cast<unsigned char>(DeviceAncModes::Transparency) |
                                 static_cast<unsigned char>(DeviceAncModes::NoiseCancellation);
 
-    unsigned char expectedPro2 = expectedPro | static_cast<unsigned char>(DeviceAncModes::Adaptive);
+    unsigned char expectedPro2 = expectedAnc | static_cast<unsigned char>(DeviceAncModes::Adaptive);
 
-    return optionsFlagFor(PixelBudsModelIds::PixelBudsPro) == expectedPro &&
+    return optionsFlagFor(PixelBudsModelIds::PixelBudsPro) == expectedAnc &&
+           optionsFlagFor(PixelBudsModelIds::PixelBuds2a) == expectedAnc &&
            optionsFlagFor(PixelBudsModelIds::PixelBudsPro2) == expectedPro2 &&
+           optionsFlagFor(PixelBudsModelIds::PixelBudsASeries) == 0 &&
+           !PixelBudsAncWatcher::IsSupport(PixelBudsModelIds::PixelBudsASeries) &&
            PixelBudsAncCapability::DeviceAncModesToPixelBudsAncState(DeviceAncModes::Off) == PixelBudsAncState::Off &&
            PixelBudsAncCapability::DeviceAncModesToPixelBudsAncState(DeviceAncModes::Transparency) == PixelBudsAncState::Aware &&
            PixelBudsAncCapability::DeviceAncModesToPixelBudsAncState(DeviceAncModes::Adaptive) == PixelBudsAncState::Adaptive &&
@@ -470,56 +473,36 @@ bool TestsPbp::TestSetAnc1()
            setter.Payload == expectedPayload;
 }
 
-bool TestsPbp::TestFindByClass1()
+bool TestsPbp::TestFindByVidPid1()
 {
     std::vector<std::string> guids = {
-        std::string(PixelBudsHelper::MAESTRO),
+        "25E97FF7-24CE-4C4C-8951-F764A708F7B5",
     };
 
-    return PixelBudsHelper::IsPixelBudsDevice(guids) &&
-           PixelBudsHelper::SearchModel(guids, PixelBudsHelper::PIXELBUDSPRO2CLASS, "") == PixelBudsModelIds::PixelBudsPro2;
+    return PixelBudsHelper::SearchModel(guids, 224, 12291) == PixelBudsModelIds::PixelBudsASeries &&
+           PixelBudsHelper::SearchModel(guids, 224, 12292) == PixelBudsModelIds::PixelBudsPro &&
+           PixelBudsHelper::SearchModel(guids, 224, 12293) == PixelBudsModelIds::PixelBudsPro2 &&
+           PixelBudsHelper::SearchModel(guids, 224, 12294) == PixelBudsModelIds::PixelBuds2a &&
+           PixelBudsHelper::GetServiceGuid(PixelBudsModelIds::PixelBudsASeries) == PixelBudsHelper::MAESTRO &&
+           PixelBudsHelper::GetServiceGuid(PixelBudsModelIds::PixelBudsPro) == PixelBudsHelper::MAESTRO &&
+           PixelBudsHelper::GetServiceGuid(PixelBudsModelIds::PixelBudsPro2) == PixelBudsHelper::MAESTRO &&
+           PixelBudsHelper::GetServiceGuid(PixelBudsModelIds::PixelBuds2a) == PixelBudsHelper::MAESTRO;
 }
 
-bool TestsPbp::TestFindByClass2()
+bool TestsPbp::TestFindByVidPid2()
 {
     std::vector<std::string> guids = {
-        std::string(PixelBudsHelper::MAESTRO),
-        std::string("0000111e-0000-1000-8000-00805f9b34fb"),
+        "0000111e-0000-1000-8000-00805f9b34fb",
     };
 
-    return PixelBudsHelper::SearchModel(guids, PixelBudsHelper::PIXELBUDSPROCLASS, "") == PixelBudsModelIds::PixelBudsPro;
-}
-
-bool TestsPbp::TestFindByName1()
-{
-    std::vector<std::string> guids = {
-        std::string(PixelBudsHelper::MAESTRO),
-    };
-
-    return PixelBudsHelper::SearchModel(guids, std::nullopt, "Pixel Buds Pro 2") == PixelBudsModelIds::PixelBudsPro2 &&
-           PixelBudsHelper::SearchModel(guids, std::nullopt, "Pixel Buds Pro") == PixelBudsModelIds::PixelBudsPro;
-}
-
-// Without the maestro service the device is not handled here
-bool TestsPbp::TestFindByName2()
-{
-    std::vector<std::string> guids = {
-        std::string("0000111e-0000-1000-8000-00805f9b34fb"),
-    };
-
-    return !PixelBudsHelper::IsPixelBudsDevice(guids) &&
-           PixelBudsHelper::SearchModel(guids, PixelBudsHelper::PIXELBUDSPRO2CLASS, "Pixel Buds Pro 2") == PixelBudsModelIds::Unknown;
-}
-
-bool TestsPbp::TestFindByName3()
-{
-    std::vector<std::string> guids = {
-        std::string(PixelBudsHelper::MAESTRO),
-    };
-
-    return PixelBudsHelper::SearchModel(guids, std::nullopt, "Pixel Buds A-Series") == PixelBudsModelIds::Unknown &&
+    return PixelBudsHelper::SearchModel(guids, 224, 12291) == PixelBudsModelIds::Unknown &&
+           PixelBudsHelper::SearchModel({PixelBudsHelper::MAESTRO}, 223, 12291) == PixelBudsModelIds::Unknown &&
+           PixelBudsHelper::SearchModel({PixelBudsHelper::MAESTRO}, 224, 65535) == PixelBudsModelIds::Unknown &&
            PixelBudsHelper::GetServiceGuid(PixelBudsModelIds::Unknown) == "" &&
-           PixelBudsHelper::GetServiceGuid(PixelBudsModelIds::PixelBudsPro2) == PixelBudsHelper::MAESTRO;
+           static_cast<unsigned short>(PixelBudsModelIds::PixelBudsASeries) == 12291 &&
+           static_cast<unsigned short>(PixelBudsModelIds::PixelBudsPro) == 12292 &&
+           static_cast<unsigned short>(PixelBudsModelIds::PixelBudsPro2) == 12293 &&
+           static_cast<unsigned short>(PixelBudsModelIds::PixelBuds2a) == 12294;
 }
 
 void TestsPbp::Test(const char *name, bool b)
@@ -570,9 +553,6 @@ MagicPodsCore::TestsPbp::TestsPbp()
     Test("PixelBudsAncWatcher.TestAnc2", TestAnc2());
     Test("PixelBudsAncCapability.TestAnc3", TestAnc3());
     Test("PixelBudsSetAnc.TestSetAnc1", TestSetAnc1());
-    Test("PixelBudsHelper.FindByClass1", TestFindByClass1());
-    Test("PixelBudsHelper.FindByClass2", TestFindByClass2());
-    Test("PixelBudsHelper.FindByName1", TestFindByName1());
-    Test("PixelBudsHelper.FindByName2", TestFindByName2());
-    Test("PixelBudsHelper.FindByName3", TestFindByName3());
+    Test("PixelBudsHelper.FindByVidPid1", TestFindByVidPid1());
+    Test("PixelBudsHelper.FindByVidPid2", TestFindByVidPid2());
 }

@@ -10,7 +10,11 @@ namespace MagicPodsCore
     enum class PixelBudsModelIds : unsigned short
     {
         Unknown = 0,
-        PixelBudsPro = 1,
-        PixelBudsPro2 = 2
+        // PixelBuds1, // TODO: Product ID is required.
+        // PixelBuds2, // TODO: Product ID is required.
+        PixelBudsASeries = 12291, // Uses GFPS Message Stream instead of Maestro.
+        PixelBudsPro = 12292,
+        PixelBudsPro2 = 12293,
+        PixelBuds2a = 12294
     };
 }

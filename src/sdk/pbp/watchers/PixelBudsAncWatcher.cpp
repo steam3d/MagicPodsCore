@@ -65,12 +65,14 @@ namespace MagicPodsCore
     bool PixelBudsAncWatcher::IsSupport(PixelBudsModelIds model)
     {
         return (model == PixelBudsModelIds::PixelBudsPro ||
-                model == PixelBudsModelIds::PixelBudsPro2);
+                model == PixelBudsModelIds::PixelBudsPro2 ||
+                model == PixelBudsModelIds::PixelBuds2a);
     }
 
     std::vector<PixelBudsAncState> PixelBudsAncWatcher::GetAncModesFor(PixelBudsModelIds model)
     {
-        if (model == PixelBudsModelIds::PixelBudsPro)
+        if (model == PixelBudsModelIds::PixelBudsPro ||
+            model == PixelBudsModelIds::PixelBuds2a)
         {
             return std::vector<PixelBudsAncState>{
                 PixelBudsAncState::Off,

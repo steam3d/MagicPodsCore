@@ -14,7 +14,6 @@
 #include "sdk/pbp/enums/PixelBudsModelIds.h"
 #include <string>
 #include <vector>
-#include <optional>
 #include <algorithm>
 #include <cstdint>
 
@@ -24,14 +23,12 @@ namespace MagicPodsCore
     {
     public:
         static bool IsPixelBudsDevice(const std::vector<std::string> &guids);
-        static PixelBudsModelIds SearchModel(const std::vector<std::string> &guids, const std::optional<unsigned int> &clazz, const std::string &name);
+        static PixelBudsModelIds SearchModel(const std::vector<std::string> &guids, unsigned short vendorId, unsigned short productId);
         static std::string GetServiceGuid(PixelBudsModelIds model);
 
         inline static const std::string MAESTRO = "25e97ff7-24ce-4c4c-8951-f764a708f7b5";
-
-        // Bluetooth class of device
-        inline static constexpr unsigned int PIXELBUDSPROCLASS = 0x240404;
-        inline static constexpr unsigned int PIXELBUDSPRO2CLASS = 0x244404;
+        // GFPS Message Stream is used by Pixel Buds A-Series instead of Maestro.
+        // inline static const std::string GFPS = "df21fe2c-2515-4fdb-8886-f12c4d67927c";
 
         // Pigweed RPC ids of the maestro service and of the methods we use
         inline static constexpr uint32_t MaestroServiceId = Hash65599::Hash("maestro_pw.Maestro");
@@ -54,7 +51,6 @@ namespace MagicPodsCore
         inline static constexpr uint64_t CurrentAncrStateSettingId = 13; // ALLEGRO_CURRENT_ANCR_STATE
 
     private:
-        static PixelBudsModelIds GetModelFromClass(unsigned int clazz);
-        static PixelBudsModelIds GetModelFromName(const std::string &name);
+        static PixelBudsModelIds GetModelFromVidPid(unsigned short vendorId, unsigned short productId);
     };
 }

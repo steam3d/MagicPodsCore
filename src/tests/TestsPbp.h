@@ -34,11 +34,8 @@ namespace MagicPodsCore{
         bool TestAnc2();
         bool TestAnc3();
         bool TestSetAnc1();
-        bool TestFindByClass1();
-        bool TestFindByClass2();
-        bool TestFindByName1();
-        bool TestFindByName2();
-        bool TestFindByName3();
+        bool TestFindByVidPid1();
+        bool TestFindByVidPid2();
         void Test(const char *name, bool b);
     public:
         TestsPbp();
