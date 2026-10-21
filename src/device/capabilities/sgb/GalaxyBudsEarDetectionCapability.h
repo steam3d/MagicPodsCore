@@ -14,8 +14,7 @@ namespace MagicPodsCore
     private:
         DeviceEarDetectionData option;
         GalaxyBudsEarDetectionWatcher watcher;
-        size_t watcherEarChangedEventId;        
-        DeviceEarDetectionData GalaxyBudsEarDetectionToDeviceEarDetectionData(GalaxyBudsEarDetectionStateArgs mode);
+        size_t watcherEventId;
         void TriggerMediaControl();
         bool LoadSetting();
         void SaveSetting(bool b);

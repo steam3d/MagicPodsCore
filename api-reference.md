@@ -513,8 +513,7 @@ Automatically plays media when the headphones are worn and pauses media when one
     "readonly": false,
     "selected": {
       "pauseMedia": true
-    },
-    "state": 1
+    }
   }
 }
 ```
@@ -523,7 +522,6 @@ Automatically plays media when the headphones are worn and pauses media when one
 | --------------------- | ------ |
 | `selected`            | object |
 | `selected.pauseMedia` | bool   |
-| `state`               | enum   |
 | `readonly`            | bool   |
 
 | selected.pauseMedia |         |
@@ -531,12 +529,25 @@ Automatically plays media when the headphones are worn and pauses media when one
 | `true`              | Enable  |
 | `false`             | Disable |
 
-| state |               |
-| ----- | ------------- |
-| `0`   | NotAvailable  |
-| `1`   | Worn          |
-| `2`   | PartiallyWorn |
-| `3`   | NotWorn       |
+##### Ear detection state (read-only)
+
+Notifies when the headphones' wearing state changes.
+
+```json
+{
+  "earDetectionState": {
+    "readonly": true,
+    "selected": 1
+  }
+}
+```
+
+| selected |               |
+| -------- | ------------- |
+| `0`      | NotAvailable  |
+| `1`      | Worn          |
+| `2`      | PartiallyWorn |
+| `3`      | NotWorn       |
 
 ##### Bluetooth codec
 

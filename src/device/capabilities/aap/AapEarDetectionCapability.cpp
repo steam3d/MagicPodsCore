@@ -3,52 +3,10 @@
 // License: GPL-3.0
 
 #include "AapEarDetectionCapability.h"
+#include "AapEarDetectionHelper.h"
 
 namespace MagicPodsCore
 {
-    DeviceEarDetectionData AapEarDetectionCapability::AapEarDetectionCapabilityToDeviceEarDetectionData(AapEarDetectionArgs mode)
-    {
-        if (mode.EarOne == AapEarDetectionState::_InClosedCase && mode.EarTwo == AapEarDetectionState::_InClosedCase)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::NotAvailable);
-        }
-
-        // one active
-        if (mode.EarOne == AapEarDetectionState::_InClosedCase && mode.EarTwo != AapEarDetectionState::_InClosedCase)
-        {
-            return DeviceEarDetectionData(mode.EarTwo == AapEarDetectionState::InEar ? DeviceEarStatus::Worn : DeviceEarStatus::NotWorn);
-        }
-
-        if (mode.EarOne != AapEarDetectionState::_InClosedCase && mode.EarTwo == AapEarDetectionState::_InClosedCase)
-        {
-            return DeviceEarDetectionData(mode.EarOne == AapEarDetectionState::InEar ? DeviceEarStatus::Worn : DeviceEarStatus::NotWorn);
-        }
-
-        // both
-        if (mode.EarOne == AapEarDetectionState::InEar && mode.EarTwo == AapEarDetectionState::InEar)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::Worn);
-        }
-
-        if (mode.EarOne != AapEarDetectionState::InEar && mode.EarTwo != AapEarDetectionState::InEar)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::NotWorn);
-        }
-
-        // one out
-        if (mode.EarOne == AapEarDetectionState::InEar && mode.EarTwo != AapEarDetectionState::InEar)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::PartiallyWorn);
-        }
-
-        if (mode.EarOne != AapEarDetectionState::InEar && mode.EarTwo == AapEarDetectionState::InEar)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::PartiallyWorn);
-        }
-
-        return DeviceEarDetectionData();
-    }
-
     bool AapEarDetectionCapability::LoadSetting()
     {
         std::optional<bool> settingEarDetection = device.LoadSettingBool("ear_pause_media");
@@ -79,7 +37,6 @@ namespace MagicPodsCore
             }
         }
     }
-    // DEMO
     nlohmann::json AapEarDetectionCapability::CreateJsonBody()
     {
         auto bodyJson = nlohmann::json::object();
@@ -87,7 +44,6 @@ namespace MagicPodsCore
         bodyJson["selected"]["pauseMedia"] = LoadSetting();
         // bodyJson["selected"]["lowerVolume"] = false;
         // bodyJson["selected"]["switchToSpeakers"] = false;
-        bodyJson["state"] = option.Status;
         return bodyJson;
     }
 
@@ -98,10 +54,9 @@ namespace MagicPodsCore
 
     AapEarDetectionCapability::AapEarDetectionCapability(AapDevice& device) : AapCapability("earDetection", false, device)
     {
-        watcherAncChangedEventId = watcher.GetEvent().Subscribe([this](size_t id, AapEarDetectionArgs mode){
-            DeviceEarDetectionData newOption = AapEarDetectionCapabilityToDeviceEarDetectionData(mode);
+        watcherEventId = watcher.GetEvent().Subscribe([this](size_t id, AapEarDetectionArgs state){
+            DeviceEarDetectionData newOption = AapEarDetectionHelper::ToDeviceEarDetectionData(state);
             if (!isAvailable){
-                //When we get ANC mode for the first time, we must notify. But on the second and subsequent times, we should notify only if the option has changed.
                 isAvailable = true;
                 option = newOption;
                 Logger::Info("EarDetection updated: %s", option.ToString().c_str());
@@ -112,7 +67,6 @@ namespace MagicPodsCore
                 option = newOption;
                 Logger::Info("EarDetection updated: %s", option.ToString().c_str());
                 TriggerMediaControl();
-                _onChanged.FireEvent(*this);
             }
         });
 
@@ -120,7 +74,7 @@ namespace MagicPodsCore
 
     AapEarDetectionCapability::~AapEarDetectionCapability()
     {
-        watcher.GetEvent().Unsubscribe(watcherAncChangedEventId);
+        watcher.GetEvent().Unsubscribe(watcherEventId);
     }
 
     void AapEarDetectionCapability::SetFromJson(const nlohmann::json &json)

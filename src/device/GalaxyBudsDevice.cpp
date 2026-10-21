@@ -9,6 +9,7 @@
 #include "capabilities/sgb/GalaxyBudsAncCapability.h"
 #include "capabilities/sgb/GalaxyBudsBatteryCapability.h"
 #include "capabilities/sgb/GalaxyBudsEarDetectionCapability.h"
+#include "capabilities/sgb/GalaxyBudsEarDetectionStateCapability.h"
 #include "capabilities/cmn/CmnBluetoothCodecCapability.h"
 
 namespace MagicPodsCore
@@ -41,6 +42,7 @@ namespace MagicPodsCore
         
         //Ear Detection works out of the box, but it could be useful later with additional features based on it.
         //device->capabilities.push_back(std::make_unique<GalaxyBudsEarDetectionCapability>(*device));
+        //device->capabilities.push_back(std::make_unique<GalaxyBudsEarDetectionStateCapability>(*device));
         
         device->_client = Client::CreateRFCOMM(deviceInfo->GetAddress(), GalaxyBudsHelper::GetServiceGuid(static_cast<GalaxyBudsModelIds>(model)));
         device->Init();

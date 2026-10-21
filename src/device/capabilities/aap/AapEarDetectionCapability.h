@@ -5,7 +5,6 @@
 #pragma once
 #include "AapCapability.h"
 #include "sdk/aap/watchers/AapEarDetectionWatcher.h"
-#include "sdk/aap/structs/AapEarDetectionArgs.h"
 #include "device/structs/DeviceEarDetectionData.h"
 
 namespace MagicPodsCore
@@ -15,8 +14,7 @@ namespace MagicPodsCore
     private:
         DeviceEarDetectionData option;
         AapEarDetectionWatcher watcher{};
-        size_t watcherAncChangedEventId;
-        DeviceEarDetectionData AapEarDetectionCapabilityToDeviceEarDetectionData(AapEarDetectionArgs mode);
+        size_t watcherEventId;
         void TriggerMediaControl();
         bool LoadSetting();
         void SaveSetting(bool b);

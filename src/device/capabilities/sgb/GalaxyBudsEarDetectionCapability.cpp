@@ -3,54 +3,10 @@
 // License: GPL-3.0
 
 #include "GalaxyBudsEarDetectionCapability.h"
-#include "sdk/sgb/GalaxyBudsPacket.h"
-#include "device/enums/DeviceEarStatus.h"
+#include "GalaxyBudsEarDetectionHelper.h"
 
 namespace MagicPodsCore
 {
-    DeviceEarDetectionData GalaxyBudsEarDetectionCapability::GalaxyBudsEarDetectionToDeviceEarDetectionData(GalaxyBudsEarDetectionStateArgs mode)
-    {
-        if (mode.Left == GalaxyBudsEarDetectionState::Disconnected && mode.Right == GalaxyBudsEarDetectionState::Disconnected)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::NotAvailable);
-        }
-
-        // one active
-        if (mode.Left == GalaxyBudsEarDetectionState::Disconnected && mode.Right != GalaxyBudsEarDetectionState::Disconnected)
-        {
-            return DeviceEarDetectionData(mode.Right == GalaxyBudsEarDetectionState::Wearing ? DeviceEarStatus::Worn : DeviceEarStatus::NotWorn);
-        }
-
-        if (mode.Left != GalaxyBudsEarDetectionState::Disconnected && mode.Right == GalaxyBudsEarDetectionState::Disconnected)
-        {
-            return DeviceEarDetectionData(mode.Left == GalaxyBudsEarDetectionState::Wearing ? DeviceEarStatus::Worn : DeviceEarStatus::NotWorn);
-        }
-
-        // both
-        if (mode.Left == GalaxyBudsEarDetectionState::Wearing && mode.Right == GalaxyBudsEarDetectionState::Wearing)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::Worn);
-        }
-
-        if (mode.Left != GalaxyBudsEarDetectionState::Wearing && mode.Right != GalaxyBudsEarDetectionState::Wearing)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::NotWorn);
-        }
-
-        // one out
-        if (mode.Left == GalaxyBudsEarDetectionState::Wearing && mode.Right != GalaxyBudsEarDetectionState::Wearing)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::PartiallyWorn);
-        }
-
-        if (mode.Left != GalaxyBudsEarDetectionState::Wearing && mode.Right == GalaxyBudsEarDetectionState::Wearing)
-        {
-            return DeviceEarDetectionData(DeviceEarStatus::PartiallyWorn);
-        }
-
-        return DeviceEarDetectionData();
-    }
-
     void GalaxyBudsEarDetectionCapability::TriggerMediaControl()
     {
         if (LoadSetting() == false)
@@ -89,7 +45,6 @@ namespace MagicPodsCore
         bodyJson["selected"]["pauseMedia"] = LoadSetting();
         // bodyJson["selected"]["lowerVolume"] = false;
         // bodyJson["selected"]["switchToSpeakers"] = false;
-        bodyJson["state"] = option.Status;
         return bodyJson;
     }
 
@@ -101,11 +56,10 @@ namespace MagicPodsCore
     GalaxyBudsEarDetectionCapability::GalaxyBudsEarDetectionCapability(GalaxyBudsDevice& device) : GalaxyBudsCapability("earDetection", false, device),
                                                                                                            watcher(GalaxyBudsEarDetectionWatcher(static_cast<GalaxyBudsModelIds>(device.GetProductId())))
     {
-        watcherEarChangedEventId = watcher.GetEarDetectionStateChangedEvent().Subscribe([this](size_t id, GalaxyBudsEarDetectionStateArgs mode){
+        watcherEventId = watcher.GetEarDetectionStateChangedEvent().Subscribe([this](size_t id, GalaxyBudsEarDetectionStateArgs state){
 
-            DeviceEarDetectionData newOption = GalaxyBudsEarDetectionToDeviceEarDetectionData(mode);
+            DeviceEarDetectionData newOption = GalaxyBudsEarDetectionHelper::ToDeviceEarDetectionData(state);
             if (!isAvailable){
-                //When we get ANC mode for the first time, we must notify. But on the second and subsequent times, we should notify only if the option has changed.
                 isAvailable = true;
                 option = newOption;
                 Logger::Info("EarDetection updated: %s", option.ToString().c_str());
@@ -116,13 +70,12 @@ namespace MagicPodsCore
                 option = newOption;
                 Logger::Info("EarDetection updated: %s", option.ToString().c_str());
                 TriggerMediaControl();
-                _onChanged.FireEvent(*this);
             }
         });
     }
 
     GalaxyBudsEarDetectionCapability::~GalaxyBudsEarDetectionCapability(){
-        watcher.GetEarDetectionStateChangedEvent().Unsubscribe(watcherEarChangedEventId);
+        watcher.GetEarDetectionStateChangedEvent().Unsubscribe(watcherEventId);
     }
 
     void GalaxyBudsEarDetectionCapability::SetFromJson(const nlohmann::json &json)

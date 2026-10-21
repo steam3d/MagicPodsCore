@@ -125,12 +125,14 @@ add_executable(magicpodscore
     src/device/capabilities/aap/AapSleepDetectionCapability.cpp
     src/device/capabilities/aap/AppAnimationCapability.cpp
     src/device/capabilities/aap/AapEarDetectionCapability.cpp
+    src/device/capabilities/aap/AapEarDetectionStateCapability.cpp
     src/device/capabilities/aap/AapHighResolutionMicrophoneCapability.cpp
 
     src/device/capabilities/sgb/GalaxyBudsCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsBatteryCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsEarDetectionCapability.cpp
+    src/device/capabilities/sgb/GalaxyBudsEarDetectionStateCapability.cpp
 
     src/device/capabilities/pbp/PixelBudsCapability.cpp
     src/device/capabilities/pbp/PixelBudsAncCapability.cpp
