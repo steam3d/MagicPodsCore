@@ -511,22 +511,25 @@ Automatically plays media when the headphones are worn and pauses media when one
 {
   "earDetection": {
     "readonly": false,
-    "selected": true,
+    "selected": {
+      "pauseMedia": true
+    },
     "state": 1
   }
 }
 ```
 
-| Field      |      |
-| ---------- | ---- |
-| `selected` | bool |
-| `state`    | enum |
-| `readonly` | bool |
+| Field                 |        |
+| --------------------- | ------ |
+| `selected`            | object |
+| `selected.pauseMedia` | bool   |
+| `state`               | enum   |
+| `readonly`            | bool   |
 
-| selected |         |
-| -------- | ------- |
-| `true`   | Enable  |
-| `false`  | Disable |
+| selected.pauseMedia |         |
+| ------------------- | ------- |
+| `true`              | Enable  |
+| `false`             | Disable |
 
 | state |               |
 | ----- | ------------- |

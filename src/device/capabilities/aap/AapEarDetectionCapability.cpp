@@ -51,7 +51,7 @@ namespace MagicPodsCore
 
     bool AapEarDetectionCapability::LoadSetting()
     {
-        std::optional<bool> settingEarDetection = device.LoadSettingBool("ear_detection");
+        std::optional<bool> settingEarDetection = device.LoadSettingBool("ear_pause_media");
         if (settingEarDetection.has_value())
             return settingEarDetection.value();
 
@@ -60,7 +60,7 @@ namespace MagicPodsCore
 
     void AapEarDetectionCapability::SaveSetting(bool b)
     {
-        device.SaveSettingBool("ear_detection", b);
+        device.SaveSettingBool("ear_pause_media", b);
     }
 
     void AapEarDetectionCapability::TriggerMediaControl()
@@ -83,7 +83,10 @@ namespace MagicPodsCore
     nlohmann::json AapEarDetectionCapability::CreateJsonBody()
     {
         auto bodyJson = nlohmann::json::object();
-        bodyJson["selected"] = LoadSetting();
+        bodyJson["selected"] = nlohmann::json::object();
+        bodyJson["selected"]["pauseMedia"] = LoadSetting();
+        // bodyJson["selected"]["lowerVolume"] = false;
+        // bodyJson["selected"]["switchToSpeakers"] = false;
         bodyJson["state"] = option.Status;
         return bodyJson;
     }
@@ -127,18 +130,25 @@ namespace MagicPodsCore
 
         const auto& capability = json.at(name);
 
-        if (capability.contains("selected") && capability["selected"].is_boolean())
+        if (capability.contains("selected") && capability["selected"].is_object())
         {
-            bool selected = capability["selected"].get<bool>();
+            const auto& selected = capability.at("selected");
+            if (!selected.contains("pauseMedia") || !selected["pauseMedia"].is_boolean())
+            {
+                Logger::Error("Error: AapEarDetectionCapability::SetFromJson got no pauseMedia value or value is not a boolean");
+                return;
+            }
 
-            SaveSetting(selected);
+            bool pauseMedia = selected["pauseMedia"].get<bool>();
+
+            SaveSetting(pauseMedia);
             _onChanged.FireEvent(*this);
 
-            Logger::Debug("AapEarDetectionCapability::SetFromJson set option to %s", selected ? "true" : "false");
+            Logger::Debug("AapEarDetectionCapability::SetFromJson set pauseMedia to %s", pauseMedia ? "true" : "false");
         }
         else
         {
-            Logger::Error("Error: AapEarDetectionCapability::SetFromJson got no value or value is not an boolean");
+            Logger::Error("Error: AapEarDetectionCapability::SetFromJson got no selected object");
         }
     }
 
