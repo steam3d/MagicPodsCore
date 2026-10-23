@@ -108,6 +108,7 @@ namespace MagicPodsCore
                     CardInfo out;
                     if (eol || !info) return;
 
+                    out.index = info->index;
                     if (info->name) out.name = info->name;
                     if (info->active_profile && info->active_profile->name) {
                         out.activeProfile = info->active_profile->name;
@@ -176,6 +177,7 @@ namespace MagicPodsCore
                     auto* out = static_cast<std::pair<bool, CardInfo>*>(userdata);
                     if (eol || !info) return;
 
+                    out->second.index = info->index;
                     if (info->name) out->second.name = info->name;
                     if (info->active_profile && info->active_profile->name) {
                         out->second.activeProfile = info->active_profile->name;
@@ -218,6 +220,7 @@ namespace MagicPodsCore
                     auto* out = static_cast<std::pair<bool, CardInfo>*>(userdata);
                     if (eol || !info) return;
 
+                    out->second.index = info->index;
                     if (info->name) out->second.name = info->name;
                     if (info->active_profile && info->active_profile->name) {
                         out->second.activeProfile = info->active_profile->name;
@@ -305,6 +308,156 @@ namespace MagicPodsCore
             &success);
 
         return connection.Wait(operation) && success;
+    }
+
+    std::optional<std::string> PulseAudioClient::GetDefaultSinkName()
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-DefaultSink"))
+            return std::nullopt;
+
+        std::optional<std::string> sinkName{};
+        auto operation = pa_context_get_server_info(
+            connection.Context,
+            [](pa_context*, const pa_server_info* info, void* userdata)
+            {
+                if (info && info->default_sink_name)
+                    *static_cast<std::optional<std::string>*>(userdata) = info->default_sink_name;
+            },
+            &sinkName);
+
+        if (!connection.Wait(operation))
+            return std::nullopt;
+        return sinkName;
+    }
+
+    std::optional<SinkInfo> PulseAudioClient::GetSinkInfoByName(const std::string& name)
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-SinkInfo"))
+            return std::nullopt;
+
+        std::optional<SinkInfo> sink{};
+        auto operation = pa_context_get_sink_info_by_name(
+            connection.Context,
+            name.c_str(),
+            [](pa_context*, const pa_sink_info* info, int eol, void* userdata)
+            {
+                if (eol || !info)
+                    return;
+
+                SinkInfo out{};
+                out.index = info->index;
+                out.card = info->card;
+                if (info->name)
+                    out.name = info->name;
+                if (info->active_port && info->active_port->name)
+                    out.activePort = info->active_port->name;
+                *static_cast<std::optional<SinkInfo>*>(userdata) = std::move(out);
+            },
+            &sink);
+
+        if (!connection.Wait(operation))
+            return std::nullopt;
+        return sink;
+    }
+
+    std::vector<SinkInfo> PulseAudioClient::GetSinks()
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-SinkList"))
+            return {};
+
+        std::vector<SinkInfo> sinks{};
+        auto operation = pa_context_get_sink_info_list(
+            connection.Context,
+            [](pa_context*, const pa_sink_info* info, int eol, void* userdata)
+            {
+                if (eol || !info)
+                    return;
+
+                SinkInfo out{};
+                out.index = info->index;
+                out.card = info->card;
+                if (info->name)
+                    out.name = info->name;
+                if (info->active_port && info->active_port->name)
+                    out.activePort = info->active_port->name;
+                static_cast<std::vector<SinkInfo>*>(userdata)->push_back(std::move(out));
+            },
+            &sinks);
+
+        if (!connection.Wait(operation))
+            return {};
+        return sinks;
+    }
+
+    bool PulseAudioClient::SetDefaultSink(const std::string& sinkName)
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-DefaultSink"))
+            return false;
+
+        bool success = false;
+        auto operation = pa_context_set_default_sink(
+            connection.Context,
+            sinkName.c_str(),
+            [](pa_context*, int result, void* userdata)
+            {
+                *static_cast<bool*>(userdata) = result != 0;
+            },
+            &success);
+
+        return connection.Wait(operation) && success;
+    }
+
+    bool PulseAudioClient::MoveSinkInputs(uint32_t sourceSinkIndex, uint32_t destinationSinkIndex)
+    {
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-SinkInputMover"))
+            return false;
+
+        struct CallbackData
+        {
+            uint32_t SourceSinkIndex;
+            std::vector<uint32_t> SinkInputIndexes{};
+        } callbackData{sourceSinkIndex};
+
+        auto listOperation = pa_context_get_sink_input_info_list(
+            connection.Context,
+            [](pa_context*, const pa_sink_input_info* info, int eol, void* userdata)
+            {
+                if (eol || !info)
+                    return;
+
+                auto& data = *static_cast<CallbackData*>(userdata);
+                if (info->sink == data.SourceSinkIndex)
+                    data.SinkInputIndexes.push_back(info->index);
+            },
+            &callbackData);
+
+        if (!connection.Wait(listOperation))
+            return false;
+
+        bool allMoved = true;
+        for (uint32_t sinkInputIndex : callbackData.SinkInputIndexes)
+        {
+            bool success = false;
+            auto moveOperation = pa_context_move_sink_input_by_index(
+                connection.Context,
+                sinkInputIndex,
+                destinationSinkIndex,
+                [](pa_context*, int result, void* userdata)
+                {
+                    *static_cast<bool*>(userdata) = result != 0;
+                },
+                &success);
+
+            if (!connection.Wait(moveOperation) || !success)
+                allMoved = false;
+        }
+
+        return allMoved;
     }
 
     std::vector<uint32_t> PulseAudioClient::GetModuleIndexesByArgument(const std::string& value)

@@ -15,9 +15,14 @@ namespace MagicPodsCore
         DeviceEarDetectionData option;
         AapEarDetectionWatcher watcher{};
         size_t watcherEventId;
+        bool switchedToSpeakers{false};
+        std::string speakersSinkName{};
         void TriggerMediaControl();
+        void TriggerAudioOutputSwitch();
         bool LoadSetting();
         void SaveSetting(bool b);
+        bool LoadSwitchToSpeakersSetting();
+        void SaveSwitchToSpeakersSetting(bool b);
 
     protected:
         nlohmann::json CreateJsonBody() override;

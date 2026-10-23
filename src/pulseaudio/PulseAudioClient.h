@@ -17,15 +17,24 @@
 namespace MagicPodsCore{
 
     struct CardInfo {
+        uint32_t index{PA_INVALID_INDEX};
         std::string name;
         std::string activeProfile;
         std::vector<std::pair<std::string,std::string>> profiles;
 
     bool operator==(const CardInfo& other) const {
-        return name == other.name &&
+        return index == other.index &&
+               name == other.name &&
                activeProfile == other.activeProfile &&
                profiles == other.profiles;
     }
+    };
+
+    struct SinkInfo {
+        uint32_t index{PA_INVALID_INDEX};
+        uint32_t card{PA_INVALID_INDEX};
+        std::string name;
+        std::string activePort;
     };
     
     class PulseAudioClient{
@@ -38,6 +47,11 @@ namespace MagicPodsCore{
             std::optional<uint32_t> LoadModule(const std::string& name, const std::string& arguments);
             bool UnloadModule(uint32_t index);
             bool SetDefaultSource(const std::string& sourceName);
+            std::optional<std::string> GetDefaultSinkName();
+            std::optional<SinkInfo> GetSinkInfoByName(const std::string& name);
+            std::vector<SinkInfo> GetSinks();
+            bool SetDefaultSink(const std::string& sinkName);
+            bool MoveSinkInputs(uint32_t sourceSinkIndex, uint32_t destinationSinkIndex);
             std::vector<uint32_t> GetModuleIndexesByArgument(const std::string& value);
             std::optional<std::string> GetSourceConsumer(const std::string& sourceName);
             std::string GetNameFromMac(const std::string& mac);
