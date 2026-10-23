@@ -17,7 +17,7 @@ namespace MagicPodsCore
         size_t watcherEventId;
         bool switchedToSpeakers{false};
         std::string speakersSinkName{};
-        void TriggerMediaControl();
+        void TriggerMediaControl(DeviceEarStatus previousStatus);
         void TriggerAudioOutputSwitch();
         bool LoadSetting();
         void SaveSetting(bool b);

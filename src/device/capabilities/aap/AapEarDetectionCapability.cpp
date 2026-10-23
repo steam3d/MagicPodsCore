@@ -118,21 +118,30 @@ namespace MagicPodsCore
         }
     }
 
-    void AapEarDetectionCapability::TriggerMediaControl()
+    void AapEarDetectionCapability::TriggerMediaControl(DeviceEarStatus previousStatus)
     {
         if (LoadSetting() == false)
             return;
 
-        DeviceEarMediaStatus status = option.GetMediaStatus();
-
-        if (status != DeviceEarMediaStatus::NotAvailable){
-            if (status == DeviceEarMediaStatus::Play){
-                device.PlayMedia();
-            }
-            else{
-                device.PauseMedia();
-            }
+        if (option.Status == DeviceEarStatus::Worn)
+        {
+            device.PlayMedia();
+            return;
         }
+
+        if (option.Status == DeviceEarStatus::NotWorn)
+        {
+            device.PauseMedia();
+            return;
+        }
+
+        if (option.Status != DeviceEarStatus::PartiallyWorn)
+            return;
+
+        if (previousStatus == DeviceEarStatus::NotWorn)
+            device.PlayMedia();
+        else if (previousStatus == DeviceEarStatus::Worn)
+            device.PauseMedia();
     }
     nlohmann::json AapEarDetectionCapability::CreateJsonBody()
     {
@@ -154,18 +163,20 @@ namespace MagicPodsCore
         watcherEventId = watcher.GetEvent().Subscribe([this](size_t id, AapEarDetectionArgs state){
             DeviceEarDetectionData newOption = AapEarDetectionHelper::ToDeviceEarDetectionData(state);
             if (!isAvailable){
+                DeviceEarStatus previousStatus = option.Status;
                 isAvailable = true;
                 option = newOption;
                 Logger::Info("EarDetection updated: %s", option.ToString().c_str());
                 TriggerAudioOutputSwitch();
-                TriggerMediaControl();
+                TriggerMediaControl(previousStatus);
                 _onChanged.FireEvent(*this);
             }
             else if (!option.AreStatesEqual(newOption)){
+                DeviceEarStatus previousStatus = option.Status;
                 option = newOption;
                 Logger::Info("EarDetection updated: %s", option.ToString().c_str());
                 TriggerAudioOutputSwitch();
-                TriggerMediaControl();
+                TriggerMediaControl(previousStatus);
             }
         });
 
