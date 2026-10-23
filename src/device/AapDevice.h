@@ -12,6 +12,12 @@
 
 namespace MagicPodsCore
 {
+    enum class AapVolumeReductionReason
+    {
+        EarDetection,
+        ConversationAwareness,
+    };
+
     class AapDevice : public Device
     {
     private:
@@ -20,6 +26,12 @@ namespace MagicPodsCore
         Event<const std::vector<unsigned char>> _onResponseDataRecived{};
         Event<const BleAdertisingData> _onLeDataReceived{};        
         Event<const nlohmann::json> _onAnimationTriggered{};
+        bool _earDetectionVolumeReductionActive{false};
+        bool _conversationAwarenessVolumeReductionActive{false};
+        bool _volumeReduced{false};
+        std::string _volumeSinkName{};
+        pa_cvolume _savedVolume{};
+        pa_cvolume _reducedVolume{};
         void OnResponseDataReceived(const std::vector<unsigned char> &data) override;
 
     public:
@@ -42,6 +54,8 @@ namespace MagicPodsCore
 
         void SendData(const AapRequest &setter);
         void FireAnimation(const nlohmann::json &json);
+        void StartVolumeReduction(AapVolumeReductionReason reason, int percent);
+        void StopVolumeReduction(AapVolumeReductionReason reason);
         static std::shared_ptr<AapDevice> Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController, std::shared_ptr<DBusBasedBleAdvertisingService> bleService);
     };
 }

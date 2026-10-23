@@ -505,29 +505,28 @@ _This feature cannot read the current AirPods setting, but it can overwrite it._
 
 ##### Ear detection
 
-Automatically plays media when the headphones are worn and pauses media when one or both earbuds are removed.
+Controls media, audio output, and volume based on wearing state.
 
 ```json
 {
   "earDetection": {
     "readonly": false,
     "selected": {
-      "pauseMedia": true
+      "pauseMedia": true,
+      "switchToSpeakers": false,
+      "lowerVolume": 0
     }
   }
 }
 ```
 
-| Field                 |        |
-| --------------------- | ------ |
-| `selected`            | object |
-| `selected.pauseMedia` | bool   |
-| `readonly`            | bool   |
-
-| selected.pauseMedia |         |
-| ------------------- | ------- |
-| `true`              | Enable  |
-| `false`             | Disable |
+| Field                       | Type   |                              |
+| --------------------------- | ------ | ---------------------------- |
+| `selected`                  | object | All fields are required      |
+| `selected.pauseMedia`       | bool   | Play or pause media          |
+| `selected.switchToSpeakers` | bool   | Switch audio output          |
+| `selected.lowerVolume`      | int    | Volume reduction, `0`–`100`% |
+| `readonly`                  | bool   |                              |
 
 ##### Ear detection state (read-only)
 
@@ -910,19 +909,24 @@ Lowers media volume and reduces background noise when you start speaking to othe
 {
   "conversationAwareness": {
     "readonly": false,
-    "selected": true
+    "selected": {
+      "enabled": true,
+      "volume": 30
+    }
   }
 }
 ```
 
-| selected |         |
-| -------- | ------- |
-| `true`   | Enable  |
-| `false`  | Disable |
+| Field              | Type   |                               |
+| ------------------ | ------ | ----------------------------- |
+| `selected`         | object | All fields are required       |
+| `selected.enabled` | bool   | Enable or disable             |
+| `selected.volume`  | int    | Volume reduction, `0`–`100`% |
+| `readonly`         | bool   |                               |
 
 ##### Conversation awareness speaking (read-only)
 
-Notifies when a conversation starts or ends.
+Notifies when a conversation starts or ends and applies volume reduction.
 
 ```json
 {

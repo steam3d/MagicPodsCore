@@ -1,5 +1,5 @@
 // MagicPodsCore: https://github.com/steam3d/MagicPodsCore
-// Copyright: 2020-2025 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
 // License: GPL-3.0
 
 #include "AapConversationAwarenessStateCapability.h"
@@ -7,6 +7,17 @@
 
 namespace MagicPodsCore
 {
+    int AapConversationAwarenessStateCapability::LoadVolumeSetting()
+    {
+        std::optional<int64_t> setting = device.LoadSettingInt("conversation_awareness_volume");
+        if (!setting.has_value() || setting.value() <= 0)
+            return 0;
+        if (setting.value() > 100)
+            return 100;
+
+        return static_cast<int>(setting.value());
+    }
+
     bool AapConversationAwarenessStateCapability::AapConversationAwarenessStateToBoolean(AapConversationAwarenessState mode)
     {
         if (mode == AapConversationAwarenessState::StartSpeaking){
@@ -16,9 +27,9 @@ namespace MagicPodsCore
     }
 
     nlohmann::json AapConversationAwarenessStateCapability::CreateJsonBody()
-    {    
+    {
         auto bodyJson = nlohmann::json::object();
-        bodyJson["selected"] = option;        
+        bodyJson["selected"] = option;
         return bodyJson;
     }
 
@@ -31,7 +42,12 @@ namespace MagicPodsCore
     {
         watcherEventId = watcher.GetEvent().Subscribe([this](size_t id, AapConversationAwarenessState mode){
             bool newOption = AapConversationAwarenessStateToBoolean(mode);
-            
+
+            if (newOption)
+                this->device.StartVolumeReduction(AapVolumeReductionReason::ConversationAwareness, LoadVolumeSetting());
+            else
+                this->device.StopVolumeReduction(AapVolumeReductionReason::ConversationAwareness);
+
             if (!isAvailable){
                     //When we get ConversationAwareness mode for the first time, we must notify. But on the second and subsequent times, we should notify only if the option has changed.
                     isAvailable = true;
@@ -45,7 +61,6 @@ namespace MagicPodsCore
                     _onChanged.FireEvent(*this);
                 }
         });
-
     }
 
     AapConversationAwarenessStateCapability::~AapConversationAwarenessStateCapability()

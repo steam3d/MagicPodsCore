@@ -104,6 +104,7 @@ add_executable(magicpodscore
     src/device/capabilities/aap/AapBatteryCapability.cpp
     src/device/capabilities/aap/AapConversationAwarenessCapability.cpp
     src/device/capabilities/aap/AapConversationAwarenessStateCapability.cpp
+    src/device/capabilities/aap/AapRawConversationAwarenessStateCapability.cpp
     src/device/capabilities/aap/AapStemControlCapability.cpp
     src/device/capabilities/aap/AapStemControlStateCapability.cpp
     src/device/capabilities/aap/AapNoiseCancellationOneAirPodModeCapability.cpp

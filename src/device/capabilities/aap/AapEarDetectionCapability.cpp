@@ -35,87 +35,44 @@ namespace MagicPodsCore
         device.SaveSettingBool("ear_switch_to_speakers", b);
     }
 
+    int AapEarDetectionCapability::LoadLowerVolumeSetting()
+    {
+        std::optional<int64_t> setting = device.LoadSettingInt("ear_lower_volume");
+        if (!setting.has_value() || setting.value() <= 0)
+            return 0;
+        if (setting.value() > 100)
+            return 100;
+
+        return static_cast<int>(setting.value());
+    }
+
+    void AapEarDetectionCapability::SaveLowerVolumeSetting(int value)
+    {
+        device.SaveSettingInt("ear_lower_volume", value);
+    }
+
     void AapEarDetectionCapability::TriggerAudioOutputSwitch()
     {
         if (!LoadSwitchToSpeakersSetting())
-        {
-            switchedToSpeakers = false;
-            speakersSinkName.clear();
             return;
-        }
 
         auto audioClient = device.GetAudioClient();
+        auto card = audioClient->GetCardInfoByName(audioClient->GetNameFromMac(device.GetAddress()));
+        if (!card.has_value() || !card->activeProfile.starts_with("a2dp-sink"))
+            return;
 
         if (option.Status == DeviceEarStatus::NotWorn)
         {
-            auto card = audioClient->GetCardInfoByName(audioClient->GetNameFromMac(device.GetAddress()));
-            if (!card.has_value() || !card->activeProfile.starts_with("a2dp-sink"))
-                return;
-
-            auto defaultSinkName = audioClient->GetDefaultSinkName();
-            if (!defaultSinkName.has_value())
-                return;
-
-            auto headphonesSink = audioClient->GetSinkInfoByName(defaultSinkName.value());
-            if (!headphonesSink.has_value() || headphonesSink->card != card->index)
-                return;
-
-            for (const auto& sink : audioClient->GetSinks())
-            {
-                if (sink.card == card->index || sink.activePort.find("speaker") == std::string::npos)
-                    continue;
-
-                if (!audioClient->SetDefaultSink(sink.name))
-                    return;
-
-                if (!audioClient->MoveSinkInputs(headphonesSink->index, sink.index))
-                    Logger::Warn("Failed to move some audio streams to speakers");
-                speakersSinkName = sink.name;
-                switchedToSpeakers = true;
-                Logger::Info("Audio output switched to speakers: %s", sink.name.c_str());
-                return;
-            }
-
-            Logger::Warn("Failed to find speakers audio output");
+            audioClient->SwitchCardToSpeakers(card.value());
             return;
         }
 
         bool headphonesAreWorn = option.Status == DeviceEarStatus::Worn ||
                                  option.Status == DeviceEarStatus::PartiallyWorn;
-        if (!headphonesAreWorn || !switchedToSpeakers)
+        if (!headphonesAreWorn)
             return;
 
-        auto defaultSinkName = audioClient->GetDefaultSinkName();
-        if (!defaultSinkName.has_value())
-            return;
-
-        if (defaultSinkName.value() != speakersSinkName)
-        {
-            switchedToSpeakers = false;
-            speakersSinkName.clear();
-            return;
-        }
-
-        auto speakersSink = audioClient->GetSinkInfoByName(speakersSinkName);
-        auto card = audioClient->GetCardInfoByName(audioClient->GetNameFromMac(device.GetAddress()));
-        if (!speakersSink.has_value() || !card.has_value() || !card->activeProfile.starts_with("a2dp-sink"))
-            return;
-
-        for (const auto& sink : audioClient->GetSinks())
-        {
-            if (sink.card != card->index)
-                continue;
-
-            if (!audioClient->SetDefaultSink(sink.name))
-                return;
-
-            if (!audioClient->MoveSinkInputs(speakersSink->index, sink.index))
-                Logger::Warn("Failed to move some audio streams to headphones");
-            switchedToSpeakers = false;
-            speakersSinkName.clear();
-            Logger::Info("Audio output switched to headphones: %s", sink.name.c_str());
-            return;
-        }
+        audioClient->SwitchToCard(card.value());
     }
 
     void AapEarDetectionCapability::TriggerMediaControl(DeviceEarStatus previousStatus)
@@ -143,13 +100,30 @@ namespace MagicPodsCore
         else if (previousStatus == DeviceEarStatus::Worn)
             device.PauseMedia();
     }
+
+    void AapEarDetectionCapability::TriggerVolumeControl(DeviceEarStatus previousStatus)
+    {
+        if (previousStatus == DeviceEarStatus::Worn &&
+            option.Status == DeviceEarStatus::PartiallyWorn)
+        {
+            device.StartVolumeReduction(AapVolumeReductionReason::EarDetection, LoadLowerVolumeSetting());
+            return;
+        }
+
+        bool headphonesAreWorn = option.Status == DeviceEarStatus::Worn ||
+                                 (previousStatus == DeviceEarStatus::NotWorn &&
+                                  option.Status == DeviceEarStatus::PartiallyWorn);
+        if (headphonesAreWorn)
+            device.StopVolumeReduction(AapVolumeReductionReason::EarDetection);
+    }
+
     nlohmann::json AapEarDetectionCapability::CreateJsonBody()
     {
         auto bodyJson = nlohmann::json::object();
         bodyJson["selected"] = nlohmann::json::object();
         bodyJson["selected"]["pauseMedia"] = LoadSetting();
         bodyJson["selected"]["switchToSpeakers"] = LoadSwitchToSpeakersSetting();
-        // bodyJson["selected"]["lowerVolume"] = false;
+        bodyJson["selected"]["lowerVolume"] = LoadLowerVolumeSetting();
         return bodyJson;
     }
 
@@ -169,6 +143,7 @@ namespace MagicPodsCore
                 Logger::Info("EarDetection updated: %s", option.ToString().c_str());
                 TriggerAudioOutputSwitch();
                 TriggerMediaControl(previousStatus);
+                TriggerVolumeControl(previousStatus);
                 _onChanged.FireEvent(*this);
             }
             else if (!option.AreStatesEqual(newOption)){
@@ -177,6 +152,7 @@ namespace MagicPodsCore
                 Logger::Info("EarDetection updated: %s", option.ToString().c_str());
                 TriggerAudioOutputSwitch();
                 TriggerMediaControl(previousStatus);
+                TriggerVolumeControl(previousStatus);
             }
         });
 
@@ -197,28 +173,32 @@ namespace MagicPodsCore
         if (capability.contains("selected") && capability["selected"].is_object())
         {
             const auto& selected = capability.at("selected");
-            bool changed = false;
-
-            if (selected.contains("pauseMedia") && selected["pauseMedia"].is_boolean())
+            if (!selected.contains("pauseMedia") || !selected["pauseMedia"].is_boolean() ||
+                !selected.contains("switchToSpeakers") || !selected["switchToSpeakers"].is_boolean() ||
+                !selected.contains("lowerVolume") || !selected["lowerVolume"].is_number_integer())
             {
-                bool pauseMedia = selected["pauseMedia"].get<bool>();
-                SaveSetting(pauseMedia);
-                changed = true;
-                Logger::Debug("AapEarDetectionCapability::SetFromJson set pauseMedia to %s", pauseMedia ? "true" : "false");
+                Logger::Error("Error: AapEarDetectionCapability::SetFromJson requires pauseMedia, switchToSpeakers and lowerVolume");
+                return;
             }
 
-            if (selected.contains("switchToSpeakers") && selected["switchToSpeakers"].is_boolean())
+            int64_t lowerVolume = selected["lowerVolume"].get<int64_t>();
+            if (lowerVolume < 0 || lowerVolume > 100)
             {
-                bool switchToSpeakers = selected["switchToSpeakers"].get<bool>();
-                SaveSwitchToSpeakersSetting(switchToSpeakers);
-                changed = true;
-                Logger::Debug("AapEarDetectionCapability::SetFromJson set switchToSpeakers to %s", switchToSpeakers ? "true" : "false");
+                Logger::Error("Error: AapEarDetectionCapability::SetFromJson lowerVolume must be between 0 and 100");
+                return;
             }
 
-            if (changed)
-                _onChanged.FireEvent(*this);
-            else
-                Logger::Error("Error: AapEarDetectionCapability::SetFromJson got no supported values");
+            bool pauseMedia = selected["pauseMedia"].get<bool>();
+            bool switchToSpeakers = selected["switchToSpeakers"].get<bool>();
+
+            SaveSetting(pauseMedia);
+            SaveSwitchToSpeakersSetting(switchToSpeakers);
+            SaveLowerVolumeSetting(static_cast<int>(lowerVolume));
+            _onChanged.FireEvent(*this);
+
+            Logger::Debug("AapEarDetectionCapability::SetFromJson set pauseMedia to %s", pauseMedia ? "true" : "false");
+            Logger::Debug("AapEarDetectionCapability::SetFromJson set switchToSpeakers to %s", switchToSpeakers ? "true" : "false");
+            Logger::Debug("AapEarDetectionCapability::SetFromJson set lowerVolume to %d", static_cast<int>(lowerVolume));
         }
         else
         {

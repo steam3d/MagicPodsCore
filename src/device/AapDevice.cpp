@@ -8,6 +8,7 @@
 #include "capabilities/aap/AapDigitalCrownCapability.h"
 #include "capabilities/aap/AapConversationAwarenessCapability.h"
 #include "capabilities/aap/AapConversationAwarenessStateCapability.h"
+//#include "capabilities/aap/AapRawConversationAwarenessStateCapability.h"
 #include "capabilities/aap/AapStemControlCapability.h"
 #include "capabilities/aap/AapStemControlStateCapability.h"
 #include "capabilities/aap/AapNoiseCancellationOneAirPodModeCapability.h"
@@ -72,6 +73,84 @@ namespace MagicPodsCore
         _onAnimationTriggered.FireEvent(json);
     }
 
+    void AapDevice::StartVolumeReduction(AapVolumeReductionReason reason, int percent)
+    {
+        if (percent <= 0)
+            return;
+        if (percent > 100)
+            percent = 100;
+
+        bool& reasonActive = reason == AapVolumeReductionReason::EarDetection
+            ? _earDetectionVolumeReductionActive
+            : _conversationAwarenessVolumeReductionActive;
+
+        if (reasonActive)
+            return;
+
+        reasonActive = true;
+        if (_volumeReduced)
+            return;
+
+        auto audioClient = GetAudioClient();
+        auto card = audioClient->GetCardInfoByName(audioClient->GetNameFromMac(GetAddress()));
+        if (!card.has_value() || !card->activeProfile.starts_with("a2dp-sink"))
+            return;
+
+        auto defaultSinkName = audioClient->GetDefaultSinkName();
+        if (!defaultSinkName.has_value())
+            return;
+
+        auto sink = audioClient->GetSinkInfoByName(defaultSinkName.value());
+        if (!sink.has_value() || !sink->IsOnCard(card.value()))
+            return;
+
+        pa_cvolume targetVolume = sink->volume;
+        for (uint8_t channel = 0; channel < targetVolume.channels; channel++)
+        {
+            targetVolume.values[channel] = static_cast<pa_volume_t>(
+                static_cast<uint64_t>(targetVolume.values[channel]) * (100 - percent) / 100);
+        }
+
+        if (!audioClient->FadeSinkVolume(sink->index, sink->volume, targetVolume))
+        {
+            Logger::Warn("Failed to reduce headphones volume");
+            return;
+        }
+
+        _savedVolume = sink->volume;
+        _reducedVolume = targetVolume;
+        _volumeSinkName = sink->name;
+        _volumeReduced = true;
+        Logger::Info("Headphones volume reduced by %d percent", percent);
+    }
+
+    void AapDevice::StopVolumeReduction(AapVolumeReductionReason reason)
+    {
+        bool& reasonActive = reason == AapVolumeReductionReason::EarDetection
+            ? _earDetectionVolumeReductionActive
+            : _conversationAwarenessVolumeReductionActive;
+
+        if (!reasonActive)
+            return;
+
+        reasonActive = false;
+        if (_earDetectionVolumeReductionActive || _conversationAwarenessVolumeReductionActive || !_volumeReduced)
+            return;
+
+        auto audioClient = GetAudioClient();
+        auto sink = audioClient->GetSinkInfoByName(_volumeSinkName);
+        if (sink.has_value() && pa_cvolume_equal(&sink->volume, &_reducedVolume))
+        {
+            if (!audioClient->FadeSinkVolume(sink->index, sink->volume, _savedVolume))
+                Logger::Warn("Failed to restore headphones volume");
+            else
+                Logger::Info("Headphones volume restored");
+        }
+
+        _volumeReduced = false;
+        _volumeSinkName.clear();
+    }
+
     std::shared_ptr<AapDevice> AapDevice::Create(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController, std::shared_ptr<DBusBasedBleAdvertisingService> bleService)
     {
         // Shared from the start, so Init() can already hand a weak reference to the deferred client restart.
@@ -82,7 +161,8 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<AapFwInfoCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapAncCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapConversationAwarenessCapability>(*device));
-        device->capabilities.push_back(std::make_unique<AapConversationAwarenessStateCapability>(*device));        
+        device->capabilities.push_back(std::make_unique<AapConversationAwarenessStateCapability>(*device));
+        //device->capabilities.push_back(std::make_unique<AapRawConversationAwarenessStateCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapNoiseCancellationOneAirPodModeCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapPressAndHoldDurationCapability>(*device));
         device->capabilities.push_back(std::make_unique<AapPressSpeedCapability>(*device));

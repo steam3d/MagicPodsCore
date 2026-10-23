@@ -166,11 +166,13 @@ namespace MagicPodsCore
 
     std::optional<CardInfo> PulseAudioClient::GetCardInfoByName(const std::string &name)
     {
-        if (!ready.load() || !ctx || !ml) return std::nullopt;
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-CardInfo"))
+            return std::nullopt;
 
         std::pair<bool, CardInfo> card {false, {}};
-            pa_operation* op = pa_context_get_card_info_by_name(
-                ctx,
+            auto operation = pa_context_get_card_info_by_name(
+                connection.Context,
                 name.c_str(),
                 [](pa_context*, const pa_card_info* info, int eol, void* userdata)
                 {
@@ -198,22 +200,21 @@ namespace MagicPodsCore
                 &card
             );
 
-            if (!op) return std::nullopt;
-            while (pa_operation_get_state(op) == PA_OPERATION_RUNNING)
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-            pa_operation_unref(op);
+            if (!connection.Wait(operation))
+                return std::nullopt;
 
             return card.first ? std::optional<CardInfo>(card.second) : std::nullopt;
     }
 
     std::optional<CardInfo> PulseAudioClient::GetCardInfoByIndex(uint32_t index)
     {
-        if (!ready.load() || !ctx || !ml) return std::nullopt;
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-CardInfo"))
+            return std::nullopt;
 
         std::pair<bool, CardInfo> card {false, {}};
-            pa_operation* op = pa_context_get_card_info_by_index(
-                ctx,
+            auto operation = pa_context_get_card_info_by_index(
+                connection.Context,
                 index,
                 [](pa_context*, const pa_card_info* info, int eol, void* userdata)
                 {
@@ -241,11 +242,8 @@ namespace MagicPodsCore
                 &card
             );
 
-            if (!op) return std::nullopt;
-            while (pa_operation_get_state(op) == PA_OPERATION_RUNNING)
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-            pa_operation_unref(op);
+            if (!connection.Wait(operation))
+                return std::nullopt;
 
             return card.first ? std::optional<CardInfo>(card.second) : std::nullopt;
     }
@@ -349,8 +347,11 @@ namespace MagicPodsCore
                 SinkInfo out{};
                 out.index = info->index;
                 out.card = info->card;
+                out.volume = info->volume;
                 if (info->name)
                     out.name = info->name;
+                if (const char* cardName = info->proplist ? pa_proplist_gets(info->proplist, "device.name") : nullptr)
+                    out.cardName = cardName;
                 if (info->active_port && info->active_port->name)
                     out.activePort = info->active_port->name;
                 *static_cast<std::optional<SinkInfo>*>(userdata) = std::move(out);
@@ -379,8 +380,11 @@ namespace MagicPodsCore
                 SinkInfo out{};
                 out.index = info->index;
                 out.card = info->card;
+                out.volume = info->volume;
                 if (info->name)
                     out.name = info->name;
+                if (const char* cardName = info->proplist ? pa_proplist_gets(info->proplist, "device.name") : nullptr)
+                    out.cardName = cardName;
                 if (info->active_port && info->active_port->name)
                     out.activePort = info->active_port->name;
                 static_cast<std::vector<SinkInfo>*>(userdata)->push_back(std::move(out));
@@ -458,6 +462,109 @@ namespace MagicPodsCore
         }
 
         return allMoved;
+    }
+
+    bool PulseAudioClient::SwitchOutput(const SinkInfo& source, const SinkInfo& destination)
+    {
+        if (source.name == destination.name)
+            return true;
+
+        if (!SetDefaultSink(destination.name))
+        {
+            Logger::Warn("Failed to set default audio output: %s", destination.name.c_str());
+            return false;
+        }
+
+        if (!MoveSinkInputs(source.index, destination.index))
+            Logger::Warn("Failed to move some audio streams to: %s", destination.name.c_str());
+
+        Logger::Info("Audio output switched to: %s", destination.name.c_str());
+        return true;
+    }
+
+    bool PulseAudioClient::SwitchCardToSpeakers(const CardInfo& card)
+    {
+        auto defaultSinkName = GetDefaultSinkName();
+        if (!defaultSinkName.has_value())
+            return false;
+
+        auto currentSink = GetSinkInfoByName(defaultSinkName.value());
+        if (!currentSink.has_value())
+            return false;
+
+        if (!currentSink->IsOnCard(card))
+            return true;
+
+        for (const auto& sink : GetSinks())
+        {
+            if (!sink.IsOnCard(card) && sink.activePort.find("speaker") != std::string::npos)
+                return SwitchOutput(currentSink.value(), sink);
+        }
+
+        Logger::Warn("Failed to find speakers audio output");
+        return false;
+    }
+
+    bool PulseAudioClient::SwitchToCard(const CardInfo& card)
+    {
+        auto defaultSinkName = GetDefaultSinkName();
+        if (!defaultSinkName.has_value())
+            return false;
+
+        auto currentSink = GetSinkInfoByName(defaultSinkName.value());
+        if (!currentSink.has_value())
+            return false;
+
+        for (const auto& sink : GetSinks())
+        {
+            if (sink.IsOnCard(card))
+                return SwitchOutput(currentSink.value(), sink);
+        }
+
+        Logger::Warn("Failed to find card audio output: %s", card.name.c_str());
+        return false;
+    }
+
+    bool PulseAudioClient::FadeSinkVolume(uint32_t sinkIndex, const pa_cvolume& from, const pa_cvolume& to)
+    {
+        if (!pa_cvolume_valid(&from) || !pa_cvolume_valid(&to) || from.channels != to.channels)
+            return false;
+
+        TemporaryPulseConnection connection{};
+        if (!connection.Connect("MagicPodsCore-SinkVolume"))
+            return false;
+
+        constexpr int steps = 10;
+        constexpr auto delay = std::chrono::milliseconds(25);
+
+        for (int step = 1; step <= steps; step++)
+        {
+            pa_cvolume volume = from;
+            for (uint8_t channel = 0; channel < volume.channels; channel++)
+            {
+                int64_t difference = static_cast<int64_t>(to.values[channel]) - from.values[channel];
+                volume.values[channel] = static_cast<pa_volume_t>(from.values[channel] + difference * step / steps);
+            }
+
+            bool success = false;
+            auto operation = pa_context_set_sink_volume_by_index(
+                connection.Context,
+                sinkIndex,
+                &volume,
+                [](pa_context*, int result, void* userdata)
+                {
+                    *static_cast<bool*>(userdata) = result != 0;
+                },
+                &success);
+
+            if (!connection.Wait(operation) || !success)
+                return false;
+
+            if (step != steps)
+                std::this_thread::sleep_for(delay);
+        }
+
+        return true;
     }
 
     std::vector<uint32_t> PulseAudioClient::GetModuleIndexesByArgument(const std::string& value)

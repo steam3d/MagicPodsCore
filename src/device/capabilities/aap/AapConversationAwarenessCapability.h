@@ -11,9 +11,11 @@ namespace MagicPodsCore
     class AapConversationAwarenessCapability : public AapCapability
     {
     private:
-        bool option;        
+        bool option{false};
         AapConversationAwarenessWatcher watcher{};
-        size_t watcherEventId;        
+        size_t watcherEventId;
+        int LoadVolumeSetting();
+        void SaveVolumeSetting(int value);
         
     protected:
         nlohmann::json CreateJsonBody() override;
