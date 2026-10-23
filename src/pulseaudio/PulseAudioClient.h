@@ -36,6 +36,7 @@ namespace MagicPodsCore{
         std::string name;
         std::string cardName;
         std::string activePort;
+        uint32_t activePortType{PA_DEVICE_PORT_TYPE_UNKNOWN};
         pa_cvolume volume{};
 
         bool IsOnCard(const CardInfo& cardInfo) const {

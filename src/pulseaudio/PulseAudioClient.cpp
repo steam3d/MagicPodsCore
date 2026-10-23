@@ -6,12 +6,27 @@
 #include "Logger.h"
 
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <pulse/proplist.h>
 #include <thread>
 
 namespace
 {
+    bool IsSpeaker(const MagicPodsCore::SinkInfo& sink)
+    {
+        if (sink.activePortType == PA_DEVICE_PORT_TYPE_SPEAKER)
+            return true;
+        if (sink.activePortType != PA_DEVICE_PORT_TYPE_UNKNOWN)
+            return false;
+
+        std::string name = sink.activePort + " " + sink.name;
+        std::transform(name.begin(), name.end(), name.begin(), [](unsigned char value) {
+            return static_cast<char>(std::tolower(value));
+        });
+        return name.find("speaker") != std::string::npos;
+    }
+
     struct TemporaryPulseConnection
     {
         pa_mainloop* MainLoop{};
@@ -354,6 +369,8 @@ namespace MagicPodsCore
                     out.cardName = cardName;
                 if (info->active_port && info->active_port->name)
                     out.activePort = info->active_port->name;
+                if (info->active_port)
+                    out.activePortType = info->active_port->type;
                 *static_cast<std::optional<SinkInfo>*>(userdata) = std::move(out);
             },
             &sink);
@@ -387,6 +404,8 @@ namespace MagicPodsCore
                     out.cardName = cardName;
                 if (info->active_port && info->active_port->name)
                     out.activePort = info->active_port->name;
+                if (info->active_port)
+                    out.activePortType = info->active_port->type;
                 static_cast<std::vector<SinkInfo>*>(userdata)->push_back(std::move(out));
             },
             &sinks);
@@ -497,7 +516,7 @@ namespace MagicPodsCore
 
         for (const auto& sink : GetSinks())
         {
-            if (!sink.IsOnCard(card) && sink.activePort.find("speaker") != std::string::npos)
+            if (!sink.IsOnCard(card) && IsSpeaker(sink))
                 return SwitchOutput(currentSink.value(), sink);
         }
 
