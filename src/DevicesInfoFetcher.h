@@ -39,7 +39,9 @@ namespace MagicPodsCore {
         std::shared_ptr<DBusBasedBleAdvertisingService> _bleService{};
         std::shared_ptr<SettingsService> _settingsService{};
         size_t _onSettingsChangeId = 0;
+        bool _isBleScanStarted = false;
         void UpdateBleState();
+        bool HasAapDevice() const;
 
         std::map<std::string, std::shared_ptr<Device>> _devicesMap{}; // address -> device
         std::shared_ptr<Device> _activeDevice{};
