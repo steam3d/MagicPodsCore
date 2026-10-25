@@ -22,7 +22,7 @@
 using namespace MagicPodsCore;
 
 //Do not forget to change version when API changes
-constexpr int API_VERSION = 0;
+constexpr int API_VERSION = 1;
 constexpr int WEBSOCKET_PORT = 2020;
 
 nlohmann::json MakeGetDeviceResponse(DevicesInfoFetcher& devicesInfoFetcher) {
