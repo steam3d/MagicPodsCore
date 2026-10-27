@@ -29,7 +29,7 @@ Build your own apps without dealing with complex Bluetooth protocols, or get sta
 - Adaptive Audio
 - Custom Equalizer
 - Noise Cancellation with One AirPod
-- Custom Noise Control Modes
+- Earbud Noise Control Modes
 - Off Listening Mode
 
 ### Controls & Gestures
