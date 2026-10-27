@@ -1,57 +1,67 @@
-# MagicPodsCore for Linux
+# MagicPodsCore💖 for Linux
 
 A powerful Bluetooth backend with a simple WebSocket API for AirPods, Beats, Galaxy Buds, and Pixel Buds.
 
 Build your own apps without dealing with complex Bluetooth protocols, or get started instantly with our ready-to-use apps below.
 
-## 💻 Ready-to-use apps
+## Applications
 
-- [MagicPods for Linux](https://github.com/steam3d/MagicPodsLinux) - A desktop app for Linux with battery monitoring, case open animations, noise control, and advanced headphone settings.
-- [MagicPods for Decky Loader](https://github.com/steam3d/MagicPodsDecky) - A Steam plugin for controlling your headphones directly from Gaming Mode.
+- [MagicPods for Linux](https://github.com/steam3d/MagicPodsLinux) - Desktop application with battery monitoring, case-opening animations, noise control, and advanced headphone settings.
+- [MagicPods for Decky Loader](https://github.com/steam3d/MagicPodsDecky) - Plugin for controlling headphones directly from Steam Gaming Mode.
 
-## 🎨 Core features
+## Core Features
 
-🎧 One API for all brands  
-🔋 Battery level  
-⚙️ Noise control  
-🔗 Connect and disconnect headphones  
-📶 Turn Bluetooth on or off  
-🎵 Switch Bluetooth audio profiles
+- Battery levels and charging status
+- Noise control
+- Bluetooth adapter management
+- Headphone connection and disconnection
+- Bluetooth audio profiles and codecs
+- Device information and capabilities
+- WebSocket JSON API with commands and events
 
-## 🔥 Advanced features for AirPods & Beats
+## Advanced AirPods & Beats Features
 
-Feature availability depends on the headphone model and firmware.
+### Audio & Noise Control
 
-- Case open animation events
-- Automatic ear detection actions
-- High-resolution virtual microphone
-- Custom equalizer
-- Press and hold action for each AirPod (voice assistant, noise control, volume control)
-- Listening modes assigned to press and hold controls
-- Digital Crown direction
-- Conversation awareness
-- Personalized volume
-- Adaptive audio noise level
-- Noise cancellation with one AirPod
-- Off listening mode
-- Stem press events (single, double, triple, or long press)
-- Press speed and press and hold duration
-- Volume swipe and swipe length
-- Tone volume
+- HD Microphone
+- Conversation Awareness
+- Personalized Volume
+- Adaptive Audio
+- Custom Equalizer
+- Noise Cancellation with One AirPod
+- Custom Noise Control Modes
+- Off Listening Mode
+
+### Controls & Gestures
+
+- Press-and-hold actions
+- Press speed and press-and-hold duration
+- Volume swipe gestures
 - Call controls
+- Digital Crown direction
+- Stem press events
+
+### Device Features
+
+- Case-opening events
+- Ear detection
+- Audio output switching
+- Headphone tone volume
 - Sleep detection
 - Optimized charging
 - Hearing protection
 - Firmware information
 
-## 🎧 Supported headphones
+*Feature availability depends on the headphone model and firmware.*
+
+## Supported Headphones
 
 | Apple            | Beats                  | Samsung           | Google              |
 | ---------------- | ---------------------- | ----------------- | ------------------- |
-| AirPods 1        | PowerBeats Pro         | Galaxy Buds       | Pixel Buds Pro      |
-| AirPods 2        | PowerBeats Pro 2       | Galaxy Buds Plus  | Pixel Buds Pro 2    |
-| AirPods 3        | PowerBeats 3           | Galaxy Buds Live  | Pixel Buds 2a       |
-| AirPods 4        | PowerBeats 4           | Galaxy Buds Pro   | Pixel Buds A-Series |
+| AirPods 1        | PowerBeats Pro         | Galaxy Buds       | Pixel Buds A-Series |
+| AirPods 2        | PowerBeats Pro 2       | Galaxy Buds Plus  | Pixel Buds Pro      |
+| AirPods 3        | PowerBeats 3           | Galaxy Buds Live  | Pixel Buds Pro 2    |
+| AirPods 4        | PowerBeats 4           | Galaxy Buds Pro   | Pixel Buds 2a       |
 | AirPods 4 (ANC)  | Beats Fit Pro          | Galaxy Buds 2     |                     |
 | AirPods 5        | Beats Studio Buds      | Galaxy Buds 2 Pro |                     |
 | AirPods 5 (WCC)  | Beats Studio Buds Plus | Galaxy Buds FE    |                     |
@@ -66,14 +76,14 @@ Feature availability depends on the headphone model and firmware.
 |                  | Beats 360              |                   |                     |
 |                  | Powerbeats Fit         |                   |                     |
 
-Note: Some headphone models do not support noise control or other advanced features.
+*Some headphones support only basic features, such as battery monitoring and audio profile selection.*
 
-## 🚀 Quick start
+## Quick Start
 
 ### Ubuntu / SteamOS:
 
 Build
-```
+```bash
 git clone https://github.com/steam3d/MagicPodsCore.git && \
 cd MagicPodsCore && \
 docker build -o . . && \
@@ -81,30 +91,27 @@ chmod +x magicpodscore
 ```
 
 Run
-```
+```bash
 ./magicpodscore
 ```
 
-Connect to 172.0.1.0:2020 WebSocket and use the API reference below to communicate with MagicPodsCore.
+Connect to the WebSocket server at `127.0.0.1:2020` to send commands and receive events.
 
-## 📘 API reference
+## API Reference
 
 Explore the WebSocket API, available commands, events, and JSON examples.
 
 📄 [`api-reference.md`](./api-reference.md)
 
-## 🧪 Feedback and bug reports
-
-In the [Discord](https://discord.com/invite/8XZmDQwen6) community you can suggest an idea or report a problem.
-
-## 🩼 Known issues
+## Known Issues
 
 MagicPodsCore may become unresponsive when running inside VirtualBox.
 
-## 💰 Donate
+## Community
 
-[Support the project here](https://magicpods.app/donate/) — every bit helps ❤️
+- [Join Discord to suggest features or report bugs](https://discord.com/invite/8XZmDQwen6).
+- 💰 [Support the project](https://magicpods.app/donate/).
 
-## 💖 Developers
+---
 
-Developed by [Aleksandr Maslov](https://github.com/steam3d/) and [Andrey Litvintsev](https://github.com/andreylitvintsev)
+Developed by [Aleksandr Maslov](https://github.com/steam3d/) and [Andrey Litvintsev](https://github.com/andreylitvintsev).
