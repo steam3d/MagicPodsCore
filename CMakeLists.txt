@@ -85,6 +85,9 @@ add_executable(magicpodscore
     src/sdk/sgb/Crc16.cpp
     src/sdk/sgb/GalaxyBudsHelper.cpp
     src/sdk/sgb/GalaxyBudsPacket.cpp
+    src/sdk/sgb/smep/SmepFrame.cpp
+    src/sdk/sgb/smep/MultipointInfo.cpp
+
 
     src/sdk/pbp/watchers/PixelBudsAncWatcher.cpp
     src/sdk/pbp/watchers/PixelBudsBatteryWatcher.cpp

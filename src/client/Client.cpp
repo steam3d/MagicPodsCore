@@ -190,21 +190,32 @@ namespace MagicPodsCore {
     bool Client::ConnectToSocketRFCOMM() {
         Logger::Debug("%s is trying to connect to %s", _address.c_str(), _serviceUuid.c_str());
 
-        if (_serviceUuid.empty()){
-            Logger::Error("Failed to connect. UUID is empty.");
-            return false;
-        }
-
         struct sockaddr_rc addr = { 0 };
 
         /* retreiving the port, before there is a socket to leak when it fails */
-        uint8_t uuid_bytes[16] = {0};
-        StringUtils::UuidStringToBytes(_serviceUuid.c_str(), uuid_bytes);
-        const auto optionalPort = RetrieveServicePortRFCOMM(uuid_bytes, _address.c_str());
-        if (!optionalPort.has_value()) {
-            return false;
+        uint8_t channel = 0;
+        if (_serviceUuid.empty())
+        {
+            // Created by CreateRFCOMMChannel: the channel is known, the buds publish no SDP
+            // record for it (scn 29, the SMEP channel the Auto Switch channel rides on).
+            if (_port == 0)
+            {
+                Logger::Error("Failed to connect. RFCOMM channel is unknown.");
+                return false;
+            }
+            channel = static_cast<uint8_t>(_port);
         }
-        _port = optionalPort.value();
+        else
+        {
+            uint8_t uuid_bytes[16] = {0};
+            StringUtils::UuidStringToBytes(_serviceUuid.c_str(), uuid_bytes);
+            const auto optionalPort = RetrieveServicePortRFCOMM(uuid_bytes, _address.c_str());
+            if (!optionalPort.has_value()) {
+                return false;
+            }
+            _port = optionalPort.value();
+            channel = static_cast<uint8_t>(_port);
+        }
 
         /* allocate a socket */
         _socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
@@ -215,7 +226,7 @@ namespace MagicPodsCore {
 
         // set the connection parameters (who to connect to)
         addr.rc_family = AF_BLUETOOTH;
-        addr.rc_channel = _port;
+        addr.rc_channel = channel;
         str2ba(_address.c_str(), &addr.rc_bdaddr);
 
         /* connect to server */
@@ -365,6 +376,10 @@ namespace MagicPodsCore {
 
     std::unique_ptr<Client> Client::CreateRFCOMM(const std::string& address, const std::string& serviceUuid) {
         return std::unique_ptr<Client>(new Client(address, serviceUuid, ClientConnectionType::RFCOMM));
+    }
+
+    std::unique_ptr<Client> Client::CreateRFCOMMChannel(const std::string& address, unsigned short channel) {
+        return std::unique_ptr<Client>(new Client(address, channel, ClientConnectionType::RFCOMM));
     }
 
     Client::~Client()

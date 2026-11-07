@@ -93,6 +93,10 @@ namespace MagicPodsCore {
     public:
         static std::unique_ptr<Client> CreateL2CAP(const std::string& address, unsigned short port);
         static std::unique_ptr<Client> CreateRFCOMM(const std::string& address, const std::string& serviceUuid);
+        // RFCOMM by channel number instead of by SDP record. The buds publish the SMEP
+        // channel (scn 29) without an SDP record of its own, so the Auto Switch channel
+        // has to be opened by number.
+        static std::unique_ptr<Client> CreateRFCOMMChannel(const std::string& address, unsigned short channel);
         ~Client();
     };
 }
