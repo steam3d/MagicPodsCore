@@ -9,6 +9,9 @@
 #include "sdk/sgb/setters/GalaxyBudsSetAnc.h"
 #include "sdk/sgb/structs/GalaxyBudsResponseData.h"
 #include "sdk/sgb/GalaxyBudsPacket.h"
+#include "multipoint/AudioStreamWatch.h"
+#include "multipoint/AutoSwitchService.h"
+#include "multipoint/SmepChannel.h"
 #include "settings/SettingsService.h"
 
 namespace MagicPodsCore
@@ -19,6 +22,9 @@ namespace MagicPodsCore
         unsigned short _customProductId = 0;
         Event<GalaxyBudsResponseData> _ResponseDataRecived{};
         GalaxyBudsPacket _packet;
+        std::shared_ptr<SmepChannel> _smepChannel{};
+        std::shared_ptr<AudioStreamWatch> _audioStreamWatch{};
+        std::unique_ptr<AutoSwitchService> _autoSwitch{};
         void OnResponseDataReceived(const std::vector<unsigned char> &data) override;
     public:
         explicit GalaxyBudsDevice(std::shared_ptr<DBusDeviceInfo> deviceInfo, std::shared_ptr<PulseAudioClient> audioClient, std::shared_ptr<SettingsService> settingsService, std::shared_ptr<MediaController> mediaController, unsigned short model);

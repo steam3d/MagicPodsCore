@@ -46,6 +46,27 @@ namespace MagicPodsCore
         
         device->_client = Client::CreateRFCOMM(deviceInfo->GetAddress(), GalaxyBudsHelper::GetServiceGuid(static_cast<GalaxyBudsModelIds>(model)));
         device->Init();
+
+        // Auto Switch. The second link (scn 29) is what carries the device group table and the
+        // focus/class sub-messages; the policy only acts while the "auto_switch.enabled" setting
+        // is on, which it is not by default.
+        device->_smepChannel = std::make_shared<SmepChannel>(deviceInfo->GetAddress());
+        const AutoSwitchSettings autoSwitchSettings = AutoSwitchSettings::Load(*settingsService);
+        // The PipeWire watcher behind the takeover path: it answers "did OUR audio just go
+        // onto the buds", which is the event the claim has to beat the buds' own pause to.
+        device->_audioStreamWatch = std::make_shared<AudioStreamWatch>(deviceInfo->GetAddress());
+        // The A4 cradle gate needs to know whether the device's own control link is up: a
+        // connected device proves the buds are awake, which stops the (link-fed) closed-cradle
+        // cache from gating the SMEP link out forever (17.21).
+        std::weak_ptr<GalaxyBudsDevice> selfWeak = device;
+        device->_autoSwitch = std::make_unique<AutoSwitchService>(device->_smepChannel, device->_audioStreamWatch,
+                                                                  mediaController, settingsService,
+                                                                  [selfWeak]()
+                                                                  {
+                                                                      const auto self = selfWeak.lock();
+                                                                      return self && self->GetConnected();
+                                                                  });
+        device->_autoSwitch->Start();
         return device;
     }
 }
