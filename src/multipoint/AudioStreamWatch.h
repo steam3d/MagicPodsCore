@@ -45,6 +45,7 @@ namespace MagicPodsCore
         int _pipeFd[2] = {-1, -1};
         pid_t _childPid = -1;
         std::thread _reader{};
+        bool _selfExitWarned = false;
         std::atomic<bool> _running{false};
         std::atomic<bool> _outputActive{false};
     };

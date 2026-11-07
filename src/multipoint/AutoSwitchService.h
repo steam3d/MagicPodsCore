@@ -81,7 +81,7 @@ namespace MagicPodsCore
         void Decide();
         // Focus lock identity management: assert 02 while armed, restore 01 on release, and
         // re-assert after claims or link rebuilds moved the row (E43/E59 insurance).
-                void ManageLockIdentity(const MultipointState& state, bool fresh, std::chrono::steady_clock::time_point now,
+        void ManageLockIdentity(const MultipointState& state, bool fresh, std::chrono::steady_clock::time_point now,
                                 const AutoSwitchSettings& settings, bool lockActive);
         bool IsLocalTag(uint16_t tag) const;
         // Guarded views of push-owned state (see OnMultipointState): Tick touches the fields

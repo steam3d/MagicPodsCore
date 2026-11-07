@@ -57,7 +57,18 @@ namespace MagicPodsCore
         }
         if (_childPid > 0)
         {
-            waitpid(_childPid, nullptr, 0);
+            int status = 0;
+            waitpid(_childPid, &status, 0);
+            // This reap only sees pactl's OWN death (Stop() reaps before any re-Start):
+            // a nonzero exit is worth one line, or a missing pactl would re-fork once a
+            // second forever in silence (exit code 127).
+            if (WIFEXITED(status) && WEXITSTATUS(status) != 0 && !_selfExitWarned)
+            {
+                _selfExitWarned = true;
+                Logger::Warn("AudioStreamWatch: pactl exited on its own with code %d; if pactl is "
+                             "not installed the Auto Switch takeover cannot work, retrying quietly",
+                             WEXITSTATUS(status));
+            }
             _childPid = -1;
         }
         if (_pipeFd[0] >= 0)
@@ -77,6 +88,9 @@ namespace MagicPodsCore
             Logger::Warn("AudioStreamWatch: fork() failed, audio takeover stays dark");
             close(_pipeFd[0]);
             close(_pipeFd[1]);
+            // No stale numbers behind: the next Start() reaps by handle, and a stale
+            // _pipeFd[0] would close a descriptor some other subsystem has since opened.
+            _pipeFd[0] = _pipeFd[1] = -1;
             return;
         }
         if (pid == 0)
