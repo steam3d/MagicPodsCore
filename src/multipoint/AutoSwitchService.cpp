@@ -42,6 +42,9 @@ namespace MagicPodsCore
         constexpr auto DemoteAfterClaim = std::chrono::milliseconds{2500};
         // An MDE re-prime always provokes a table push, but keep the wire quiet.
         constexpr auto RefreshMinGap = std::chrono::seconds{2};
+        // The lock's 02-class writes are only ever corrections of a fresh push, so twice a
+        // second on the wire is the most they can ever demand.
+        constexpr auto IdentityWriteMinGap = std::chrono::seconds{2};
 
         const char* PhaseName(AutoSwitchPhase phase)
         {
@@ -67,6 +70,10 @@ namespace MagicPodsCore
           _mediaController{std::move(mediaController)}, _settingsService{std::move(settingsService)},
           _mainLinkUp{std::move(mainLinkUp)}
     {
+        // Must match what GalaxyBudsDevice::Create put into the bootstrap; the first Decide
+        // then corrects it if the lock is armed (a game already runs at core start).
+        const AutoSwitchSettings initial = AutoSwitchSettings::Load(*_settingsService);
+        _bootstrapCarries02 = initial.focusLock && SteamGamePresence::IsGameRunning();
     }
 
     AutoSwitchService::~AutoSwitchService()
@@ -219,8 +226,18 @@ namespace MagicPodsCore
         if (_demotePending && now >= _demoteDueAt)
         {
             _demotePending = false;
-            _channel->SendProfileControl(0x81);
-            Logger::Info("AutoSwitch: our record demoted back to computer, the peer may interrupt us again");
+            if (settings.focusLock && SteamGamePresence::IsGameRunning())
+            {
+                // Under the lock the post-claim demote to computer would undo our phone-class
+                // identity; ManageLockIdentity rewrites the 02 correction instead (the claim's
+                // 07 row only lasts a tick), and while we output, 02 holds the focus (E55).
+                Logger::Info("AutoSwitch: post-claim demote skipped - the focus lock keeps our record in phone class");
+            }
+            else
+            {
+                _channel->SendProfileControl(0x81);
+                Logger::Info("AutoSwitch: our record demoted back to computer, the peer may interrupt us again");
+            }
         }
 
         if (!_claimPending)
@@ -289,6 +306,69 @@ namespace MagicPodsCore
         _phase = AutoSwitchPhase::Claiming;
     }
 
+    void AutoSwitchService::ManageLockIdentity(const MultipointState& state, bool fresh, clock::time_point now,
+                                               const AutoSwitchSettings& settings, bool lockActive)
+    {
+        const SmepHostRecord* ourRow = nullptr;
+        for (const auto& host : state.hosts)
+        {
+            if (IsLocalTag(host.tag))
+            {
+                ourRow = &host;
+                break;
+            }
+        }
+        const bool verifiable = fresh && ourRow != nullptr; // only a fresh push tells us what our row IS
+
+        if (lockActive)
+        {
+            if (!_lockIdentityActive)
+            {
+                _lockIdentityActive = true;
+                Logger::Info("AutoSwitch: focus lock armed - our record becomes phone class (71 02); the buds "
+                             "refuse the peer's handover while we output (E55). A silent Deck is NOT covered (E56).");
+                if (!verifiable)
+                {
+                    _channel->SendBootstrap(); // provoke the table push (17.15) that lets us check the row
+                }
+            }
+            if (verifiable && ourRow->devTypeMajor != 0x02 && now - _lastIdentityWriteAt >= IdentityWriteMinGap)
+            {
+                // Covers the lock arming, the claim's 07 detour and any rebuild that reset the row.
+                _lastIdentityWriteAt = now;
+                _channel->SendProfileControl(0x02);
+                Logger::Info("AutoSwitch: focus lock - re-writing our record to phone class (71 02)");
+            }
+            return;
+        }
+
+        if (_lockIdentityActive)
+        {
+            _lockIdentityActive = false;
+            if (verifiable && ourRow->devTypeMajor != 0x01 && now - _lastIdentityWriteAt >= IdentityWriteMinGap)
+            {
+                _lastIdentityWriteAt = now;
+                _channel->SendProfileControl(0x81);
+                Logger::Info("AutoSwitch: focus lock released - our record restored to computer (71 81), "
+                             "the peer may take the focus again");
+            }
+            else if (!verifiable)
+            {
+                _channel->SendBootstrap(); // owe the restore: get a fresh push and the next tick writes it
+            }
+        }
+
+        // NV-persistence insurance (E59 open): if a phone-class row we once wrote survives a
+        // relink while the lock is off, restore cooperation.
+        if (verifiable && ourRow->devTypeMajor == 0x02 &&
+            now - _lastIdentityWriteAt >= IdentityWriteMinGap)
+        {
+            _lastIdentityWriteAt = now;
+            _channel->SendProfileControl(0x81);
+            Logger::Info("AutoSwitch: a phone-class record survived with the lock off - restoring computer (71 81)");
+        }
+    }
+
     void AutoSwitchService::Decide()
     {
         const AutoSwitchSettings settings = AutoSwitchSettings::Load(*_settingsService);
@@ -301,6 +381,25 @@ namespace MagicPodsCore
         {
             // Idempotent: brings up the pactl-subscribe watcher on the first enabled tick.
             _audioWatch->Start();
+        }
+
+        // Focus lock state, computed here rather than in the table view: the bootstrap below
+        // must be right even while the SMEP link is down and no table is in view. Records are
+        // per-connection (E43), so a link that opens while the lock is armed (a lid cycle
+        // mid-game) has to carry 71 02 in its first frames; the row of an already-open link is
+        // handled by ManageLockIdentity.
+        const bool lockActive = settings.focusLock && SteamGamePresence::IsGameRunning();
+        const bool bootstrap02 = lockActive;
+        if (bootstrap02 != _bootstrapCarries02)
+        {
+            std::vector<uint8_t> bootstrap = SmepChannel::MdePrime();
+            if (bootstrap02)
+            {
+                bootstrap.insert(bootstrap.end(), {0x71, 0x02});
+            }
+            _channel->SetBootstrap(std::move(bootstrap));
+            _bootstrapCarries02 = bootstrap02;
+            Logger::Info("AutoSwitch: link bootstrap now %s the phone-class write", bootstrap02 ? "carries" : "drops");
         }
 
         // ---- link layer ----
@@ -416,6 +515,13 @@ namespace MagicPodsCore
         const uint8_t hs = state.holderState;
         const uint8_t out = state.holderOutput;
 
+        // Focus lock (the "lock audio focus while gaming" toggle): the identity flip IS the
+        // prevention - while a Steam game runs we report as a phone (71 02), and the firmware
+        // refuses to hand the audio of an outputting phone-class host to the peer (E55/E57,
+        // one byte decides grabability). Runs before PEER_ABSENT so the release restore cannot
+        // stall on a group that shrank to just us.
+        ManageLockIdentity(state, fresh, now, settings, lockActive);
+
         // PEER_ABSENT: we are the only host in the table, so the focus is ours anyway. Do not
         // claim, do not keep a second host alive on purpose, and do not read "no output" as
         // the other host having finished playing - the buds drop a silent host by themselves
@@ -454,6 +560,31 @@ namespace MagicPodsCore
                                  (out == MultipointState::OUTPUT_GRANTED || hs == MultipointState::STATE_GRANT);
         const bool peerAudible = fresh && peerHold && hs != MultipointState::STATE_RELEASE &&
                                  (out == MultipointState::OUTPUT_AUDIO || hs == MultipointState::STATE_STREAM);
+
+        // Focus lock backstop for the window the identity flip cannot cover (E56): while OUR
+        // output is stopped - game paused, menu silence - the peer can still be granted even
+        // from a 02 record. Then it is the old reactive path: resume our own audio (the buds
+        // hand over the second our output restarts) and claim under the cooldown; the identity
+        // loop immediately rewrites the claim's 07 row back to 02.
+        if (lockActive && (peerGranted || peerAudible))
+        {
+            _peerBusySince = now;
+            _peerBusyTracked = true;
+            // If we had stepped aside before the lock engaged, take our own audio back now -
+            // the buds hand the focus over the second our output restarts.
+            ResumeOwnPlayers("focus lock - the game owns the audio");
+            if (!claimingFlow && now - _lastClaim >= std::chrono::seconds{settings.claimCooldownSec})
+            {
+                _lastClaim = now;
+                _claimPending = false;
+                _knownHolderIsSelf = true;
+                _channel->SendProfileControl(0x87);
+                Logger::Info("AutoSwitch: focus lock active - the peer took the focus during a game, pulled it back (71 87)");
+            }
+            _phase = AutoSwitchPhase::Claiming;
+            _weWereOutputting = weOutput;
+            return;
+        }
 
         // Rule A: somebody else holds the focus, or has been granted it. While our own audio
         // keeps running the buds will not always complete the handover - measured on the same

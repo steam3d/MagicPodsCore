@@ -63,6 +63,7 @@ toml::table SettingsService::GetDefaults() {
     autoSwitch.insert_or_assign("state_read_interval_ms", 45000);
     autoSwitch.insert_or_assign("takeover", true);
     autoSwitch.insert_or_assign("require_game_running", true);
+    autoSwitch.insert_or_assign("focus_lock", false);
 
     toml::table defaults{};
     defaults.insert_or_assign("magicpods", std::move(magicpods));

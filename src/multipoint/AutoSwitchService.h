@@ -35,8 +35,7 @@ namespace MagicPodsCore
         Claiming,          // our own audio went onto the buds while the peer held focus
     };
 
-    // Auto Switch v2.4 (MagicPodsDecky_AutoSwitch_Plan.md 17.11; behaviour lineage 17.7-17.9,
-    // PC-side evidence 20.2/20.9/20.11):
+    // Auto Switch (behaviour measured on paired PC and Deck hosts, 20.2/20.9/20.11):
     //  * rule A - a fresh group-table push says the other host was granted the focus (0x85)
     //    or is streaming (0x87 / output 0x01): pause our own players so the buds can finish
     //    the handover.
@@ -80,6 +79,10 @@ namespace MagicPodsCore
         void Tick();
         // The decisions themselves, without the phase-change logging Tick adds.
         void Decide();
+        // Focus lock identity management: assert 02 while armed, restore 01 on release, and
+        // re-assert after claims or link rebuilds moved the row (E43/E59 insurance).
+        void ManageLockIdentity(const MultipointState& state, bool fresh, std::chrono::steady_clock::time_point now,
+                                const AutoSwitchSettings& settings, bool lockActive);
         bool IsLocalTag(uint16_t tag) const;
         void OnMultipointState(const MultipointState& state);
         void PauseOwnPlayers(const char* reason);
@@ -111,6 +114,15 @@ namespace MagicPodsCore
         bool _releasePending = false;
         size_t _stateEventId = 0;
 
+        // Focus lock v2 (fake-phone identity): while armed we keep our record at devType 02.
+        // The decisive A/B (14.22 E55/E57, run on this very Deck): a host that reports itself
+        // as a phone AND is currently outputting cannot be handed over to by the firmware -
+        // the peer's grab is refused outright, not pulled back afterwards. 01 can be grabbed,
+        // 02 cannot; that one byte is the whole difference. 02 carries no grant bit, so the
+        // 40 s silent-holder eviction (14.20) never arms either.
+        bool _lockIdentityActive = false;
+        bool _bootstrapCarries02 = false;
+        std::chrono::steady_clock::time_point _lastIdentityWriteAt{};
         // Only set when this service paused the players, so a player the user paused by hand
         // is never resumed by us.
         bool _wePausedPlayers = false;

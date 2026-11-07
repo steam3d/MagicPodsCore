@@ -37,6 +37,7 @@ namespace MagicPodsCore
         out.stateReadIntervalMs = GetInt(settingsService, "state_read_interval_ms", out.stateReadIntervalMs);
         out.takeover = GetBool(settingsService, "takeover", out.takeover);
         out.requireGameRunning = GetBool(settingsService, "require_game_running", out.requireGameRunning);
+        out.focusLock = GetBool(settingsService, "focus_lock", out.focusLock);
 
         if (out.idleTimeoutSec < 0)
         {

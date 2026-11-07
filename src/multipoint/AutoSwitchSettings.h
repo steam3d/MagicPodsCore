@@ -41,6 +41,11 @@ namespace MagicPodsCore
         bool takeover = true;
         // Only take the focus back while a Steam game is running (rule B gate).
         bool requireGameRunning = true;
+        // Focus lock: while a Steam game is running, keep the audio on us - report as a phone
+        // (71 02); the buds refuse to hand over an outputting phone-class host (measured, E55).
+        // While our output is stopped (a paused game) a reactive claim (71 87) covers the gap.
+        // On release our record goes back to computer (71 81).
+        bool focusLock = false;
 
         static AutoSwitchSettings Load(SettingsService& settingsService);
     };
