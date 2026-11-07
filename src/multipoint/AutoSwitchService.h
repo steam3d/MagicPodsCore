@@ -24,7 +24,7 @@ namespace MagicPodsCore
     class MediaController;
     class AudioStreamWatch;
 
-    // What the policy is doing right now; also what the frontend shows.
+    // What the policy is doing right now (exposed for diagnostics/tests).
     enum class AutoSwitchPhase
     {
         Disabled,          // the feature is off
@@ -84,6 +84,11 @@ namespace MagicPodsCore
         void ManageLockIdentity(const MultipointState& state, bool fresh, std::chrono::steady_clock::time_point now,
                                 const AutoSwitchSettings& settings, bool lockActive);
         bool IsLocalTag(uint16_t tag) const;
+    // Guarded views of push-owned state (see OnMultipointState): Tick touches the fields
+    // below only through these, or it races the SMEP reader thread.
+    void MarkHolderSelf();
+    std::optional<bool> HolderIsSelf();
+    bool ReleasePushPending();
         void OnMultipointState(const MultipointState& state);
         void PauseOwnPlayers(const char* reason);
         void ResumeOwnPlayers(const char* reason);
@@ -126,6 +131,7 @@ namespace MagicPodsCore
         // Only set when this service paused the players, so a player the user paused by hand
         // is never resumed by us.
         bool _wePausedPlayers = false;
+    bool _wasEnabled = true;
         // Was our own output going last tick - a handover that starts without us noticing
         // still has to make us step aside.
         bool _weWereOutputting = false;

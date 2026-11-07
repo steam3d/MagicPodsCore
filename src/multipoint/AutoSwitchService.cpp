@@ -70,10 +70,10 @@ namespace MagicPodsCore
           _mediaController{std::move(mediaController)}, _settingsService{std::move(settingsService)},
           _mainLinkUp{std::move(mainLinkUp)}
     {
-        // Must match what GalaxyBudsDevice::Create put into the bootstrap; the first Decide
-        // then corrects it if the lock is armed (a game already runs at core start).
-        const AutoSwitchSettings initial = AutoSwitchSettings::Load(*_settingsService);
-        _bootstrapCarries02 = initial.focusLock && SteamGamePresence::IsGameRunning();
+        // The channel's actual bootstrap at construction is the plain MDE prime, whatever
+        // the settings say: the first Decide compares against THIS and installs the
+        // phone-class variant when the lock is already armed (a game running at core start).
+        _bootstrapCarries02 = false;
     }
 
     AutoSwitchService::~AutoSwitchService()
@@ -113,6 +113,9 @@ namespace MagicPodsCore
         {
             _thread.join();
         }
+        // Stop the SMEP link first: joining its reader closes the only window that can still
+        // fire the multipoint event, so the unsubscribe below never races FireEvent.
+        _channel->Stop();
         _channel->GetMultipointStateEvent().Unsubscribe(_stateEventId);
         _phase = AutoSwitchPhase::Disabled;
         Logger::Info("AutoSwitch: service stopped");
@@ -121,6 +124,26 @@ namespace MagicPodsCore
     bool AutoSwitchService::IsLocalTag(uint16_t tag) const
     {
         return std::find(_localTags.begin(), _localTags.end(), tag) != _localTags.end();
+    }
+
+    // Guarded views of the fields OnMultipointState owns: Tick must never touch them
+    // outside _stateMutex or the push thread and Tick race on them (UB).
+    void AutoSwitchService::MarkHolderSelf()
+    {
+        std::lock_guard lock{_stateMutex};
+        _knownHolderIsSelf = true;
+    }
+
+    std::optional<bool> AutoSwitchService::HolderIsSelf()
+    {
+        std::lock_guard lock{_stateMutex};
+        return _knownHolderIsSelf;
+    }
+
+    bool AutoSwitchService::ReleasePushPending()
+    {
+        std::lock_guard lock{_stateMutex};
+        return _releasePending;
     }
 
     AutoSwitchPhase AutoSwitchService::GetPhase() const
@@ -255,7 +278,8 @@ namespace MagicPodsCore
 
         // The freshest table (fresh or not) has to say the peer holds the focus: claiming
         // while we hold it ourselves is a no-op at best and disconnects the peer at worst.
-        const bool holderKnownPeer = _knownHolderIsSelf.has_value() && !*_knownHolderIsSelf;
+        const auto holderSelf = HolderIsSelf();
+        const bool holderKnownPeer = holderSelf.has_value() && !*holderSelf;
         const bool peerHolds = fresh ? peerHold : holderKnownPeer;
         if (!peerPresent || !peerHolds)
         {
@@ -301,7 +325,7 @@ namespace MagicPodsCore
         _channel->SendProfileControl(0x87);
         _demotePending = true;
         _demoteDueAt = now + DemoteAfterClaim;
-        _knownHolderIsSelf = true; // the claim just moved the focus here; do not race the push
+        MarkHolderSelf(); // the claim just moved the focus here; do not race the push
         Logger::Info("AutoSwitch: claimed audio focus (71 87) over the persistent SMEP link");
         _phase = AutoSwitchPhase::Claiming;
     }
@@ -374,9 +398,29 @@ namespace MagicPodsCore
         const AutoSwitchSettings settings = AutoSwitchSettings::Load(*_settingsService);
         if (!settings.enabled)
         {
+            if (_wasEnabled)
+            {
+                // Mid-flight switch-off: give the cooperative identity back - a phone-class
+                // record we left behind would keep the peer from ever being handed over -
+                // and tear down everything we own.
+                _wasEnabled = false;
+                if (_wePausedPlayers)
+                {
+                    ResumeOwnPlayers("Auto Switch was switched off");
+                }
+                if (_lockIdentityActive)
+                {
+                    _lockIdentityActive = false;
+                    _channel->SendProfileControl(0x81);
+                    Logger::Info("AutoSwitch: Auto Switch switched off - our record restored to computer (71 81)");
+                }
+                _audioWatch->Stop();
+                _channel->Stop();
+            }
             _phase = AutoSwitchPhase::Disabled;
             return;
         }
+        _wasEnabled = true;
         if (settings.takeover && _audioWatch)
         {
             // Idempotent: brings up the pactl-subscribe watcher on the first enabled tick.
@@ -577,7 +621,7 @@ namespace MagicPodsCore
             {
                 _lastClaim = now;
                 _claimPending = false;
-                _knownHolderIsSelf = true;
+                MarkHolderSelf();
                 _channel->SendProfileControl(0x87);
                 Logger::Info("AutoSwitch: focus lock active - the peer took the focus during a game, pulled it back (71 87)");
             }
@@ -617,7 +661,7 @@ namespace MagicPodsCore
         // is what gets the other host disconnected (14.20 E53).
         if (_wePausedPlayers)
         {
-            if (_releasePending && fresh)
+            if (ReleasePushPending() && fresh)
             {
                 ResumeOwnPlayers("the buds released the peer's grant");
             }

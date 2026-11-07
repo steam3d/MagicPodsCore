@@ -12,6 +12,12 @@ namespace MagicPodsCore
 {
     std::vector<uint8_t> SmepFrame::Encode(uint8_t id, const std::vector<uint8_t>& payload, uint16_t flags)
     {
+        if (payload.size() > 0x3FC)
+        {
+            // The size field is 10 bits: a longer payload cannot be framed at all. Refuse
+            // rather than emit a truncated frame that would desynchronise the stream.
+            return {};
+        }
         const uint16_t size = static_cast<uint16_t>(1 + payload.size() + 2);
         std::vector<uint8_t> body;
         body.reserve(1 + payload.size());

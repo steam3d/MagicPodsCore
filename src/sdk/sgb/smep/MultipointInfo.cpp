@@ -18,15 +18,6 @@ namespace MagicPodsCore
         constexpr size_t HOLDER_TAG_OFFSET = 19;
         constexpr size_t RECORD_OFFSETS[2] = {19, 49};
 
-        uint16_t ReadLE16(const std::vector<uint8_t>& v, size_t at)
-        {
-            if (at + 1 >= v.size())
-            {
-                return 0;
-            }
-            return static_cast<uint16_t>(v[at] | (v[at + 1] << 8));
-        }
-
         SmepHostRecord ParseSlot(const std::vector<uint8_t>& p, size_t at)
         {
             SmepHostRecord rec{};
@@ -135,7 +126,7 @@ namespace MagicPodsCore
 
     std::optional<MultipointState> ParseMultipointState(const std::vector<uint8_t>& payload)
     {
-        if (payload.size() < HOLDER_TAG_OFFSET + 2 || payload[1] != 0x02 || payload[2] != 0x05)
+        if (payload.size() < HOLDER_TAG_OFFSET + 2 || payload[0] != 0x45 || payload[1] != 0x02 || payload[2] != 0x05)
         {
             return std::nullopt;
         }

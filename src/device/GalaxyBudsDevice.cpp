@@ -51,7 +51,6 @@ namespace MagicPodsCore
         // focus/class sub-messages; the policy only acts while the "auto_switch.enabled" setting
         // is on, which it is not by default.
         device->_smepChannel = std::make_shared<SmepChannel>(deviceInfo->GetAddress());
-        const AutoSwitchSettings autoSwitchSettings = AutoSwitchSettings::Load(*settingsService);
         // The PipeWire watcher behind the takeover path: it answers "did OUR audio just go
         // onto the buds", which is the event the claim has to beat the buds' own pause to.
         device->_audioStreamWatch = std::make_shared<AudioStreamWatch>(deviceInfo->GetAddress());

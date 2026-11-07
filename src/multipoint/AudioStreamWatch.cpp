@@ -48,6 +48,22 @@ namespace MagicPodsCore
         {
             return;
         }
+        // A previous pactl instance may have died (RunReader cleared _running): reap it
+        // before re-arming, or the dead reader thread and its child linger forever.
+        if (_reader.joinable())
+        {
+            _reader.join();
+        }
+        if (_childPid > 0)
+        {
+            waitpid(_childPid, nullptr, 0);
+            _childPid = -1;
+        }
+        if (_pipeFd[0] >= 0)
+        {
+            close(_pipeFd[0]);
+            _pipeFd[0] = -1;
+        }
         if (pipe(_pipeFd) != 0)
         {
             Logger::Warn("AudioStreamWatch: pipe() failed, audio takeover stays dark");
@@ -115,7 +131,7 @@ namespace MagicPodsCore
             const ssize_t got = read(_pipeFd[0], buffer.data(), buffer.size());
             if (got <= 0)
             {
-                // EOF (pactl died / was terminated) or error: nothing more to learn.
+                // EOF (pactl died or was terminated) or error: nothing more to learn.
                 break;
             }
             pending.append(buffer.data(), static_cast<size_t>(got));

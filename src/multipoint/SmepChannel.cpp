@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdio>
 
 namespace MagicPodsCore
 {
@@ -82,6 +83,12 @@ namespace MagicPodsCore
         _lastStartAttempt = now;
         _started = true;
 
+        // Subscribe BEFORE the reader thread exists: the upstream Event map carries no lock,
+        // so it is only ever mutated when no reader can be inside FireEvent (same discipline
+        // as Device::Init subscribing before StartClient).
+        _receivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe(
+            [this](size_t, const std::vector<uint8_t>& data) { OnReceivedData(data); });
+
         std::vector<uint8_t> bootstrap = _bootstrap;
         _client->Start([bootstrap](Client& client) {
             // Sent right after the socket is up, before the reader can interleave: the class
@@ -93,6 +100,7 @@ namespace MagicPodsCore
 
         if (!_client->IsStarted())
         {
+            _client->GetOnReceivedDataEvent().Unsubscribe(_receivedDataEventId);
             _started = false;
             Logger::Warn("SmepChannel: could not open scn %d on %s", SMEP_CHANNEL, _budsAddress.c_str());
             return;
@@ -104,8 +112,6 @@ namespace MagicPodsCore
             _lastRxTime = _openedAt;
         }
 
-        _receivedDataEventId = _client->GetOnReceivedDataEvent().Subscribe(
-            [this](size_t, const std::vector<uint8_t>& data) { OnReceivedData(data); });
         Logger::Info("SmepChannel: scn %d open on %s", SMEP_CHANNEL, _budsAddress.c_str());
     }
 
@@ -116,8 +122,9 @@ namespace MagicPodsCore
             return;
         }
         _started = false;
-        _client->GetOnReceivedDataEvent().Unsubscribe(_receivedDataEventId);
+        // Join the reader first, only then touch the (lock-free) Event map.
         _client->Stop();
+        _client->GetOnReceivedDataEvent().Unsubscribe(_receivedDataEventId);
         Logger::Info("SmepChannel: scn %d closed on %s", SMEP_CHANNEL, _budsAddress.c_str());
     }
 
