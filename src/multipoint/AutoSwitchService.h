@@ -81,14 +81,14 @@ namespace MagicPodsCore
         void Decide();
         // Focus lock identity management: assert 02 while armed, restore 01 on release, and
         // re-assert after claims or link rebuilds moved the row (E43/E59 insurance).
-        void ManageLockIdentity(const MultipointState& state, bool fresh, std::chrono::steady_clock::time_point now,
+                void ManageLockIdentity(const MultipointState& state, bool fresh, std::chrono::steady_clock::time_point now,
                                 const AutoSwitchSettings& settings, bool lockActive);
         bool IsLocalTag(uint16_t tag) const;
-    // Guarded views of push-owned state (see OnMultipointState): Tick touches the fields
-    // below only through these, or it races the SMEP reader thread.
-    void MarkHolderSelf();
-    std::optional<bool> HolderIsSelf();
-    bool ReleasePushPending();
+        // Guarded views of push-owned state (see OnMultipointState): Tick touches the fields
+        // below only through these, or it races the SMEP reader thread.
+        void MarkHolderSelf();
+        std::optional<bool> HolderIsSelf();
+        bool ReleasePushPending();
         void OnMultipointState(const MultipointState& state);
         void PauseOwnPlayers(const char* reason);
         void ResumeOwnPlayers(const char* reason);
@@ -131,7 +131,9 @@ namespace MagicPodsCore
         // Only set when this service paused the players, so a player the user paused by hand
         // is never resumed by us.
         bool _wePausedPlayers = false;
-    bool _wasEnabled = true;
+        // Was the feature on last tick: only the enabled->disabled EDGE runs the teardown,
+        // so a service that was never enabled tears nothing down.
+        bool _wasEnabled = false;
         // Was our own output going last tick - a handover that starts without us noticing
         // still has to make us step aside.
         bool _weWereOutputting = false;

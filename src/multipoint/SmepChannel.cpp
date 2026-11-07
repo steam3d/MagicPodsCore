@@ -150,7 +150,14 @@ namespace MagicPodsCore
         {
             return;
         }
-        _client->SendData(SmepFrame::Encode(0x01, sub));
+        // Encode refuses payloads that cannot fit the frame; never queue an empty one
+        // (the writer would issue a pointless zero-byte send).
+        const std::vector<uint8_t> frame = SmepFrame::Encode(0x01, sub);
+        if (frame.empty())
+        {
+            return;
+        }
+        _client->SendData(frame);
     }
 
     void SmepChannel::SendProfileControl(uint8_t controlByte)

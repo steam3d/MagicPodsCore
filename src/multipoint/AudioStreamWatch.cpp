@@ -48,8 +48,9 @@ namespace MagicPodsCore
         {
             return;
         }
-        // A previous pactl instance may have died (RunReader cleared _running): reap it
-        // before re-arming, or the dead reader thread and its child linger forever.
+        // A previous pactl instance may have died (RunReader clears _running when its
+        // read hits EOF): reap the dead reader and its child before re-arming, or
+        // takeover would stay dark for the lifetime of the device.
         if (_reader.joinable())
         {
             _reader.join();
@@ -101,10 +102,9 @@ namespace MagicPodsCore
 
     void AudioStreamWatch::Stop()
     {
-        if (!_running)
-        {
-            return;
-        }
+        // Reap unconditionally: the reader may have exited on its own (pactl died, which
+        // clears _running) while the thread and the zombie child are still there. Each
+        // resource is gated on its own handle, never on _running.
         _running = false;
         if (_childPid > 0)
         {
@@ -150,6 +150,10 @@ namespace MagicPodsCore
                 }
             }
         }
+        // pactl died or we were stopped: the reader is done, say so. Start() re-arms
+        // through its reap block and Stop() below reaps every resource unconditionally,
+        // so neither path can leave this thread or its child behind.
+        _running = false;
         if (_pipeFd[0] >= 0)
         {
             close(_pipeFd[0]);
