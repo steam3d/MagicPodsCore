@@ -65,7 +65,19 @@ namespace MagicPodsCore
                                                                       const auto self = selfWeak.lock();
                                                                       return self && self->GetConnected();
                                                                   });
-        device->_autoSwitch->Start();
+        // Model gate: outside the simultaneous-multipoint generation line there is no SMEP MDE
+        // machinery to talk to, so the service never starts there at all - enabling
+        // "auto_switch.enabled" can then never produce scn 29 connect churn or audio watcher
+        // traffic against buds that lack the plane (the UI hides the toggles for these models
+        // through the same capability, see Device::GetAsJson).
+        if (GalaxyBudsHelper::IsSmepMultipointModel(static_cast<GalaxyBudsModelIds>(model)))
+        {
+            device->_autoSwitch->Start();
+        }
+        else
+        {
+            Logger::Info("AutoSwitch: the buds model is not on the simultaneous-multipoint generation line - the service stays off");
+        }
         return device;
     }
 }

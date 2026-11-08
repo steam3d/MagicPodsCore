@@ -250,6 +250,22 @@ namespace MagicPodsCore
         return {GalaxyBudsHelper::GetModelFromName(name), ""};
     }
 
+    bool GalaxyBudsHelper::IsSmepMultipointModel(GalaxyBudsModelIds model)
+    {
+        switch (model)
+        {
+        case GalaxyBudsModelIds::GalaxyBuds2Pro:
+        case GalaxyBudsModelIds::GalaxyBuds3:
+        case GalaxyBudsModelIds::GalaxyBuds3Pro:
+        case GalaxyBudsModelIds::GalaxyBuds3Fe:
+        case GalaxyBudsModelIds::GalaxyBuds4:
+        case GalaxyBudsModelIds::GalaxyBuds4Pro:
+            return true;
+        default:
+            return false;
+        }
+    }
+
     std::string GalaxyBudsHelper::GetServiceGuid(GalaxyBudsModelIds model)
     {
         if (model == GalaxyBudsModelIds::GalaxyBuds)

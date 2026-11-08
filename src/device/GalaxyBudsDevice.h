@@ -9,6 +9,7 @@
 #include "sdk/sgb/setters/GalaxyBudsSetAnc.h"
 #include "sdk/sgb/structs/GalaxyBudsResponseData.h"
 #include "sdk/sgb/GalaxyBudsPacket.h"
+#include "sdk/sgb/GalaxyBudsHelper.h"
 #include "multipoint/AudioStreamWatch.h"
 #include "multipoint/AutoSwitchService.h"
 #include "multipoint/SmepChannel.h"
@@ -33,6 +34,11 @@ namespace MagicPodsCore
         {
             std::lock_guard lock{_propertyMutex};
             return _customProductId;
+        }
+
+        bool GetSmepMultipointSupported() const override
+        {
+            return GalaxyBudsHelper::IsSmepMultipointModel(static_cast<GalaxyBudsModelIds>(_customProductId));
         }
 
         Event<GalaxyBudsResponseData> &GetResponseDataRecived()

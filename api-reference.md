@@ -118,6 +118,7 @@ Response:
       "address": "AA:BB:CC:DD:EE:FF",
       "vendor": 76,
       "model": 8207,
+      "smepMultipoint": false,
       "color": 0,
       "connected": false
     },
@@ -126,6 +127,7 @@ Response:
       "address": "11:22:33:44:55:66",
       "vendor": 117,
       "model": 9,
+      "smepMultipoint": true,
       "color": 0,
       "connected": false
     }
@@ -164,6 +166,7 @@ Response:
       "address": "AA:BB:CC:DD:EE:FF",
       "vendor": 76,
       "model": 8207,
+      "smepMultipoint": false,
       "color": 0,
       "connected": true
     },
@@ -172,6 +175,7 @@ Response:
       "address": "11:22:33:44:55:66",
       "vendor": 117,
       "model": 9,
+      "smepMultipoint": true,
       "color": 0,
       "connected": false
     }
@@ -202,6 +206,7 @@ Response:
       "address": "AA:BB:CC:DD:EE:FF",
       "vendor": 76,
       "model": 8207,
+      "smepMultipoint": false,
       "color": 0,
       "connected": false
     },
@@ -210,6 +215,7 @@ Response:
       "address": "11:22:33:44:55:66",
       "vendor": 117,
       "model": 9,
+      "smepMultipoint": true,
       "color": 0,
       "connected": false
     }
@@ -229,6 +235,7 @@ When the connection status of any headphone changes:
       "address": "AA:BB:CC:DD:EE:FF",
       "vendor": 76,
       "model": 8207,
+      "smepMultipoint": false,
       "color": 0,
       "connected": true
     },
@@ -237,6 +244,7 @@ When the connection status of any headphone changes:
       "address": "11:22:33:44:55:66",
       "vendor": 117,
       "model": 9,
+      "smepMultipoint": true,
       "color": 0,
       "connected": false
     }
@@ -262,10 +270,11 @@ Response:
 ```json
 {
   "info": {
-    "name": "AirPods",
+    "name": "Galaxy Buds 3",
     "address": "AA:BB:CC:DD:EE:FF",
     "vendor": 117,
     "model": 9,
+    "smepMultipoint": true,
     "color": 0,
     "connected": true,
     "capabilities": {
@@ -282,10 +291,11 @@ Returns empty `capabilities` if no features are available:
 ```json
 {
   "info": {
-    "name": "AirPods",
+    "name": "Galaxy Buds 3",
     "address": "AA:BB:CC:DD:EE:FF",
     "vendor": 117,
     "model": 9,
+    "smepMultipoint": true,
     "color": 0,
     "connected": true,
     "capabilities": { }
@@ -308,10 +318,11 @@ On any property change:
 ```json
 {
   "info": {
-    "name": "AirPods Pro",
+    "name": "Galaxy Buds 3",
     "address": "AA:BB:CC:DD:EE:FF",
     "vendor": 117,
     "model": 9,
+    "smepMultipoint": true,
     "color": 0,
     "connected": true,
     "capabilities": {
