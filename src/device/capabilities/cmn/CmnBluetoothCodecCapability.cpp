@@ -100,11 +100,13 @@ void CmnBluetoothCodecCapability::SetFromJson(const nlohmann::json &json)
             std::string selected = capability["selected"].get<std::string>();
             if (IsValidSelected(selected))
             {
-                auto pac = device.GetAudioClient();
-                pac->SetCardProfile(pac->GetNameFromMac(device.GetAddress()), selected);                
-                Logger::Debug("CmnBluetoothCodecCapability::SetFromJson set option to %s", selected.c_str());
+                if (selected != info.activeProfile) {
+                    auto pac = device.GetAudioClient();
+                    pac->SetCardProfile(pac->GetNameFromMac(device.GetAddress()), selected);                
+                    Logger::Debug("CmnBluetoothCodecCapability::SetFromJson set option to %s", selected.c_str());
+                }
             }
-            else
+            else 
             {
                 Logger::Error("Error: CmnBluetoothCodecCapability::SetFromJson got unexpected option: %s", selected.c_str());
             }
