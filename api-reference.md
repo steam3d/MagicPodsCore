@@ -578,6 +578,37 @@ Supported Bluetooth profiles/codecs
 | `[1]`         | Human-readable profile description |
 
 
+##### Auto Switch
+
+Moves the audio focus between this host and the other device paired with the Galaxy Buds.
+Reported only while a Galaxy Buds model carrying the vendor's simultaneous multipoint plane
+is connected; on every other device the capability is absent.
+
+```json
+{
+  "autoSwitch": {
+    "readonly": false,
+    "selected": {
+      "enabled": false,
+      "takeover": true,
+      "focusLock": false,
+      "idleTimeoutSec": 5,
+      "focusLockActive": false
+    }
+  }
+}
+```
+
+| Field                     | Type   |                                                    |
+| ------------------------- | ------ | -------------------------------------------------- |
+| `selected`                | object | All fields are required                            |
+| `selected.enabled`        | bool   | Master switch                                      |
+| `selected.takeover`       | bool   | Claim the focus back when local audio starts       |
+| `selected.focusLock`      | bool   | Report as a phone-class host to refuse handovers   |
+| `selected.idleTimeoutSec` | int    | Fallback wait before returning the focus, seconds  |
+| `selected.focusLockActive`| bool   | Runtime state: the focus lock is armed right now. Write to arm or release it (a plugin-side policy decides when); it is never persisted and resets when Core restarts. The lock engages only while `focusLock` is also selected |
+| `readonly`                | bool   |                                                    |
+
 ### AirPods and Beats capabilities
 
 ##### Firmware information (read-only)

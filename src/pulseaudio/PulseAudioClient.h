@@ -38,6 +38,7 @@ namespace MagicPodsCore{
         std::string activePort;
         uint32_t activePortType{PA_DEVICE_PORT_TYPE_UNKNOWN};
         pa_cvolume volume{};
+        pa_sink_state_t state{PA_SINK_INVALID_STATE};
 
         bool IsOnCard(const CardInfo& cardInfo) const {
             return card == cardInfo.index || cardName == cardInfo.name;
@@ -65,6 +66,9 @@ namespace MagicPodsCore{
             std::vector<uint32_t> GetModuleIndexesByArgument(const std::string& value);
             std::optional<std::string> GetSourceConsumer(const std::string& sourceName);
             std::string GetNameFromMac(const std::string& mac);
+            // The bluez sink names of a device share the card name's MAC part:
+            // bluez_output.<MAC with underscores>.<profile>.
+            static std::string GetBluezSinkPrefixFromMac(const std::string& mac);
             Event<CardInfo>& GatAudioCardPropertyChangedEvent() {
                 return _onAudioCardPropertyChangedEvent;
             }

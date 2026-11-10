@@ -1,0 +1,176 @@
+// MagicPodsCore: https://github.com/steam3d/MagicPodsCore
+// Copyright: 2020-2026 Aleksandr Maslov <https://magicpods.app> & Andrei Litvintsev <a.a.litvintsev@gmail.com>
+// License: GPL-3.0
+// the policy state machine
+
+#pragma once
+
+#include "AutoSwitchSettings.h"
+#include "SmepChannel.h"
+#include "sdk/sgb/smep/MultipointInfo.h"
+
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <string>
+#include <thread>
+
+namespace MagicPodsCore
+{
+    class MediaController;
+    class PulseAudioClient;
+
+    // What the policy is doing right now (exposed for diagnostics/tests).
+    enum class AutoSwitchPhase
+    {
+        Disabled,          // the feature is off
+        WaitingForState,   // link is not up, or no device group table seen yet
+        Holding,           // we hold the output, nothing to do
+        Yielding,          // we let another host take over and paused our own players
+        WaitingToReclaim,  // the other host is silent, we are waiting to resume our players
+        Claiming,          // our own audio went onto the buds while the peer held focus
+    };
+
+    // Auto Switch: moves the audio focus between this host and the other host paired with
+    // the buds. The policy reacts to audio activity and to what the buds push, never to the
+    // presence of any application. Protocol behaviour it relies on:
+    //  * rule A - a fresh group-table push says the other host was granted the focus (0x85)
+    //    or is streaming (0x87 / output 0x01): pause our own players so the buds can finish
+    //    the handover.
+    //  * rule B - the release the buds push themselves 6-10 s after the peer goes silent
+    //    (state 0x81, or output back to 0x00) is the idle event; it resumes our players. The
+    //    idle_timeout_sec timer is only the fallback while that push stays missing. No 0x71
+    //    claim is needed to take the focus back: the buds hand it over the same second our
+    //    output restarts.
+    //  * takeover - when OUR audio goes onto the buds (the buds' sink reports RUNNING) while
+    //    the peer holds focus, claim it (71 87): while the peer holds the focus the buds kill
+    //    unauthorised streams with an AVRCP pause 0.8-1.2 s after the stream starts, so the
+    //    claim races that pause; a stream the buds killed anyway leaves us authorised for
+    //    the next one. The demote (71 81) after 2.5 s puts our record back to "computer" so
+    //    the peer can still interrupt us afterwards.
+    //  * PEER_ABSENT - the other host is not in the device group table at all: no claiming,
+    //    no keepalive pressure; the buds drop silent hosts by themselves, except when one
+    //    side is a stamped phone.
+    //  * link layer - the 44 00 02 read is the keepalive (45 s); three silent intervals mean
+    //    a half-open link and it gets rebuilt unless the buds last reported the closed cradle
+    //    (paging a sleeping bud is noise). A stale table is refreshed by re-sending the MDE
+    //    prime, the deterministic table trigger.
+    class AutoSwitchService
+    {
+    public:
+        // mainLinkUp answers "is the device's own control link connected" - the buds being
+        // reachable is stronger evidence than our (link-fed, therefore stale when the link is
+        // down) closed-cradle cache, and keeps the closed-cradle gate from deadlocking.
+        AutoSwitchService(std::shared_ptr<SmepChannel> channel,
+                          std::shared_ptr<PulseAudioClient> audioClient,
+                          std::shared_ptr<MediaController> mediaController,
+                          std::shared_ptr<SettingsService> settingsService,
+                          std::string settingsContainer,
+                          std::string budsAddress,
+                          std::function<bool()> mainLinkUp);
+        ~AutoSwitchService();
+
+        void Start();
+        void Stop();
+
+        // The focus-lock arm/release switch for the plugin's gaming mode: a runtime state,
+        // deliberately separate from the saved sgb_auto_switch_focus_lock preference.
+        void SetFocusLockActive(bool active);
+        bool GetFocusLockActive() const;
+
+        AutoSwitchPhase GetPhase() const;
+
+    private:
+        void Run();
+        void Tick();
+        // The decisions themselves, without the phase-change logging Tick adds.
+        void Decide();
+        // Focus lock identity management: assert 02 while armed, restore 01 on release, and
+        // re-assert after claims or link rebuilds moved the row.
+        void ManageLockIdentity(const MultipointState& state, bool fresh, std::chrono::steady_clock::time_point now,
+                                const AutoSwitchSettings& settings, bool lockActive);
+        bool IsLocalTag(uint16_t tag) const;
+        // Guarded views of push-owned state (see OnMultipointState): Tick touches the fields
+        // below only through these, or it races the SMEP reader thread.
+        void MarkHolderSelf();
+        std::optional<bool> HolderIsSelf();
+        bool ReleasePushPending();
+        void OnMultipointState(const MultipointState& state);
+        void PauseOwnPlayers(const char* reason);
+        void ResumeOwnPlayers(const char* reason);
+        bool LocalOutputActive();
+        // The takeover side: sink-RUNNING edge bookkeeping and the claim/demote writes.
+        void UpdateClaim(const MultipointState* state, bool fresh, bool peerPresent, bool peerHold,
+                        const AutoSwitchSettings& settings);
+
+        std::shared_ptr<SmepChannel> _channel{};
+        // The buds' own sink queried through the core PulseAudio client: our audio is on
+        // the wire exactly while that sink reports RUNNING.
+        std::shared_ptr<PulseAudioClient> _audioClient{};
+        std::string _sinkNamePrefix{};
+        int _emptySinkStreak = 0;
+        std::shared_ptr<MediaController> _mediaController{};
+        std::shared_ptr<SettingsService> _settingsService{};
+        // The device's own settings container; the sgb_auto_switch* keys live per device.
+        std::string _settingsContainer{};
+        std::function<bool()> _mainLinkUp{};
+        // Our own rows in the group table: the tails of this machine's Bluetooth adapters.
+        // Everything else in the table is the other host.
+        std::vector<uint16_t> _localTags{};
+        std::thread _thread{};
+        std::atomic<bool> _running{false};
+        std::atomic<bool> _focusLockRequested{false};
+        std::atomic<AutoSwitchPhase> _phase{AutoSwitchPhase::Disabled};
+
+        std::mutex _stateMutex{};
+        std::optional<MultipointState> _latestState{};
+        std::chrono::steady_clock::time_point _lastTablePushAt{};
+        // The freshest table we ever saw said who holds the focus (used when the table itself
+        // is too old to act on but the question is still "peer or us").
+        std::optional<bool> _knownHolderIsSelf{};
+        // True while the latest push was a release (0x81 / output back to none): that push is
+        // the idle event rule B waits for.
+        bool _releasePending = false;
+        size_t _stateEventId = 0;
+
+        // Focus lock (fake-phone identity): while armed we keep our record at devType 02.
+        // A host that reports itself as a phone AND is currently outputting cannot be handed
+        // over to by the firmware - the peer's grab is refused outright, not pulled back
+        // afterwards. 01 can be grabbed, 02 cannot; that one byte is the whole difference.
+        // 02 carries no grant bit, so the 40 s silent-holder eviction never arms either.
+        bool _lockIdentityActive = false;
+        bool _bootstrapCarries02 = false;
+        std::chrono::steady_clock::time_point _lastIdentityWriteAt{};
+        // Only set when this service paused the players, so a player the user paused by hand
+        // is never resumed by us.
+        bool _wePausedPlayers = false;
+        // Was the feature on last tick: only the enabled->disabled EDGE runs the teardown,
+        // so a service that was never enabled tears nothing down.
+        bool _wasEnabled = false;
+        // Was our own output going last tick - a handover that starts without us noticing
+        // still has to make us step aside.
+        bool _weWereOutputting = false;
+
+        std::chrono::steady_clock::time_point _lastStateRead{};
+        std::chrono::steady_clock::time_point _lastReopenAttempt{};
+        std::chrono::steady_clock::time_point _linkOpenedAt{};
+        bool _subscribed = false;
+        bool _cradleSkipLogged = false;
+
+        std::chrono::steady_clock::time_point _peerBusySince{};
+        bool _peerBusyTracked = false;
+
+        // Takeover bookkeeping.
+        bool _sinkWasActive = false;
+        bool _claimPending = false;
+        std::chrono::steady_clock::time_point _claimEdgeAt{};
+        std::chrono::steady_clock::time_point _lastClaim{};
+        std::chrono::steady_clock::time_point _lastRefreshSent{};
+        bool _demotePending = false;
+        std::chrono::steady_clock::time_point _demoteDueAt{};
+    };
+}

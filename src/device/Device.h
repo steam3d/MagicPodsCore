@@ -55,9 +55,12 @@ namespace MagicPodsCore {
         void StartClient();
         void RestartClientAfterConnectionLost();
         void SetClientState(ClientState state);
-        std::string GetContainerName();
 
     protected:
+        // The device's own settings container name (address-derived). Capabilities that
+        // persist per-device options read and write through it via the Load/SaveSetting* API.
+        std::string GetContainerName();
+
         mutable std::mutex _propertyMutex{};
         std::unique_ptr<Client> _client;
         std::vector<std::vector<unsigned char>>_clientStartData {};

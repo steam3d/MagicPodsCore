@@ -85,6 +85,13 @@ add_executable(magicpodscore
     src/sdk/sgb/Crc16.cpp
     src/sdk/sgb/GalaxyBudsHelper.cpp
     src/sdk/sgb/GalaxyBudsPacket.cpp
+    src/sdk/sgb/smep/SmepFrame.cpp
+    src/sdk/sgb/smep/MultipointInfo.cpp
+
+    src/multipoint/AdapterTags.cpp
+    src/multipoint/SmepChannel.cpp
+    src/multipoint/AutoSwitchSettings.cpp
+    src/multipoint/AutoSwitchService.cpp
 
     src/sdk/pbp/watchers/PixelBudsAncWatcher.cpp
     src/sdk/pbp/watchers/PixelBudsBatteryWatcher.cpp
@@ -131,6 +138,7 @@ add_executable(magicpodscore
 
     src/device/capabilities/sgb/GalaxyBudsCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
+    src/device/capabilities/sgb/GalaxyBudsAutoSwitchCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsBatteryCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsEarDetectionCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsEarDetectionStateCapability.cpp

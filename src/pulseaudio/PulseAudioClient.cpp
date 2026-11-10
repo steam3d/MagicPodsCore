@@ -363,6 +363,7 @@ namespace MagicPodsCore
                 out.index = info->index;
                 out.card = info->card;
                 out.volume = info->volume;
+                out.state = info->state;
                 if (info->name)
                     out.name = info->name;
                 if (const char* cardName = info->proplist ? pa_proplist_gets(info->proplist, "device.name") : nullptr)
@@ -398,6 +399,7 @@ namespace MagicPodsCore
                 out.index = info->index;
                 out.card = info->card;
                 out.volume = info->volume;
+                out.state = info->state;
                 if (info->name)
                     out.name = info->name;
                 if (const char* cardName = info->proplist ? pa_proplist_gets(info->proplist, "device.name") : nullptr)
@@ -676,6 +678,16 @@ namespace MagicPodsCore
                [](unsigned char c){ return std::toupper(c); });
 
         return "bluez_card." + name;
+    }
+
+    std::string PulseAudioClient::GetBluezSinkPrefixFromMac(const std::string &mac)
+    {
+        std::string name = mac;
+        std::replace(name.begin(), name.end(), ':', '_');
+        std::transform(name.begin(), name.end(), name.begin(),
+               [](unsigned char c){ return std::toupper(c); });
+
+        return "bluez_output." + name + ".";
     }
 
     void PulseAudioClient::MainLoop()
