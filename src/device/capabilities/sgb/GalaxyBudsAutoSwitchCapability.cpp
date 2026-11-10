@@ -79,6 +79,7 @@ namespace MagicPodsCore
     GalaxyBudsAutoSwitchCapability::GalaxyBudsAutoSwitchCapability(GalaxyBudsDevice& device,
                                                                    std::shared_ptr<SettingsService> settingsService,
                                                                    std::shared_ptr<MediaController> mediaController,
+                                                                   std::shared_ptr<PulseAudioClient> audioClient,
                                                                    std::string settingsContainer)
         : GalaxyBudsCapability("autoSwitch", false, device), _settingsContainer{std::move(settingsContainer)}
     {
@@ -88,9 +89,9 @@ namespace MagicPodsCore
             return;
 
         _smepChannel = std::make_shared<SmepChannel>(device.GetAddress());
-        _audioWatch = std::make_shared<AudioStreamWatch>(device.GetAddress());
-        _service = std::make_unique<AutoSwitchService>(_smepChannel, _audioWatch, mediaController,
+        _service = std::make_unique<AutoSwitchService>(_smepChannel, audioClient, mediaController,
                                                        settingsService, _settingsContainer,
+                                                       device.GetAddress(),
                                                        [this]() { return this->device.GetConnected(); });
 
         // The policy runs only while the buds are actually connected, and stops with them.

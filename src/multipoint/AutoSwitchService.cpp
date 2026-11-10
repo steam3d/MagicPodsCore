@@ -6,7 +6,7 @@
 #include "AutoSwitchService.h"
 
 #include "AdapterTags.h"
-#include "AudioStreamWatch.h"
+#include "pulseaudio/PulseAudioClient.h"
 #include "Logger.h"
 #include "media/MediaController.h"
 
@@ -61,12 +61,13 @@ namespace MagicPodsCore
     }
 
     AutoSwitchService::AutoSwitchService(std::shared_ptr<SmepChannel> channel,
-                                         std::shared_ptr<AudioStreamWatch> audioWatch,
+                                         std::shared_ptr<PulseAudioClient> audioClient,
                                          std::shared_ptr<MediaController> mediaController,
                                          std::shared_ptr<SettingsService> settingsService,
                                          std::string settingsContainer,
+                                         std::string budsAddress,
                                          std::function<bool()> mainLinkUp)
-        : _channel{std::move(channel)}, _audioWatch{std::move(audioWatch)},
+        : _channel{std::move(channel)}, _audioClient{std::move(audioClient)},
           _mediaController{std::move(mediaController)}, _settingsService{std::move(settingsService)},
           _settingsContainer{std::move(settingsContainer)}, _mainLinkUp{std::move(mainLinkUp)}
     {
@@ -74,6 +75,27 @@ namespace MagicPodsCore
         // the settings say: the first Decide compares against THIS and installs the
         // phone-class variant when the lock is already armed at core start.
         _bootstrapCarries02 = false;
+
+        // The bluez sink of this device, matched by name: index numbers move on reconnects.
+        std::string tail = std::move(budsAddress);
+        std::replace(tail.begin(), tail.end(), ':', '_');
+        _sinkNamePrefix = "bluez_output." + tail + ".";
+    }
+
+    bool AutoSwitchService::LocalOutputActive() const
+    {
+        if (!_audioClient)
+        {
+            return false;
+        }
+        for (const auto& sink : _audioClient->GetSinks())
+        {
+            if (sink.state == PA_SINK_RUNNING && sink.name.rfind(_sinkNamePrefix, 0) == 0)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     AutoSwitchService::~AutoSwitchService()
@@ -123,10 +145,6 @@ namespace MagicPodsCore
         // Stop the SMEP link first: joining its reader closes the only window that can still
         // fire the multipoint event, so the unsubscribe below never races FireEvent.
         _channel->Stop();
-        if (_audioWatch)
-        {
-            _audioWatch->Stop();
-        }
         _channel->GetMultipointStateEvent().Unsubscribe(_stateEventId);
         _phase = AutoSwitchPhase::Disabled;
         Logger::Info("AutoSwitch: service stopped");
@@ -238,7 +256,7 @@ namespace MagicPodsCore
                                         bool peerHold, const AutoSwitchSettings& settings)
     {
         const auto now = clock::now();
-        const bool sinkActive = _audioWatch && _audioWatch->IsOutputActive();
+        const bool sinkActive = LocalOutputActive();
 
         if (sinkActive && !_sinkWasActive)
         {
@@ -425,19 +443,12 @@ namespace MagicPodsCore
                     _channel->SendProfileControl(0x81);
                     Logger::Info("AutoSwitch: Auto Switch switched off - our record restored to computer (71 81)");
                 }
-                _audioWatch->Stop();
                 _channel->Stop();
             }
             _phase = AutoSwitchPhase::Disabled;
             return;
         }
         _wasEnabled = true;
-        if (settings.takeover && _audioWatch)
-        {
-            // Idempotent: brings up the pactl-subscribe watcher on the first enabled tick.
-            _audioWatch->Start();
-        }
-
         // Focus lock state, computed here rather than in the table view: the bootstrap below
         // must be right even while the SMEP link is down and no table is in view. Records are
         // per-connection, so a link that opens while the lock is armed has to carry 71 02 in

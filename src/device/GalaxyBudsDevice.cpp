@@ -40,7 +40,7 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<GalaxyBudsBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<GalaxyBudsAncCapability>(*device));
-        device->capabilities.push_back(std::make_unique<GalaxyBudsAutoSwitchCapability>(*device, settingsService, mediaController, device->GetContainerName()));
+        device->capabilities.push_back(std::make_unique<GalaxyBudsAutoSwitchCapability>(*device, settingsService, mediaController, audioClient, device->GetContainerName()));
         
         //Ear Detection works out of the box, but it could be useful later with additional features based on it.
         //device->capabilities.push_back(std::make_unique<GalaxyBudsEarDetectionCapability>(*device));

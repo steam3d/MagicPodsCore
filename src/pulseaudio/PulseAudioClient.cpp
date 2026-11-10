@@ -363,6 +363,7 @@ namespace MagicPodsCore
                 out.index = info->index;
                 out.card = info->card;
                 out.volume = info->volume;
+                out.state = info->state;
                 if (info->name)
                     out.name = info->name;
                 if (const char* cardName = info->proplist ? pa_proplist_gets(info->proplist, "device.name") : nullptr)
@@ -398,6 +399,7 @@ namespace MagicPodsCore
                 out.index = info->index;
                 out.card = info->card;
                 out.volume = info->volume;
+                out.state = info->state;
                 if (info->name)
                     out.name = info->name;
                 if (const char* cardName = info->proplist ? pa_proplist_gets(info->proplist, "device.name") : nullptr)

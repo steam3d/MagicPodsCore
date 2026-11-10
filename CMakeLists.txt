@@ -89,7 +89,6 @@ add_executable(magicpodscore
     src/sdk/sgb/smep/MultipointInfo.cpp
 
     src/multipoint/AdapterTags.cpp
-    src/multipoint/AudioStreamWatch.cpp
     src/multipoint/SmepChannel.cpp
     src/multipoint/AutoSwitchSettings.cpp
     src/multipoint/AutoSwitchService.cpp

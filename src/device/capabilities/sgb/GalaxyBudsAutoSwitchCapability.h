@@ -4,7 +4,6 @@
 
 #pragma once
 #include "GalaxyBudsCapability.h"
-#include "multipoint/AudioStreamWatch.h"
 #include "multipoint/AutoSwitchService.h"
 #include "multipoint/SmepChannel.h"
 
@@ -21,7 +20,6 @@ namespace MagicPodsCore
     {
     private:
         std::shared_ptr<SmepChannel> _smepChannel{};
-        std::shared_ptr<AudioStreamWatch> _audioWatch{};
         std::unique_ptr<AutoSwitchService> _service{};
         std::string _settingsContainer{};
         size_t connectedEventId = 0;
@@ -36,6 +34,7 @@ namespace MagicPodsCore
         explicit GalaxyBudsAutoSwitchCapability(GalaxyBudsDevice& device,
                                                 std::shared_ptr<SettingsService> settingsService,
                                                 std::shared_ptr<MediaController> mediaController,
+                                                std::shared_ptr<PulseAudioClient> audioClient,
                                                 std::string settingsContainer);
         ~GalaxyBudsAutoSwitchCapability() override;
         void SetFromJson(const nlohmann::json &json) override;

@@ -38,6 +38,7 @@ namespace MagicPodsCore{
         std::string activePort;
         uint32_t activePortType{PA_DEVICE_PORT_TYPE_UNKNOWN};
         pa_cvolume volume{};
+        pa_sink_state_t state{PA_SINK_INVALID_STATE};
 
         bool IsOnCard(const CardInfo& cardInfo) const {
             return card == cardInfo.index || cardName == cardInfo.name;

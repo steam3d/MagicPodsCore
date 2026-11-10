@@ -22,7 +22,7 @@
 namespace MagicPodsCore
 {
     class MediaController;
-    class AudioStreamWatch;
+    class PulseAudioClient;
 
     // What the policy is doing right now (exposed for diagnostics/tests).
     enum class AutoSwitchPhase
@@ -44,7 +44,7 @@ namespace MagicPodsCore
     //    idle_timeout_sec timer is only the fallback while that push stays missing. No 0x71
     //    claim is needed to take the focus back: the buds hand it over the same second our
     //    output restarts (deck bench 14.22 E56).
-    //  * takeover - when OUR audio goes onto the buds (PipeWire sink -> RUNNING) while the
+    //  * takeover - when OUR audio goes onto the buds (the buds' sink reports RUNNING) while the
     //    peer holds focus, claim it (71 87) within ~0.5 s: while the peer holds the focus the
     //    buds kill unauthorised streams with an AVRCP pause 0.8-1.2 s after the stream starts
     //    (PC bench 20.9), and the demote (71 81) after 2.5 s puts our record back to "computer"
@@ -63,10 +63,11 @@ namespace MagicPodsCore
         // reachable is stronger evidence than our (link-fed, therefore stale when the link is
         // down) closed-cradle cache, and keeps the A4 gate from deadlocking (17.21).
         AutoSwitchService(std::shared_ptr<SmepChannel> channel,
-                          std::shared_ptr<AudioStreamWatch> audioWatch,
+                          std::shared_ptr<PulseAudioClient> audioClient,
                           std::shared_ptr<MediaController> mediaController,
                           std::shared_ptr<SettingsService> settingsService,
                           std::string settingsContainer,
+                          std::string budsAddress,
                           std::function<bool()> mainLinkUp);
         ~AutoSwitchService();
 
@@ -93,12 +94,16 @@ namespace MagicPodsCore
         void OnMultipointState(const MultipointState& state);
         void PauseOwnPlayers(const char* reason);
         void ResumeOwnPlayers(const char* reason);
+        bool LocalOutputActive() const;
         // The takeover side: sink-RUNNING edge bookkeeping and the claim/demote writes.
         void UpdateClaim(const MultipointState* state, bool fresh, bool peerPresent, bool peerHold,
                         const AutoSwitchSettings& settings);
 
         std::shared_ptr<SmepChannel> _channel{};
-        std::shared_ptr<AudioStreamWatch> _audioWatch{};
+        // The buds' own sink queried through the core PulseAudio client: our audio is on
+        // the wire exactly while that sink reports RUNNING.
+        std::shared_ptr<PulseAudioClient> _audioClient{};
+        std::string _sinkNamePrefix{};
         std::shared_ptr<MediaController> _mediaController{};
         std::shared_ptr<SettingsService> _settingsService{};
         // The device's own settings container; the sgb_auto_switch* keys live per device.
