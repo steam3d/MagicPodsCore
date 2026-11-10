@@ -24,7 +24,9 @@ namespace MagicPodsCore
     nlohmann::json GalaxyBudsAutoSwitchCapability::CreateJsonBody()
     {
         auto bodyJson = nlohmann::json::object();
-        bodyJson["selected"] = SelectedFromSettings();
+        auto selected = SelectedFromSettings();
+        selected["focusLockActive"] = _service ? _service->GetFocusLockActive() : false;
+        bodyJson["selected"] = selected;
         return bodyJson;
     }
 
@@ -59,6 +61,13 @@ namespace MagicPodsCore
             if (idle < 0)
                 idle = 0;
             device.SaveSettingInt("sgb_auto_switch_idle_timeout_sec", idle);
+        }
+
+        // Runtime state, never persisted: the plugin's gaming mode arms and releases the
+        // lock here, while the saved preference above stays the user's.
+        if (selected.contains("focusLockActive") && selected["focusLockActive"].is_boolean())
+        {
+            _service->SetFocusLockActive(selected["focusLockActive"].get<bool>());
         }
 
         _onChanged.FireEvent(*this);

@@ -74,6 +74,11 @@ namespace MagicPodsCore
         void Start();
         void Stop();
 
+        // The focus-lock arm/release switch for the plugin's gaming mode: a runtime state,
+        // deliberately separate from the saved sgb_auto_switch_focus_lock preference.
+        void SetFocusLockActive(bool active);
+        bool GetFocusLockActive() const;
+
         AutoSwitchPhase GetPhase() const;
 
     private:
@@ -114,6 +119,7 @@ namespace MagicPodsCore
         std::vector<uint16_t> _localTags{};
         std::thread _thread{};
         std::atomic<bool> _running{false};
+        std::atomic<bool> _focusLockRequested{false};
         std::atomic<AutoSwitchPhase> _phase{AutoSwitchPhase::Disabled};
 
         std::mutex _stateMutex{};

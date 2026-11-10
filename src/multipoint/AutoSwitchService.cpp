@@ -175,6 +175,20 @@ namespace MagicPodsCore
         return _releasePending;
     }
 
+    void AutoSwitchService::SetFocusLockActive(bool active)
+    {
+        const bool previous = _focusLockRequested.exchange(active);
+        if (previous != active)
+        {
+            Logger::Info("AutoSwitch: focus lock %s by the plugin", active ? "armed" : "released");
+        }
+    }
+
+    bool AutoSwitchService::GetFocusLockActive() const
+    {
+        return _focusLockRequested;
+    }
+
     AutoSwitchPhase AutoSwitchService::GetPhase() const
     {
         return _phase;
@@ -278,7 +292,7 @@ namespace MagicPodsCore
         if (_demotePending && now >= _demoteDueAt)
         {
             _demotePending = false;
-            if (settings.focusLock)
+            if (settings.focusLock && _focusLockRequested)
             {
                 // Under the lock the post-claim demote to computer would undo our phone-class
                 // identity; ManageLockIdentity rewrites the 02 correction instead (the claim's
@@ -453,7 +467,9 @@ namespace MagicPodsCore
         // must be right even while the SMEP link is down and no table is in view. Records are
         // per-connection, so a link that opens while the lock is armed has to carry 71 02 in
         // its first frames; the row of an already-open link is handled by ManageLockIdentity.
-        const bool lockActive = settings.focusLock;
+        // The preference is the user's; the plugin's gaming mode decides WHEN it applies and
+        // pushes that runtime flag through the autoSwitch capability.
+        const bool lockActive = settings.focusLock && _focusLockRequested;
         const bool bootstrap02 = lockActive;
         if (bootstrap02 != _bootstrapCarries02)
         {
