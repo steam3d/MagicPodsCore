@@ -12,8 +12,8 @@
 namespace MagicPodsCore
 {
     // The device group table identifies every host by the tail of its BD_ADDR, so telling our
-    // own rows apart from the other host's needs our adapter addresses. SteamOS has no
-    // /sys/class/bluetooth/hci*/address, so BlueZ is asked over D-Bus.
+    // own rows apart from the other host's needs our adapter addresses; BlueZ (org.bluez
+    // Adapter1) is the authority on the host's own BD_ADDR.
     class AdapterTags
     {
     public:

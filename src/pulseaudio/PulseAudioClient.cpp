@@ -680,6 +680,16 @@ namespace MagicPodsCore
         return "bluez_card." + name;
     }
 
+    std::string PulseAudioClient::GetBluezSinkPrefixFromMac(const std::string &mac)
+    {
+        std::string name = mac;
+        std::replace(name.begin(), name.end(), ':', '_');
+        std::transform(name.begin(), name.end(), name.begin(),
+               [](unsigned char c){ return std::toupper(c); });
+
+        return "bluez_output." + name + ".";
+    }
+
     void PulseAudioClient::MainLoop()
     {
         while(!stop){

@@ -66,6 +66,9 @@ namespace MagicPodsCore{
             std::vector<uint32_t> GetModuleIndexesByArgument(const std::string& value);
             std::optional<std::string> GetSourceConsumer(const std::string& sourceName);
             std::string GetNameFromMac(const std::string& mac);
+            // The bluez sink names of a device share the card name's MAC part:
+            // bluez_output.<MAC with underscores>.<profile>.
+            static std::string GetBluezSinkPrefixFromMac(const std::string& mac);
             Event<CardInfo>& GatAudioCardPropertyChangedEvent() {
                 return _onAudioCardPropertyChangedEvent;
             }

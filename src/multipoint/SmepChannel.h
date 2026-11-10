@@ -22,22 +22,21 @@ namespace MagicPodsCore
     // Owns the second RFCOMM link to the buds (scn 29, "SMEP"), which is the only place the
     // multipoint state and the focus/class sub-messages live.
     //
-    // Facts from the bench shape this class (14.19-14.22 deck runs,
-    // 17.13-M/17.23/17.24 PC runs):
+    // Protocol behaviour this class relies on:
     //  * a 0x71 write is only obeyed on the link the buds consider first, so the link has to
     //    be long-lived rather than opened per claim;
     //  * the device group table (attr 0x0502) is push-only: a direct read never answers with
     //    it. An MDE write is the deterministic way to provoke a fresh push (<=0.3 s);
     //  * the 44 00 02 read is READ ALL_CURRENT_STATES (0x0200 little-endian), not a table
     //    read. It doubles as the link keepalive a Galaxy phone drives with its own periodic
-    //    reads: hammered for whole research sessions with zero side effects, and a link that
-    //    answers nothing for three intervals is half-open and needs a rebuild (17.14 A3).
+    //    reads: repeating it has no side effects, and a link that answers nothing for three
+    //    intervals is half-open and needs a rebuild.
     class SmepChannel
     {
     public:
         static constexpr unsigned short SMEP_CHANNEL = 29;
-        // Attribute ids from the PC-side AltProperty table (SppAlternativeMessage.cs), the
-        // wire encoding is little-endian inside the TLV chains.
+        // Attribute ids seen on the wire; the encoding is little-endian inside the TLV
+        // chains.
         static constexpr uint16_t ATTR_ALL_CURRENT_STATES = 0x0200;
         static constexpr uint16_t ATTR_STATE_WEARING_L = 0x0206;
         static constexpr uint16_t ATTR_STATE_WEARING_R = 0x0207;
@@ -46,15 +45,15 @@ namespace MagicPodsCore
         static constexpr uint16_t ATTR_CMD_SUBSCRIBE = 0x0301;
 
         // MDE version write (43 ...) with the account tag the buds answer with (0xCB5D family).
-        // Writing it is what makes the buds publish the device group table again (17.15), which
+        // Writing it is what makes the buds publish the device group table again, which
         // is how a class write is verified and how a stale table is refreshed deterministically.
         static const std::vector<uint8_t>& MdePrime();
         // 44 00 02 = READ_PROPERTY of ALL_CURRENT_STATES: keepalive + state snapshot.
         static const std::vector<uint8_t>& StateRead();
         // 43 + (attr 0x0000 = 03) + (attr CMD_SUBSCRIBE 0x0301 = 01): one write buys a state
         // snapshot now plus WEARING/CRADLE/battery pushes within seconds of a change, for the
-        // rest of the session (per-session, no residue; coexists with the phone's own subscribes
-        // and traffic gain is ~0 - measured, 17.13-M E, 17.23 U1-U3, 17.24).
+        // rest of the session (per-session, no residue; coexists with the phone's own
+        // subscribes and adds no traffic of its own).
         static const std::vector<uint8_t>& Subscribe();
 
         explicit SmepChannel(std::string budsAddress);
@@ -70,7 +69,7 @@ namespace MagicPodsCore
         // Re-establishes the link (the half-open watchdog's recovery). Start()'s own rate limit
         // keeps a genuinely unreachable bud from churning.
         void Reopen();
-        // Resends the bootstrap on the live link: the deterministic table refresh (17.15).
+        // Resends the bootstrap on the live link: the deterministic table refresh.
         void SendBootstrap();
 
         // Sends one SMEP sub-message (payload of a PROFILE_CONTROL frame) on this link.
@@ -89,7 +88,7 @@ namespace MagicPodsCore
         std::vector<uint8_t> GetCachedState(uint16_t attribute) const;
         // True when the freshest samples say the buds are stored with the lid shut: cradle
         // battery 0xFF is only readable as such with the lid closed, WEARING 4 is "in the
-        // cradle after a close" (calibrated PC-side, 17.13-M F). Paging a sleeping bud with a
+        // cradle after a close". Paging a sleeping bud with a
         // rebuild is noise; the link comes back on its own when the lid opens.
         bool EarbudsInClosedCradle() const;
 

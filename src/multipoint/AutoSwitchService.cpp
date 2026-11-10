@@ -20,16 +20,15 @@ namespace MagicPodsCore
     {
         using clock = std::chrono::steady_clock;
 
-        // A group-table push older than this cannot prove anything about right now; the PC
-        // client uses the same 10 s window (SmepWatchService.TableFreshness).
+        // A group-table push older than this cannot prove anything about right now.
         constexpr auto TableFreshness = std::chrono::seconds{10};
-        // Let a freshly opened link settle before subscribing (bench timing, 17.13-M E).
+        // Let a freshly opened link settle before subscribing.
         constexpr auto SubscribeSettle = std::chrono::milliseconds{1500};
         // Half-open link detection: three keepalive intervals of complete silence mean the
-        // socket is lying (17.14 A3). Rebuild at most once per two minutes.
+        // socket is lying. Rebuild at most once per two minutes.
         constexpr int StaleLinkMisses = 3;
         constexpr auto ReopenCooldown = std::chrono::seconds{120};
-        // Claim timing (PC bench 20.9/20.11): proven contention is claimed after a short
+        // Claim timing: proven contention is claimed after a short
         // debounce, unproven waits the old flash-filter window; the buds' AVRCP kill cannot
         // physically land faster than this after a stream starts, so a shorter stint is the
         // user's own second press and gets left alone.
@@ -37,8 +36,11 @@ namespace MagicPodsCore
         constexpr auto ClaimDebounce = std::chrono::milliseconds{1500};
         constexpr auto BudsReactionFloor = std::chrono::milliseconds{800};
         // 71 87 promotes our record to 07; the demote back to "computer" 2.5 s later keeps
-        // the peer able to interrupt us again (E12/E13, PC runs demote the same beat).
+        // the peer able to interrupt us again.
         constexpr auto DemoteAfterClaim = std::chrono::milliseconds{2500};
+        // Empty sink lists (dead sound server / sink gone): back off for ~15 s before the
+        // next probe; the policy tick is one second.
+        constexpr int SinkQueryBackoffTicks = 5;
         // An MDE re-prime always provokes a table push, but keep the wire quiet.
         constexpr auto RefreshMinGap = std::chrono::seconds{2};
         // The lock's 02-class writes are only ever corrections of a fresh push, so twice a
@@ -77,18 +79,40 @@ namespace MagicPodsCore
         _bootstrapCarries02 = false;
 
         // The bluez sink of this device, matched by name: index numbers move on reconnects.
-        std::string tail = std::move(budsAddress);
-        std::replace(tail.begin(), tail.end(), ':', '_');
-        _sinkNamePrefix = "bluez_output." + tail + ".";
+        _sinkNamePrefix = PulseAudioClient::GetBluezSinkPrefixFromMac(budsAddress);
     }
 
-    bool AutoSwitchService::LocalOutputActive() const
+    bool AutoSwitchService::LocalOutputActive()
     {
         if (!_audioClient)
         {
             return false;
         }
-        for (const auto& sink : _audioClient->GetSinks())
+        // An empty sink list means the sound server is unreachable or the sink went away
+        // mid-reconnect; either way there is no local output to detect, and a dead server
+        // makes every attempt take seconds. Back off and probe again periodically.
+        if (_emptySinkStreak >= SinkQueryBackoffTicks)
+        {
+            if (_emptySinkStreak < SinkQueryBackoffTicks * 3)
+            {
+                ++_emptySinkStreak;
+                return false;
+            }
+            _emptySinkStreak = 0;
+        }
+        const auto sinks = _audioClient->GetSinks();
+        if (sinks.empty())
+        {
+            if (_emptySinkStreak == SinkQueryBackoffTicks - 1)
+            {
+                Logger::Warn("AutoSwitch: the sound server reports no sinks; local audio "
+                             "detection is backing off until it answers again");
+            }
+            ++_emptySinkStreak;
+            return false;
+        }
+        _emptySinkStreak = 0;
+        for (const auto& sink : sinks)
         {
             if (sink.state == PA_SINK_RUNNING && sink.name.rfind(_sinkNamePrefix, 0) == 0)
             {
@@ -204,8 +228,8 @@ namespace MagicPodsCore
             _knownHolderIsSelf = IsLocalTag(state.hosts.front().tag);
         }
         // The push kind is remembered so rule B can wait for the release the buds push
-        // themselves (0x81, or output back to none) instead of a local timer (20.2: it arrives
-        // by itself 6-10 s after the peer goes silent).
+        // themselves (0x81, or output back to none) instead of a local timer; their own
+        // release arrives by itself 6-10 s after the peer goes silent.
         _releasePending = state.holderState == MultipointState::STATE_RELEASE ||
                           (state.holderState == MultipointState::STATE_IDLE &&
                            state.holderOutput == MultipointState::OUTPUT_NONE);
@@ -275,8 +299,8 @@ namespace MagicPodsCore
         if (sinkActive && !_sinkWasActive)
         {
             // Our audio just went onto the buds. If the table is stale, ask for a fresh one
-            // right now: the MDE write provokes a deterministic push (17.15) and the claim
-            // decision on the slow path then has real data.
+            // right now: the MDE write provokes a deterministic push and the claim decision
+            // on the slow path then has real data.
             _claimEdgeAt = now;
             _claimPending = true;
             if (!fresh && now - _lastRefreshSent >= RefreshMinGap)
@@ -296,7 +320,7 @@ namespace MagicPodsCore
             {
                 // Under the lock the post-claim demote to computer would undo our phone-class
                 // identity; ManageLockIdentity rewrites the 02 correction instead (the claim's
-                // 07 row only lasts a tick), and while we output, 02 holds the focus (E55).
+                // 07 row only lasts a tick), and while we output, 02 holds the focus.
                 Logger::Info("AutoSwitch: post-claim demote skipped - the focus lock keeps our record in phone class");
             }
             else
@@ -344,9 +368,8 @@ namespace MagicPodsCore
         {
             // The stream already stopped before we decided. If it ran shorter than the buds
             // physically need to notice it, the stop was the user's own second press and no
-            // claim may replay it (M9c, 20.13); if it ran longer, the buds' own AVRCP pause
-            // probably killed an unauthorised stream and the claim makes the NEXT stream
-            // authorised.
+            // claim may replay it; if it ran longer, the buds' own AVRCP pause probably
+            // killed an unauthorised stream and the claim makes the NEXT stream authorised.
             if (now - _claimEdgeAt < BudsReactionFloor)
             {
                 Logger::Info("AutoSwitch: takeover dropped - the stream stopped sooner than the buds can "
@@ -393,10 +416,10 @@ namespace MagicPodsCore
             {
                 _lockIdentityActive = true;
                 Logger::Info("AutoSwitch: focus lock armed - our record becomes phone class (71 02); the buds "
-                             "refuse the peer's handover while we output (E55). A silent Deck is NOT covered (E56).");
+                             "refuse the peer's handover while we output. A silent host is not covered.");
                 if (!verifiable)
                 {
-                    _channel->SendBootstrap(); // provoke the table push (17.15) that lets us check the row
+                    _channel->SendBootstrap(); // provoke the table push that lets us check the row
                 }
             }
             if (verifiable && ourRow->devTypeMajor != 0x02 && now - _lastIdentityWriteAt >= IdentityWriteMinGap)
@@ -425,8 +448,8 @@ namespace MagicPodsCore
             }
         }
 
-        // NV-persistence insurance (E59 open): if a phone-class row we once wrote survives a
-        // relink while the lock is off, restore cooperation.
+        // NV-persistence insurance: if a phone-class row we once wrote survives a relink
+        // while the lock is off, restore cooperation.
         if (verifiable && ourRow->devTypeMajor == 0x02 &&
             now - _lastIdentityWriteAt >= IdentityWriteMinGap)
         {
@@ -487,15 +510,13 @@ namespace MagicPodsCore
         const bool mainLinkUp = _mainLinkUp && _mainLinkUp();
         if (!_channel->IsStarted())
         {
-            // Do not page buds that last reported the closed cradle; the link comes back on
-            // its own when the lid opens and the next device connect retriggers us (A4 gate,
-            // 17.14: cradle battery unreadable / WEARING 4 = lid shut). But that cache is fed
-            // only over the very link that is down, so a link lost while the cradle read as
-            // closed would gate us out forever (deck log 2026-11-07: buds reconnected at
-            // 00:34:12/00:40:19, scn 29 never returned). The gate therefore also requires the
-            // main control link to be down - with the device connected the buds are provably
-            // awake, and reopening scn 29 pages nothing (17.21: main link up, SMEP down ->
-            // rebuild on a beat; SmepChannel::Start throttles its own attempts).
+            // Do not page buds that last reported the closed cradle (cradle battery
+            // unreadable / WEARING 4 = lid shut); the link comes back on its own when the lid
+            // opens and the next device connect retriggers us. But that cache is fed only over
+            // the very link that is down, so a link lost while the cradle read as closed would
+            // gate us out forever. The gate therefore also requires the main control link to
+            // be down - with the device connected the buds are provably awake, and reopening
+            // scn 29 pages nothing; SmepChannel::Start throttles its own attempts.
             if (!mainLinkUp && _channel->EarbudsInClosedCradle())
             {
                 if (!_cradleSkipLogged)
@@ -537,7 +558,7 @@ namespace MagicPodsCore
         }
 
         // Half-open link watchdog: an open socket that answers nothing makes Auto Switch
-        // silently unavailable (17.14 A3); rebuild after three silent intervals, rate limited,
+        // silently unavailable; rebuild after three silent intervals, rate limited,
         // and not while the buds are asleep in the closed cradle.
         if (now - _channel->GetLastRxTime() >= interval * StaleLinkMisses &&
             now - _lastReopenAttempt >= ReopenCooldown)
@@ -604,8 +625,8 @@ namespace MagicPodsCore
 
         // PEER_ABSENT: we are the only host in the table, so the focus is ours anyway. Do not
         // claim, do not keep a second host alive on purpose, and do not read "no output" as
-        // the other host having finished playing - the buds drop a silent host by themselves
-        // (14.20; 17.19 narrows that to pairs where neither side is a stamped phone).
+        // the other host having finished playing - the buds drop a silent host by themselves,
+        // except in pairs where neither side is a stamped phone.
         if (!peerPresent)
         {
             _peerBusyTracked = false;
@@ -628,13 +649,12 @@ namespace MagicPodsCore
         const bool claimingFlow = _demotePending || _claimPending ||
                                   now - _lastClaim < std::chrono::seconds{3};
 
-        // Fresh table only: the push kinds settled on the PC side (18.2 #6) - 0x85 names the
-        // host that was just granted the focus, 0x87/output 0x01 the host that is streaming.
+        // Fresh table only: 0x85 names the host that was just granted the focus,
+        // 0x87/output 0x01 the host that is streaming.
         // A release push (0x81) can still carry the pre-release output byte: the byte lags
-        // behind the event, the state byte IS the event. Counting that as "the peer is audible"
-        // makes rule A swallow the release and rule B only fire once the byte catches up or
-        // the table ages out - the measured ~15 s idle-fallback resume instead of the ~1 s
-        // push-driven one. Rule A's peer-busy timer must not restart from release pushes either.
+        // behind the event, the state byte IS the event. Counting that lagging byte as "the
+        // peer is audible" makes rule A swallow the release and delays rule B to the idle
+        // fallback. Rule A's peer-busy timer must not restart from release pushes either.
         const bool peerGranted = fresh && peerHold && hs != MultipointState::STATE_RELEASE &&
                                  (out == MultipointState::OUTPUT_GRANTED || hs == MultipointState::STATE_GRANT);
         const bool peerAudible = fresh && peerHold && hs != MultipointState::STATE_RELEASE &&
@@ -666,9 +686,8 @@ namespace MagicPodsCore
         }
 
         // Rule A: somebody else holds the focus, or has been granted it. While our own audio
-        // keeps running the buds will not always complete the handover - measured on the same
-        // link with nothing else changed (14.22 E55/E57) - so getting out of the way is what
-        // makes the switch happen, and it works whatever class either host reports.
+        // keeps running the buds will not always complete the handover, so getting out of the
+        // way is what makes the switch happen, and it works whatever class either host reports.
         if (peerGranted || peerAudible)
         {
             _peerBusySince = now;
@@ -687,10 +706,10 @@ namespace MagicPodsCore
         }
 
         // Rule B: the other host went idle. The preferred trigger is the release the buds
-        // push themselves (0x81, or output back to 0x00) 6-10 s after the peer stops (20.2);
-        // no 0x71 claim is needed to take the focus back: the buds hand it over the same
-        // second our output restarts (14.22 E56), and a claim we do not back with real audio
-        // is what gets the other host disconnected (14.20 E53).
+        // push themselves (0x81, or output back to 0x00) 6-10 s after the peer stops; no
+        // 0x71 claim is needed to take the focus back: the buds hand it over the same second
+        // our output restarts, and a claim we do not back with real audio is what gets the
+        // other host disconnected.
         if (_wePausedPlayers)
         {
             if (ReleasePushPending() && fresh)

@@ -35,7 +35,9 @@ namespace MagicPodsCore
         Claiming,          // our own audio went onto the buds while the peer held focus
     };
 
-    // Auto Switch (behaviour measured on paired PC and Deck hosts, 20.2/20.9/20.11):
+    // Auto Switch: moves the audio focus between this host and the other host paired with
+    // the buds. The policy reacts to audio activity and to what the buds push, never to the
+    // presence of any application. Protocol behaviour it relies on:
     //  * rule A - a fresh group-table push says the other host was granted the focus (0x85)
     //    or is streaming (0x87 / output 0x01): pause our own players so the buds can finish
     //    the handover.
@@ -43,25 +45,26 @@ namespace MagicPodsCore
     //    (state 0x81, or output back to 0x00) is the idle event; it resumes our players. The
     //    idle_timeout_sec timer is only the fallback while that push stays missing. No 0x71
     //    claim is needed to take the focus back: the buds hand it over the same second our
-    //    output restarts (deck bench 14.22 E56).
-    //  * takeover - when OUR audio goes onto the buds (the buds' sink reports RUNNING) while the
-    //    peer holds focus, claim it (71 87) within ~0.5 s: while the peer holds the focus the
-    //    buds kill unauthorised streams with an AVRCP pause 0.8-1.2 s after the stream starts
-    //    (PC bench 20.9), and the demote (71 81) after 2.5 s puts our record back to "computer"
-    //    so the peer can still interrupt us afterwards (E13/E16).
+    //    output restarts.
+    //  * takeover - when OUR audio goes onto the buds (the buds' sink reports RUNNING) while
+    //    the peer holds focus, claim it (71 87): while the peer holds the focus the buds kill
+    //    unauthorised streams with an AVRCP pause 0.8-1.2 s after the stream starts, so the
+    //    claim races that pause; a stream the buds killed anyway leaves us authorised for
+    //    the next one. The demote (71 81) after 2.5 s puts our record back to "computer" so
+    //    the peer can still interrupt us afterwards.
     //  * PEER_ABSENT - the other host is not in the device group table at all: no claiming,
-    //    no keepalive pressure; the buds drop silent hosts by themselves (14.20, refined by
-    //    17.19: stamped-phone + PC pairs are never dropped).
+    //    no keepalive pressure; the buds drop silent hosts by themselves, except in pairs
+    //    where neither side is a stamped phone.
     //  * link layer - the 44 00 02 read is the keepalive (45 s); three silent intervals mean
     //    a half-open link and it gets rebuilt unless the buds last reported the closed cradle
-    //    (paging a sleeping bud is noise, PC bench 17.13-M F). A stale table is refreshed by
-    //    re-sending the MDE prime, the deterministic table trigger (17.15).
+    //    (paging a sleeping bud is noise). A stale table is refreshed by re-sending the MDE
+    //    prime, the deterministic table trigger.
     class AutoSwitchService
     {
     public:
         // mainLinkUp answers "is the device's own control link connected" - the buds being
         // reachable is stronger evidence than our (link-fed, therefore stale when the link is
-        // down) closed-cradle cache, and keeps the A4 gate from deadlocking (17.21).
+        // down) closed-cradle cache, and keeps the closed-cradle gate from deadlocking.
         AutoSwitchService(std::shared_ptr<SmepChannel> channel,
                           std::shared_ptr<PulseAudioClient> audioClient,
                           std::shared_ptr<MediaController> mediaController,
@@ -87,7 +90,7 @@ namespace MagicPodsCore
         // The decisions themselves, without the phase-change logging Tick adds.
         void Decide();
         // Focus lock identity management: assert 02 while armed, restore 01 on release, and
-        // re-assert after claims or link rebuilds moved the row (E43/E59 insurance).
+        // re-assert after claims or link rebuilds moved the row.
         void ManageLockIdentity(const MultipointState& state, bool fresh, std::chrono::steady_clock::time_point now,
                                 const AutoSwitchSettings& settings, bool lockActive);
         bool IsLocalTag(uint16_t tag) const;
@@ -99,7 +102,7 @@ namespace MagicPodsCore
         void OnMultipointState(const MultipointState& state);
         void PauseOwnPlayers(const char* reason);
         void ResumeOwnPlayers(const char* reason);
-        bool LocalOutputActive() const;
+        bool LocalOutputActive();
         // The takeover side: sink-RUNNING edge bookkeeping and the claim/demote writes.
         void UpdateClaim(const MultipointState* state, bool fresh, bool peerPresent, bool peerHold,
                         const AutoSwitchSettings& settings);
@@ -109,6 +112,7 @@ namespace MagicPodsCore
         // the wire exactly while that sink reports RUNNING.
         std::shared_ptr<PulseAudioClient> _audioClient{};
         std::string _sinkNamePrefix{};
+        int _emptySinkStreak = 0;
         std::shared_ptr<MediaController> _mediaController{};
         std::shared_ptr<SettingsService> _settingsService{};
         // The device's own settings container; the sgb_auto_switch* keys live per device.
@@ -133,12 +137,11 @@ namespace MagicPodsCore
         bool _releasePending = false;
         size_t _stateEventId = 0;
 
-        // Focus lock v2 (fake-phone identity): while armed we keep our record at devType 02.
-        // The decisive A/B (14.22 E55/E57, run on this very Deck): a host that reports itself
-        // as a phone AND is currently outputting cannot be handed over to by the firmware -
-        // the peer's grab is refused outright, not pulled back afterwards. 01 can be grabbed,
-        // 02 cannot; that one byte is the whole difference. 02 carries no grant bit, so the
-        // 40 s silent-holder eviction (14.20) never arms either.
+        // Focus lock (fake-phone identity): while armed we keep our record at devType 02.
+        // A host that reports itself as a phone AND is currently outputting cannot be handed
+        // over to by the firmware - the peer's grab is refused outright, not pulled back
+        // afterwards. 01 can be grabbed, 02 cannot; that one byte is the whole difference.
+        // 02 carries no grant bit, so the 40 s silent-holder eviction never arms either.
         bool _lockIdentityActive = false;
         bool _bootstrapCarries02 = false;
         std::chrono::steady_clock::time_point _lastIdentityWriteAt{};

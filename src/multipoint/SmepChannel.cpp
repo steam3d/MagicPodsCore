@@ -26,7 +26,7 @@ namespace MagicPodsCore
     const std::vector<uint8_t>& SmepChannel::StateRead()
     {
         // 44 = READ_PROPERTY, then 00 02 = 0x0200 little-endian = ALL_CURRENT_STATES. This is
-        // NOT a group table read - 0x0502 is push-only and never answered (17.13-M C, 18.2).
+        // NOT a group table read - 0x0502 is push-only and never answered.
         static const std::vector<uint8_t> value{0x44, 0x00, 0x02};
         return value;
     }
@@ -64,8 +64,7 @@ namespace MagicPodsCore
         {
             // The underlying client hit EOF (buds powered off - the normal lid-close event)
             // while nobody called Stop(): IsStarted() already reports false through the
-            // client, but a blind Start() would early-return on this stale flag forever
-            // (deck log 2026-11-07 00:56: scn 29 never came back after the lid cycle).
+            // client, but a blind Start() would early-return on this stale flag forever.
             // Reset through Stop() first, exactly like the reconnect the device itself does.
             Stop();
         }

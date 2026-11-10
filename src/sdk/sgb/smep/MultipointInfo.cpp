@@ -10,9 +10,8 @@
 
 namespace MagicPodsCore
 {
-    // The group table arrives inside a 0x45 attribute push. Measured frames start with
-    // 45 02 05 4C 0B, then a 14-byte holder block at 5..18 and two 30-byte host records at
-    // 19 and 49 (14.22, mp/dumprec.py prints the same layout).
+    // The group table arrives inside a 0x45 attribute push: 45 02 05 4C 0B, then a 14-byte
+    // holder block at 5..18 and two 30-byte host records at 19 and 49.
     namespace
     {
         constexpr size_t HOLDER_TAG_OFFSET = 19;
