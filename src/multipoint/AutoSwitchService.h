@@ -66,6 +66,7 @@ namespace MagicPodsCore
                           std::shared_ptr<AudioStreamWatch> audioWatch,
                           std::shared_ptr<MediaController> mediaController,
                           std::shared_ptr<SettingsService> settingsService,
+                          std::string settingsContainer,
                           std::function<bool()> mainLinkUp);
         ~AutoSwitchService();
 
@@ -100,6 +101,8 @@ namespace MagicPodsCore
         std::shared_ptr<AudioStreamWatch> _audioWatch{};
         std::shared_ptr<MediaController> _mediaController{};
         std::shared_ptr<SettingsService> _settingsService{};
+        // The device's own settings container; the sgb_auto_switch* keys live per device.
+        std::string _settingsContainer{};
         std::function<bool()> _mainLinkUp{};
         // Our own rows in the group table: the tails of this machine's Bluetooth adapters.
         // Everything else in the table is the other host.

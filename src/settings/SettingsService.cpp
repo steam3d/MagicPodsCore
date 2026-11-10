@@ -54,20 +54,8 @@ toml::table SettingsService::GetDefaults() {
     magicpods.insert_or_assign("aap_mic_keep_alive", true);
     magicpods.insert_or_assign("logLevel", static_cast<int>(LogLevel::Info));
 
-    toml::table autoSwitch{};
-    // Off by default: Auto Switch touches what the user is listening to, so it only runs when
-    // it is turned on.
-    autoSwitch.insert_or_assign("enabled", false);
-    autoSwitch.insert_or_assign("idle_timeout_sec", 5);
-    autoSwitch.insert_or_assign("claim_cooldown_sec", 10);
-    autoSwitch.insert_or_assign("state_read_interval_ms", 45000);
-    autoSwitch.insert_or_assign("takeover", true);
-    autoSwitch.insert_or_assign("require_game_running", true);
-    autoSwitch.insert_or_assign("focus_lock", false);
-
     toml::table defaults{};
     defaults.insert_or_assign("magicpods", std::move(magicpods));
-    defaults.insert_or_assign("auto_switch", std::move(autoSwitch));
     return defaults;
 }
 

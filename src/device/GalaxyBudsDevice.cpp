@@ -48,8 +48,8 @@ namespace MagicPodsCore
         device->Init();
 
         // Auto Switch. The second link (scn 29) is what carries the device group table and the
-        // focus/class sub-messages; the policy only acts while the "auto_switch.enabled" setting
-        // is on, which it is not by default.
+        // focus/class sub-messages; the policy only acts while the device's sgb_auto_switch
+        // setting is on, which it is not by default.
         device->_smepChannel = std::make_shared<SmepChannel>(deviceInfo->GetAddress());
         // The PipeWire watcher behind the takeover path: it answers "did OUR audio just go
         // onto the buds", which is the event the claim has to beat the buds' own pause to.
@@ -60,6 +60,7 @@ namespace MagicPodsCore
         std::weak_ptr<GalaxyBudsDevice> selfWeak = device;
         device->_autoSwitch = std::make_unique<AutoSwitchService>(device->_smepChannel, device->_audioStreamWatch,
                                                                   mediaController, settingsService,
+                                                                  device->GetContainerName(),
                                                                   [selfWeak]()
                                                                   {
                                                                       const auto self = selfWeak.lock();
@@ -67,7 +68,7 @@ namespace MagicPodsCore
                                                                   });
         // Model gate: outside the simultaneous-multipoint generation line there is no SMEP MDE
         // machinery to talk to, so the service never starts there at all - enabling
-        // "auto_switch.enabled" can then never produce scn 29 connect churn or audio watcher
+        // "sgb_auto_switch" can then never produce scn 29 connect churn or audio watcher
         // traffic against buds that lack the plane (the UI hides the toggles for these models
         // through the same capability, see Device::GetAsJson).
         if (GalaxyBudsHelper::IsSmepMultipointModel(static_cast<GalaxyBudsModelIds>(model)))

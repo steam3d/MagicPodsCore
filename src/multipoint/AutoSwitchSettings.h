@@ -13,40 +13,33 @@
 
 namespace MagicPodsCore
 {
-    // Everything the Auto Switch policy can be told to do, in the TOML container
-    // "auto_switch". All of it is off by default: the feature only runs when the user
-    // turns it on, and the class write stays off unless the user asks for it, because
-    // reporting devType 02 costs something real (see the notes, 14.22).
+    // User-facing Auto Switch options, stored in the per-device settings container
+    // under the sgb_ prefix. Off by default: the feature only runs once the user
+    // turns it on.
     struct AutoSwitchSettings
     {
-        static constexpr const char* CONTAINER = "auto_switch";
-
-        // Master switch. Off by default.
+        // Master switch.
         bool enabled = false;
-        // Fallback wait before we take the focus back when the firmware's own release push
-        // never arrived. Normally the buds push the grant-back (state 0x81 / output -> 0x00)
-        // 6-10 s after the other host goes silent, and that push is the trigger (20.2);
-        // this timer only covers the case where it stays missing.
-        int idleTimeoutSec = 5;
-        // Minimum gap between two 0x71 focus claims.
-        int claimCooldownSec = 10;
-        // Keepalive cadence of the 44 00 02 ALL_CURRENT_STATES read. The PC client hammers
-        // this exact read all day with zero side effects (17.13-M F); one write buys the
-        // state snapshot, keeps the link out of idle eviction, and answers double as the
-        // liveness proof the half-open watchdog needs.
-        int stateReadIntervalMs = 45000;
-        // Claim the focus back when OUR audio goes onto the buds while the other host holds
-        // it (the mirror of the official Auto Switch, 20.9: without a claim the buds kill
-        // the unauthorised stream with an AVRCP pause in ~1 s). Runs under "enabled".
+        // Claim the focus back when our own audio goes onto the buds while the other
+        // host holds it.
         bool takeover = true;
+        // Focus lock: report our record as a phone-class device so the firmware
+        // refuses to hand our audio focus over to another host.
+        bool focusLock = false;
+        // Fallback wait before the focus is taken back when the firmware's own
+        // release push never arrives. The buds normally push the grant-back
+        // themselves a few seconds after the other host goes silent; this timer
+        // only covers the case where that push stays missing.
+        int idleTimeoutSec = 5;
+
+        // Policy parameters that are not user settings.
+        // Minimum gap between two focus claims.
+        int claimCooldownSec = 10;
+        // Cadence of the group-table read; doubles as the SMEP link keepalive.
+        int stateReadIntervalMs = 45000;
         // Only take the focus back while a Steam game is running (rule B gate).
         bool requireGameRunning = true;
-        // Focus lock: while a Steam game is running, keep the audio on us - report as a phone
-        // (71 02); the buds refuse to hand over an outputting phone-class host (measured, E55).
-        // While our output is stopped (a paused game) a reactive claim (71 87) covers the gap.
-        // On release our record goes back to computer (71 81).
-        bool focusLock = false;
 
-        static AutoSwitchSettings Load(SettingsService& settingsService);
+        static AutoSwitchSettings Load(const std::string& container, SettingsService& settingsService);
     };
 }

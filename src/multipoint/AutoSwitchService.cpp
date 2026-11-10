@@ -65,10 +65,11 @@ namespace MagicPodsCore
                                          std::shared_ptr<AudioStreamWatch> audioWatch,
                                          std::shared_ptr<MediaController> mediaController,
                                          std::shared_ptr<SettingsService> settingsService,
+                                         std::string settingsContainer,
                                          std::function<bool()> mainLinkUp)
         : _channel{std::move(channel)}, _audioWatch{std::move(audioWatch)},
           _mediaController{std::move(mediaController)}, _settingsService{std::move(settingsService)},
-          _mainLinkUp{std::move(mainLinkUp)}
+          _settingsContainer{std::move(settingsContainer)}, _mainLinkUp{std::move(mainLinkUp)}
     {
         // The channel's actual bootstrap at construction is the plain MDE prime, whatever
         // the settings say: the first Decide compares against THIS and installs the
@@ -395,7 +396,7 @@ namespace MagicPodsCore
 
     void AutoSwitchService::Decide()
     {
-        const AutoSwitchSettings settings = AutoSwitchSettings::Load(*_settingsService);
+        const AutoSwitchSettings settings = AutoSwitchSettings::Load(_settingsContainer, *_settingsService);
         if (!settings.enabled)
         {
             if (_wasEnabled)
