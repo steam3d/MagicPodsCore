@@ -8,7 +8,6 @@
 #include "AdapterTags.h"
 #include "AudioStreamWatch.h"
 #include "Logger.h"
-#include "SteamGamePresence.h"
 #include "media/MediaController.h"
 
 #include <algorithm>
@@ -254,7 +253,7 @@ namespace MagicPodsCore
         if (_demotePending && now >= _demoteDueAt)
         {
             _demotePending = false;
-            if (settings.focusLock && SteamGamePresence::IsGameRunning())
+            if (settings.focusLock)
             {
                 // Under the lock the post-claim demote to computer would undo our phone-class
                 // identity; ManageLockIdentity rewrites the 02 correction instead (the claim's
@@ -434,10 +433,9 @@ namespace MagicPodsCore
 
         // Focus lock state, computed here rather than in the table view: the bootstrap below
         // must be right even while the SMEP link is down and no table is in view. Records are
-        // per-connection (E43), so a link that opens while the lock is armed (a lid cycle
-        // mid-game) has to carry 71 02 in its first frames; the row of an already-open link is
-        // handled by ManageLockIdentity.
-        const bool lockActive = settings.focusLock && SteamGamePresence::IsGameRunning();
+        // per-connection, so a link that opens while the lock is armed has to carry 71 02 in
+        // its first frames; the row of an already-open link is handled by ManageLockIdentity.
+        const bool lockActive = settings.focusLock;
         const bool bootstrap02 = lockActive;
         if (bootstrap02 != _bootstrapCarries02)
         {
@@ -564,11 +562,10 @@ namespace MagicPodsCore
         const uint8_t hs = state.holderState;
         const uint8_t out = state.holderOutput;
 
-        // Focus lock (the "lock audio focus while gaming" toggle): the identity flip IS the
-        // prevention - while a Steam game runs we report as a phone (71 02), and the firmware
-        // refuses to hand the audio of an outputting phone-class host to the peer (E55/E57,
-        // one byte decides grabability). Runs before PEER_ABSENT so the release restore cannot
-        // stall on a group that shrank to just us.
+        // Focus lock: the identity flip IS the prevention - while the lock is armed we report
+        // as a phone (71 02), and the firmware refuses to hand the audio of an outputting
+        // phone-class host to the peer; one byte decides grabability. Runs before PEER_ABSENT
+        // so the release restore cannot stall on a group that shrank to just us.
         ManageLockIdentity(state, fresh, now, settings, lockActive);
 
         // PEER_ABSENT: we are the only host in the table, so the focus is ours anyway. Do not
@@ -578,10 +575,9 @@ namespace MagicPodsCore
         if (!peerPresent)
         {
             _peerBusyTracked = false;
-            if (_wePausedPlayers && (!settings.requireGameRunning || SteamGamePresence::IsGameRunning()))
+            if (_wePausedPlayers)
             {
-                // The host we stepped aside for is gone; take our audio back under the same
-                // gate rule B uses, so we never resume something on our own initiative.
+                // The host we stepped aside for is gone; take our audio back.
                 ResumeOwnPlayers("peer left the group");
             }
             _phase = weOutput ? AutoSwitchPhase::Holding : AutoSwitchPhase::WaitingForState;
@@ -643,13 +639,10 @@ namespace MagicPodsCore
         {
             _peerBusySince = now;
             _peerBusyTracked = true;
-            // Pausing our players is only safe while a Steam game is running: rule B resumes
-            // players we paused, and rule B is gated on the same condition. Without that gate we
-            // would pause a music player and never start it again. With a game running there is
-            // usually no MPRIS player at all, so this stays a no-op unless something else is
-            // playing on top of the game - exactly the case where our stream blocks the handover.
-            // A fresh claim in flight wins: the user just asked for audio HERE.
-            if (!claimingFlow && (weOutput || weHold || _weWereOutputting) && SteamGamePresence::IsGameRunning())
+            // Safe to pause because rule B resumes exactly what was paused here; a player the
+            // user paused by hand is never ours to resume. A fresh claim in flight wins: the
+            // user just asked for audio HERE.
+            if (!claimingFlow && (weOutput || weHold || _weWereOutputting))
             {
                 PauseOwnPlayers(peerGranted ? "focus granted to the other host"
                                             : "the other host is outputting");
@@ -672,15 +665,14 @@ namespace MagicPodsCore
             }
             else
             {
-                // Fallback while that push stays missing: a local idle timer, still under the
-                // rule B gate so we never resume on our own initiative.
+                // Fallback while that push stays missing: a local idle timer.
                 if (!_peerBusyTracked)
                 {
                     _peerBusySince = now;
                     _peerBusyTracked = true;
                 }
                 const auto idleFor = std::chrono::duration_cast<std::chrono::seconds>(now - _peerBusySince).count();
-                if (idleFor < settings.idleTimeoutSec || (settings.requireGameRunning && !SteamGamePresence::IsGameRunning()))
+                if (idleFor < settings.idleTimeoutSec)
                 {
                     _phase = AutoSwitchPhase::WaitingToReclaim;
                     _weWereOutputting = weOutput;

@@ -37,8 +37,6 @@ namespace MagicPodsCore
         int claimCooldownSec = 10;
         // Cadence of the group-table read; doubles as the SMEP link keepalive.
         int stateReadIntervalMs = 45000;
-        // Only take the focus back while a Steam game is running (rule B gate).
-        bool requireGameRunning = true;
 
         static AutoSwitchSettings Load(const std::string& container, SettingsService& settingsService);
     };

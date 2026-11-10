@@ -93,7 +93,6 @@ add_executable(magicpodscore
     src/multipoint/SmepChannel.cpp
     src/multipoint/AutoSwitchSettings.cpp
     src/multipoint/AutoSwitchService.cpp
-    src/multipoint/SteamGamePresence.cpp
 
     src/sdk/pbp/watchers/PixelBudsAncWatcher.cpp
     src/sdk/pbp/watchers/PixelBudsBatteryWatcher.cpp
