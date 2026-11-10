@@ -12,15 +12,12 @@ namespace MagicPodsCore
 {
     nlohmann::json GalaxyBudsAutoSwitchCapability::SelectedFromSettings() const
     {
+        const AutoSwitchSettings defaults{};
         auto selected = nlohmann::json::object();
-        const auto enabled = device.LoadSettingBool("sgb_auto_switch");
-        selected["enabled"] = enabled.value_or(false);
-        const auto takeover = device.LoadSettingBool("sgb_auto_switch_takeover");
-        selected["takeover"] = takeover.value_or(true);
-        const auto focusLock = device.LoadSettingBool("sgb_auto_switch_focus_lock");
-        selected["focusLock"] = focusLock.value_or(false);
-        const auto idle = device.LoadSettingInt("sgb_auto_switch_idle_timeout_sec");
-        selected["idleTimeoutSec"] = idle.value_or(5);
+        selected["enabled"] = device.LoadSettingBool("sgb_auto_switch").value_or(defaults.enabled);
+        selected["takeover"] = device.LoadSettingBool("sgb_auto_switch_takeover").value_or(defaults.takeover);
+        selected["focusLock"] = device.LoadSettingBool("sgb_auto_switch_focus_lock").value_or(defaults.focusLock);
+        selected["idleTimeoutSec"] = device.LoadSettingInt("sgb_auto_switch_idle_timeout_sec").value_or(defaults.idleTimeoutSec);
         return selected;
     }
 
@@ -35,6 +32,10 @@ namespace MagicPodsCore
     // device carries its own choice; the policy reloads them on its next cycle.
     void GalaxyBudsAutoSwitchCapability::SetFromJson(const nlohmann::json &json)
     {
+        // Models without the SMEP plane never run Auto Switch; their settings stay unwritten.
+        if (!_service)
+            return;
+
         if (!json.contains(name))
             return;
 

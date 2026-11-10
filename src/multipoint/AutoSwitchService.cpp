@@ -117,6 +117,10 @@ namespace MagicPodsCore
         // Stop the SMEP link first: joining its reader closes the only window that can still
         // fire the multipoint event, so the unsubscribe below never races FireEvent.
         _channel->Stop();
+        if (_audioWatch)
+        {
+            _audioWatch->Stop();
+        }
         _channel->GetMultipointStateEvent().Unsubscribe(_stateEventId);
         _phase = AutoSwitchPhase::Disabled;
         Logger::Info("AutoSwitch: service stopped");
