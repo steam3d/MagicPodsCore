@@ -100,14 +100,6 @@ namespace MagicPodsCore {
             return _deviceInfo->GetProductId();
         }
 
-        // True when the device exposes the SMEP simultaneous-multipoint plane that Auto Switch
-        // drives (the Galaxy Buds line from Buds2 Pro up). Answered per model by
-        // GalaxyBudsDevice; every other device is false and its Auto Switch stays inert.
-        virtual bool GetSmepMultipointSupported() const
-        {
-            return false;
-        }
-
         uint8_t GetHandsFreeBattery() const {
             std::lock_guard lock{_propertyMutex};
             return _deviceInfo->GetHandsFreeBatteryStatus().GetValue();

@@ -140,6 +140,7 @@ add_executable(magicpodscore
 
     src/device/capabilities/sgb/GalaxyBudsCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsAncCapability.cpp
+    src/device/capabilities/sgb/GalaxyBudsAutoSwitchCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsBatteryCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsEarDetectionCapability.cpp
     src/device/capabilities/sgb/GalaxyBudsEarDetectionStateCapability.cpp

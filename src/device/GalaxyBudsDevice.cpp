@@ -7,6 +7,7 @@
 #include "sdk/sgb/GalaxyBudsHelper.h"
 #include "sdk/sgb/enums/GalaxyBudsModelIds.h"
 #include "capabilities/sgb/GalaxyBudsAncCapability.h"
+#include "capabilities/sgb/GalaxyBudsAutoSwitchCapability.h"
 #include "capabilities/sgb/GalaxyBudsBatteryCapability.h"
 #include "capabilities/sgb/GalaxyBudsEarDetectionCapability.h"
 #include "capabilities/sgb/GalaxyBudsEarDetectionStateCapability.h"
@@ -39,6 +40,7 @@ namespace MagicPodsCore
         device->capabilities.push_back(std::make_unique<CmnBluetoothCodecCapability>(*device));
         device->capabilities.push_back(std::make_unique<GalaxyBudsBatteryCapability>(*device));
         device->capabilities.push_back(std::make_unique<GalaxyBudsAncCapability>(*device));
+        device->capabilities.push_back(std::make_unique<GalaxyBudsAutoSwitchCapability>(*device, settingsService, mediaController, device->GetContainerName()));
         
         //Ear Detection works out of the box, but it could be useful later with additional features based on it.
         //device->capabilities.push_back(std::make_unique<GalaxyBudsEarDetectionCapability>(*device));
@@ -47,38 +49,6 @@ namespace MagicPodsCore
         device->_client = Client::CreateRFCOMM(deviceInfo->GetAddress(), GalaxyBudsHelper::GetServiceGuid(static_cast<GalaxyBudsModelIds>(model)));
         device->Init();
 
-        // Auto Switch. The second link (scn 29) is what carries the device group table and the
-        // focus/class sub-messages; the policy only acts while the device's sgb_auto_switch
-        // setting is on, which it is not by default.
-        device->_smepChannel = std::make_shared<SmepChannel>(deviceInfo->GetAddress());
-        // The PipeWire watcher behind the takeover path: it answers "did OUR audio just go
-        // onto the buds", which is the event the claim has to beat the buds' own pause to.
-        device->_audioStreamWatch = std::make_shared<AudioStreamWatch>(deviceInfo->GetAddress());
-        // The A4 cradle gate needs to know whether the device's own control link is up: a
-        // connected device proves the buds are awake, which stops the (link-fed) closed-cradle
-        // cache from gating the SMEP link out forever (17.21).
-        std::weak_ptr<GalaxyBudsDevice> selfWeak = device;
-        device->_autoSwitch = std::make_unique<AutoSwitchService>(device->_smepChannel, device->_audioStreamWatch,
-                                                                  mediaController, settingsService,
-                                                                  device->GetContainerName(),
-                                                                  [selfWeak]()
-                                                                  {
-                                                                      const auto self = selfWeak.lock();
-                                                                      return self && self->GetConnected();
-                                                                  });
-        // Model gate: outside the simultaneous-multipoint generation line there is no SMEP MDE
-        // machinery to talk to, so the service never starts there at all - enabling
-        // "sgb_auto_switch" can then never produce scn 29 connect churn or audio watcher
-        // traffic against buds that lack the plane (the UI hides the toggles for these models
-        // through the same capability, see Device::GetAsJson).
-        if (GalaxyBudsHelper::IsSmepMultipointModel(static_cast<GalaxyBudsModelIds>(model)))
-        {
-            device->_autoSwitch->Start();
-        }
-        else
-        {
-            Logger::Info("AutoSwitch: the buds model is not on the simultaneous-multipoint generation line - the service stays off");
-        }
         return device;
     }
 }

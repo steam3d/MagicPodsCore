@@ -282,7 +282,6 @@ namespace MagicPodsCore {
         deviceJson["connected"] = GetConnected();
         deviceJson["model"] = GetProductId();
         deviceJson["vendor"] = GetVendorId();
-        deviceJson["smepMultipoint"] = GetSmepMultipointSupported();
         
         std::optional<int64_t> settingColor = LoadSettingInt("color");        
         deviceJson["color"] = settingColor.has_value()? settingColor.value() : 0;

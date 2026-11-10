@@ -118,7 +118,6 @@ Response:
       "address": "AA:BB:CC:DD:EE:FF",
       "vendor": 76,
       "model": 8207,
-      "smepMultipoint": false,
       "color": 0,
       "connected": false
     },
@@ -127,7 +126,6 @@ Response:
       "address": "11:22:33:44:55:66",
       "vendor": 117,
       "model": 9,
-      "smepMultipoint": true,
       "color": 0,
       "connected": false
     }
@@ -166,7 +164,6 @@ Response:
       "address": "AA:BB:CC:DD:EE:FF",
       "vendor": 76,
       "model": 8207,
-      "smepMultipoint": false,
       "color": 0,
       "connected": true
     },
@@ -175,7 +172,6 @@ Response:
       "address": "11:22:33:44:55:66",
       "vendor": 117,
       "model": 9,
-      "smepMultipoint": true,
       "color": 0,
       "connected": false
     }
@@ -206,7 +202,6 @@ Response:
       "address": "AA:BB:CC:DD:EE:FF",
       "vendor": 76,
       "model": 8207,
-      "smepMultipoint": false,
       "color": 0,
       "connected": false
     },
@@ -215,7 +210,6 @@ Response:
       "address": "11:22:33:44:55:66",
       "vendor": 117,
       "model": 9,
-      "smepMultipoint": true,
       "color": 0,
       "connected": false
     }
@@ -235,7 +229,6 @@ When the connection status of any headphone changes:
       "address": "AA:BB:CC:DD:EE:FF",
       "vendor": 76,
       "model": 8207,
-      "smepMultipoint": false,
       "color": 0,
       "connected": true
     },
@@ -244,7 +237,6 @@ When the connection status of any headphone changes:
       "address": "11:22:33:44:55:66",
       "vendor": 117,
       "model": 9,
-      "smepMultipoint": true,
       "color": 0,
       "connected": false
     }
@@ -270,11 +262,10 @@ Response:
 ```json
 {
   "info": {
-    "name": "Galaxy Buds 3",
+    "name": "AirPods",
     "address": "AA:BB:CC:DD:EE:FF",
     "vendor": 117,
     "model": 9,
-    "smepMultipoint": true,
     "color": 0,
     "connected": true,
     "capabilities": {
@@ -291,11 +282,10 @@ Returns empty `capabilities` if no features are available:
 ```json
 {
   "info": {
-    "name": "Galaxy Buds 3",
+    "name": "AirPods",
     "address": "AA:BB:CC:DD:EE:FF",
     "vendor": 117,
     "model": 9,
-    "smepMultipoint": true,
     "color": 0,
     "connected": true,
     "capabilities": { }
@@ -318,11 +308,10 @@ On any property change:
 ```json
 {
   "info": {
-    "name": "Galaxy Buds 3",
+    "name": "AirPods Pro",
     "address": "AA:BB:CC:DD:EE:FF",
     "vendor": 117,
     "model": 9,
-    "smepMultipoint": true,
     "color": 0,
     "connected": true,
     "capabilities": {
@@ -588,6 +577,35 @@ Supported Bluetooth profiles/codecs
 | `[0]`         | Profile identifier                 |
 | `[1]`         | Human-readable profile description |
 
+
+##### Auto Switch
+
+Moves the audio focus between this host and the other device paired with the Galaxy Buds.
+Reported only while a Galaxy Buds model carrying the vendor's simultaneous multipoint plane
+is connected; on every other device the capability is absent.
+
+```json
+{
+  "autoSwitch": {
+    "readonly": false,
+    "selected": {
+      "enabled": false,
+      "takeover": true,
+      "focusLock": false,
+      "idleTimeoutSec": 5
+    }
+  }
+}
+```
+
+| Field                     | Type   |                                                    |
+| ------------------------- | ------ | -------------------------------------------------- |
+| `selected`                | object | All fields are required                            |
+| `selected.enabled`        | bool   | Master switch                                      |
+| `selected.takeover`       | bool   | Claim the focus back when local audio starts       |
+| `selected.focusLock`      | bool   | Report as a phone-class host to refuse handovers   |
+| `selected.idleTimeoutSec` | int    | Fallback wait before returning the focus, seconds  |
+| `readonly`                | bool   |                                                    |
 
 ### AirPods and Beats capabilities
 
