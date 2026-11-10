@@ -53,8 +53,8 @@ namespace MagicPodsCore
     //    the next one. The demote (71 81) after 2.5 s puts our record back to "computer" so
     //    the peer can still interrupt us afterwards.
     //  * PEER_ABSENT - the other host is not in the device group table at all: no claiming,
-    //    no keepalive pressure; the buds drop silent hosts by themselves, except in pairs
-    //    where neither side is a stamped phone.
+    //    no keepalive pressure; the buds drop silent hosts by themselves, except when one
+    //    side is a stamped phone.
     //  * link layer - the 44 00 02 read is the keepalive (45 s); three silent intervals mean
     //    a half-open link and it gets rebuilt unless the buds last reported the closed cradle
     //    (paging a sleeping bud is noise). A stale table is refreshed by re-sending the MDE

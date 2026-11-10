@@ -18,7 +18,7 @@ namespace MagicPodsCore
     //   +0  tag          low two bytes of the host BD_ADDR, in the order the buds push them
     //   +2  devTypeMajor 01 computer, 02 phone, 04 media; 07 is what a host that just claimed
     //                    the focus is temporarily promoted to and drops back to 01 after ~2.5 s
-    //   +3  subDevType, seen 02 on every connected host surveyed
+    //   +3  subDevType, seen 02 on every connected host
     //   +4/+5 cloud-registration flag (40 00 ours, 41 00 for the stamped phone)
     //   +6  seen 0x15 for a live host, 0x11 just after the link came up
     //   +10 secType      01 on real Samsung phones (paired through the Samsung flow), 0 on every

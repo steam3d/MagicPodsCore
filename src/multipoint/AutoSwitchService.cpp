@@ -29,7 +29,7 @@ namespace MagicPodsCore
         constexpr int StaleLinkMisses = 3;
         constexpr auto ReopenCooldown = std::chrono::seconds{120};
         // Claim timing: proven contention is claimed after a short
-        // debounce, unproven waits the old flash-filter window; the buds' AVRCP kill cannot
+        // debounce, unproven waits a longer one; the buds' AVRCP kill cannot
         // physically land faster than this after a stream starts, so a shorter stint is the
         // user's own second press and gets left alone.
         constexpr auto ClaimDebounceProven = std::chrono::milliseconds{300};
@@ -626,7 +626,7 @@ namespace MagicPodsCore
         // PEER_ABSENT: we are the only host in the table, so the focus is ours anyway. Do not
         // claim, do not keep a second host alive on purpose, and do not read "no output" as
         // the other host having finished playing - the buds drop a silent host by themselves,
-        // except in pairs where neither side is a stamped phone.
+        // except when one side is a stamped phone.
         if (!peerPresent)
         {
             _peerBusyTracked = false;
@@ -640,7 +640,7 @@ namespace MagicPodsCore
             return;
         }
 
-        // ---- takeover (Deck -> peer direction), before the yielding rules so a deliberate
+        // ---- takeover (our audio -> peer direction), before the yielding rules so a deliberate
         // play here wins over stepping aside ----
         if (settings.takeover)
         {
@@ -662,7 +662,7 @@ namespace MagicPodsCore
 
         // Focus lock backstop for the window the identity flip cannot cover: while OUR
         // output is stopped the peer can still be granted even from a 02 record. Then it is
-        // the old reactive path: resume our own audio (the buds
+        // the reactive path: resume our own audio (the buds
         // hand over the second our output restarts) and claim under the cooldown; the identity
         // loop immediately rewrites the claim's 07 row back to 02.
         if (lockActive && (peerGranted || peerAudible))
