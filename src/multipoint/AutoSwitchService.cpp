@@ -72,13 +72,20 @@ namespace MagicPodsCore
     {
         // The channel's actual bootstrap at construction is the plain MDE prime, whatever
         // the settings say: the first Decide compares against THIS and installs the
-        // phone-class variant when the lock is already armed (a game running at core start).
+        // phone-class variant when the lock is already armed at core start.
         _bootstrapCarries02 = false;
     }
 
     AutoSwitchService::~AutoSwitchService()
     {
         Stop();
+        // Final teardown: players we paused must not stay paused once this service is gone
+        // for good. A plain disconnect does not resume them here on purpose - the next
+        // Start() resumes them under rule B once the table says the peer is done.
+        if (_wePausedPlayers)
+        {
+            ResumeOwnPlayers("Auto Switch was removed");
+        }
     }
 
     void AutoSwitchService::Start()
@@ -606,9 +613,9 @@ namespace MagicPodsCore
         const bool peerAudible = fresh && peerHold && hs != MultipointState::STATE_RELEASE &&
                                  (out == MultipointState::OUTPUT_AUDIO || hs == MultipointState::STATE_STREAM);
 
-        // Focus lock backstop for the window the identity flip cannot cover (E56): while OUR
-        // output is stopped - game paused, menu silence - the peer can still be granted even
-        // from a 02 record. Then it is the old reactive path: resume our own audio (the buds
+        // Focus lock backstop for the window the identity flip cannot cover: while OUR
+        // output is stopped the peer can still be granted even from a 02 record. Then it is
+        // the old reactive path: resume our own audio (the buds
         // hand over the second our output restarts) and claim under the cooldown; the identity
         // loop immediately rewrites the claim's 07 row back to 02.
         if (lockActive && (peerGranted || peerAudible))
@@ -617,14 +624,14 @@ namespace MagicPodsCore
             _peerBusyTracked = true;
             // If we had stepped aside before the lock engaged, take our own audio back now -
             // the buds hand the focus over the second our output restarts.
-            ResumeOwnPlayers("focus lock - the game owns the audio");
+            ResumeOwnPlayers("focus lock - our own output owns the audio");
             if (!claimingFlow && now - _lastClaim >= std::chrono::seconds{settings.claimCooldownSec})
             {
                 _lastClaim = now;
                 _claimPending = false;
                 MarkHolderSelf();
                 _channel->SendProfileControl(0x87);
-                Logger::Info("AutoSwitch: focus lock active - the peer took the focus during a game, pulled it back (71 87)");
+                Logger::Info("AutoSwitch: focus lock active - the peer took the focus, pulled it back (71 87)");
             }
             _phase = AutoSwitchPhase::Claiming;
             _weWereOutputting = weOutput;
@@ -663,9 +670,25 @@ namespace MagicPodsCore
             {
                 ResumeOwnPlayers("the buds released the peer's grant");
             }
+            else if (!fresh)
+            {
+                // A stale table says nothing about the peer. Provoke a fresh group-table
+                // push (the deterministic MDE re-prime) and keep waiting; the idle timer
+                // below then measures against real evidence instead of table age.
+                if (now - _lastRefreshSent >= std::chrono::seconds{std::max(1, settings.idleTimeoutSec)})
+                {
+                    _lastRefreshSent = now;
+                    _channel->SendBootstrap();
+                    Logger::Debug("AutoSwitch: waiting to reclaim on a stale group table, re-priming MDE");
+                }
+                _phase = AutoSwitchPhase::WaitingToReclaim;
+                _weWereOutputting = weOutput;
+                return;
+            }
             else
             {
-                // Fallback while that push stays missing: a local idle timer.
+                // Fallback while that push stays missing: a local idle timer, measured from
+                // the last fresh evidence that the peer was playing.
                 if (!_peerBusyTracked)
                 {
                     _peerBusySince = now;
